@@ -15,10 +15,10 @@ api.interceptors.response.use(
     const interactiveStore = useInteractiveStore();
 
     if (error.response) { // Backend returned an error (status 4xx or 5xx)
-    
+
     if(error.response.data.message !== "Not logged in.") {
-        
-      interactiveStore.backend_message = error.response.data.message || "Server error occurred";
+                                          //am making this check for the response data. because rate limiters put response directly on data, while custom errors use data as an object
+      interactiveStore.backend_message = typeof(error.response.data) == 'string' ? error.response.data : error.response?.data?.message || "Server error occurred"; //if the error na from ratelimiter first error, if na custom by me second error, 
 
       interactiveStore.display_error_alert_box();
       

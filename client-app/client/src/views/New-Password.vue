@@ -2,9 +2,9 @@
 
   <div class = "home_container">
  
-  <SUCCESSALERTBOX>{{backend_message}}</SUCCESSALERTBOX>
+  <SUCCESSALERTBOX>{{interactive_store.backend_message}}</SUCCESSALERTBOX>
 
-  <ERRORALERTBOX>{{backend_message}}</ERRORALERTBOX>
+  <ERRORALERTBOX>{{interactive_store.backend_message}}</ERRORALERTBOX>
 
   <LoadingOverlay/>
 

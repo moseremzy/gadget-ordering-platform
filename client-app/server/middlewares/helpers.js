@@ -1,19 +1,25 @@
 
 module.exports = class MIDDLEWARES {
-
+ 
 // Create date and add 1 hour
 static date_created() {
+
   const now = new Date();
+  
   now.setHours(now.getHours() + 1); // Add 1 hour
+  
   return now.toISOString().slice(0, 19).replace('T', ' ');
+
 }
 
+// Creates Confirmation Pin for Orders
 static generateConfirmationPin() {
   
   return Math.floor(1000 + Math.random() * 9000); // Generates a 4-digit PIN
 
 }
 
+// Check Stock Availability
 static stock_availability(products) {
 
   let out_of_stock = "";

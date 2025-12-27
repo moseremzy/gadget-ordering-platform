@@ -18,57 +18,75 @@
 
       <div class = "grid">
 
-       <div class="contactusform">
-        <h2>Edit Details</h2>
-        <form action="">
+       <div class="edit-details-form-container">
+        <h2 class="form-title">Edit Details</h2>
+        <form class="edit-details-form grid-form">
             
-            <div class="item3">
-            <label for = "email">Email</label>
-            <input type="email" placeholder="Email" v-model = "admin_info.email"  id = "email" class="reedonly">
+            <div class="form-group">
+            <label for = "email" class = "form-label">Email</label>
+            <input type="email" placeholder="Email" v-model = "admin_info.email"  id = "email" class="form-input" readonly>
             <p class="err">{{ admin_info_error.email_err }}</p>
             </div>
 
-            <div class="item4">
-            <label for = "phone">Phone</label>
-            <input type="text" placeholder="Phone No" v-model = "admin_info.phone" id = "phone" class="reedonly">
+            <div class="form-group">
+            <label for = "phone" class = "form-label">Phone</label>
+            <input type="text" placeholder="Phone No" v-model = "admin_info.phone" id = "phone" class="form-input">
             <p class="err">{{ admin_info_error.phone_err }}</p>
             </div>
 
-            <div class="item1">
-            <label for = "first_name">Service Fee</label>
-            <input type = "number" placeholder="Delivery fee" id = "service_fee" v-model = "admin_info.website_info.service_fee" class="reedonly">
-            <p class="err">{{ admin_info_error.service_fee_err }}</p>
+            <div class="form-group grid-full">
+            <label for = "fee_same_city" class = "form-label">Same City (Benin) Delivery Fee</label>
+            <input type = "number" placeholder = "Delivery fee" id = "fee_same_city" v-model = "admin_info.fee_same_city" class = "form-input">
+            <p class="err">{{ admin_info_error.same_city_err }}</p>
             </div>
 
-            <button type = "submit" @click.prevent = "updateAdmin"><font-awesome-icon v-if = "spinner"  class="fa-solid fa-spinner fa-spin" id = "spinner" icon="fa-solid fa-spinner"/>Save</button>
+            <div class="form-group grid-full">
+            <label for = "fee_same_state" class = "form-label">Same State (Edo) Delivery Fee</label>
+            <input type = "number" placeholder = "Delivery fee" id = "fee_same_state" v-model = "admin_info.fee_same_state" class = "form-input">
+            <p class="err">{{ admin_info_error.same_state_err }}</p>
+            </div>
+
+            <div class="form-group grid-full">
+            <label for = "fee_other_state" class = "form-label">Other States Delivery Fee</label>
+            <input type = "number" placeholder="Delivery fee" v-model = "admin_info.fee_other_state" id = "fee_other_state" class = "form-input">
+            <p class="err">{{ admin_info_error.other_state_err }}</p>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="form-group grid-full">
+                <button type="submit" @click.prevent = "UploadItem" class="submit-button">Submit</button>
+            </div>
             </form>
             </div>
 
+            
+            <!-- EDIT PASSWORD -->
+            <div class="edit-details-form-container">
+            <h2 class="form-title">Edit Password</h2>
+            <form class="edit-details-form grid-form">
 
-            <!-- CHANGE PASSWORD -->
-            <div class="contactusform">
-            <h2>Change Password</h2>
-            <form action="">
-
-            <div class="item4">
-            <label for = "old_password">Old Password</label>
-            <input type="text" placeholder="Old Password" v-model = "password.old_password" id = "old_password">
+            <div class="form-group grid-full">
+            <label class = "form-label" for = "old_password">Old Password</label>
+            <input class = "form-input" type="text" placeholder="Old Password" v-model = "password.old_password" id = "old_password">
             <p class="err">{{password_error.old_password_err}}</p>
             </div>
 
-            <div class="item4">
-            <label for = "password">New Password</label>
-            <input type="password" placeholder="New Password" v-model = "password.new_password" id = "new_password">
+            <div class="form-group grid-full">
+            <label class = "form-label" for = "password">New Password</label>
+            <input class = "form-input" type="password" placeholder="New Password" v-model = "password.new_password" id = "new_password">
             <p class="err">{{password_error.new_password_err}}</p>
             </div>
 
-            <div class="item4">
-            <label for = "confirm_password">Confirm Password</label>
-            <input type="password" placeholder="Confirm Password" v-model = "password.confirm_password" id = "confirm_password" class="reedonly">
+            <div class="form-group grid-full">
+            <label class = "form-label" for = "confirm_password">Confirm Password</label>
+            <input class = "form-input" type="password" placeholder="Confirm Password" v-model = "password.confirm_password" id = "confirm_password">
             <p class="err">{{password_error.confirm_password_err}}</p>
             </div>
-
-            <button type = "submit" @click.prevent = "update_admin_pass"><font-awesome-icon v-if = "spinner"  class="fa-solid fa-spinner fa-spin" id = "spinner" icon="fa-solid fa-spinner"/>Update Password</button>
+            
+            <!-- Submit Button -->
+            <div class="form-group grid-full">
+                <button type="submit" @click.prevent = "UploadItem" class="submit-button">Submit</button>
+            </div>
             </form>
             </div>
 
@@ -83,6 +101,7 @@
 import OVERLAY from "../components/modals/loading_overlay.vue";
 import { useInteractiveStore } from '@/stores/interactive'
 import { useAdminStore } from '@/stores/admin'
+import { useSettingStore } from '@/stores/settings'
 import { useCustomersStore } from '@/stores/customers'
 import HEADER from "../components/Header.vue";
 import SIDEBAR from "../components/SideBar.vue"; 
@@ -94,22 +113,28 @@ const interactive_store = useInteractiveStore()
 
 const admin_store = useAdminStore()
 
+const settings_store = useSettingStore()
+
 const route = useRoute()
 const router = useRouter()
+
+console.log(settings_store.fee_same_city)
 
 let admin_info = reactive({
 
     ...admin_store.admin,
-    
-    website_info: admin_store.website_info
-  
+
+    ...settings_store.settings
+
 })
  
 
 let admin_info_error = reactive({
-        email_err: "",
-        phone_err: "", 
-        service_fee_err: "",  
+    email_err: "",
+    phone_err: "", 
+    same_city_err: "",  
+    same_state_err: "",
+    other_state_err: ""
 })
 
 
@@ -127,14 +152,14 @@ let password_error = reactive({
 
 
 
-if (!admin_store.admin_isAuthenticated) { //if user no get session redirect to login
+if (!admin_store.isAuthenticated) { //if user no get session redirect to login
 
     router.push({ path: "/login" })
 
 }
 
 
-watch( () => admin_store.admin_isAuthenticated,
+watch( () => admin_store.isAuthenticated,
 
   (isAuthenticated) => { //i dey confirm if admin still dey authenticated
 
@@ -165,7 +190,9 @@ onUpdated(() => {
 
     emailvalidated()
     phonevalidated()
-    servicefeevalidated()
+    samecityvalidated()
+    samestatevalidated()
+    otherstatevalidated()
 
     old_password_validated()
     new_password_validated()
@@ -228,15 +255,47 @@ function phonevalidated() {
 
 
 
-function servicefeevalidated() {
+function samecityvalidated() {
     
-    if (admin_info.website_info.service_fee === "") {
+    if (admin_info.fee_same_city === "") {
     
-        admin_info_error.service_fee_err = "Please fill field";
+        admin_info_error.same_city_err = "Please fill field";
     
     } else {
         
-        admin_info_error.service_fee_err = ""
+        admin_info_error.same_city_err = ""
+        
+        return true
+
+    }         
+}
+
+
+function samestatevalidated() {
+    
+    if (admin_info.fee_same_state === "") {
+    
+        admin_info_error.same_state_err = "Please fill field";
+    
+    } else {
+        
+        admin_info_error.same_state_err = ""
+        
+        return true
+
+    }         
+}
+
+
+function otherstatevalidated() {
+    
+    if (admin_info.fee_other_state === "") {
+    
+        admin_info_error.other_state_err = "Please fill field";
+    
+    } else {
+        
+        admin_info_error.other_state_err = ""
         
         return true
 
@@ -306,7 +365,7 @@ function confirm_password_validated() {
 
 async function updateAdmin(e) {
 
-    if (emailvalidated() && phonevalidated() && servicefeevalidated()) {
+    if (emailvalidated() && phonevalidated() && samecityvalidated() && samestatevalidated() && otherstatevalidate()) {
 
         interactive_store.toggle_loading_overlay(true)
 
@@ -392,231 +451,155 @@ async function update_admin_pass(e) {
 </script>
 
 <style scoped>
+/*DESKTOP VIEW*/
+@media only screen and (min-width: 992px) {
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: "Roboto" ,"Helvetica Neue","Helvetica",Arial,sans-serif;
+        background-color: rgb(225, 230, 231);
+    }
+    div.container {
+        display: flex;
+        height: 100vh;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    div.sub_container {
+        display: block;
+        margin:0 0 0 250px;
+        height: 100vh;
+        padding: 0 15px 50px 15px;
+        width: 100%;
+        overflow-y: auto;
+        width: calc(100% - 250px);
+    }
+    div.sub_container h1{
+        margin: 0px auto 5px auto;
+        color: #0E2E45;
+        font-size: 35px;
+        font-weight: 300;
+    }
+}
 /* MOBILE VIEW */
 @media only screen and (max-width: 992px) {
-  body {
+body {
     margin: 0;
     padding: 0;
-    font-family: "Roboto", "Helvetica Neue", "Helvetica", Arial, sans-serif;
+    font-family: "Roboto" ,"Helvetica Neue","Helvetica",Arial,sans-serif;
     background-color: rgb(225, 230, 231);
-  }
-  div.container {
+}
+div.container {
     display: flex;
-    height: auto;
-    width: 100%;
+    height: auto; 
+    width: 100%; 
     margin: 0;
-    padding: 0;
-  }
-  div.sub_container {
+    padding: 0;  
+}
+div.sub_container {
     display: block;
-    margin: 0;
-    padding: 0 15px 90px 15px;
-    width: 100%;
-  }
-  div.sub_container h1 {
-    margin: 0px auto 25px auto;
-    color: #0e2e45;
+    margin:0;
+    padding: 0 15px 50px 15px;
+    width: 100%; /*calc(100% - 250px)*/;
+}
+div.sub_container h1{
+    margin: 0px auto 5px auto;
+    color: #0E2E45;
     font-size: 3rem;
     font-weight: 300;
+}
+}
+
+.edit-details-form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 30px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(145, 138, 138, 0.1);
+}
+
+.form-title {
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.edit-details-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.grid-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+/* Make certain fields span full width */
+.grid-full {
+  grid-column: span 2;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 16px;
+  font-weight: bold;
+  color: #555;
+}
+
+.form-input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.form-input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+
+.submit-button {
+  padding: 12px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+p.err {
+  color: red;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Mobile fallback */
+@media (max-width: 768px) {
+  .grid-form {
+    grid-template-columns: 1fr;
   }
 
-     div.contactusform {
-        margin: 50px 0 80px 0;
-        border-radius: 12px;
-        padding: 20px 25px;
-        border: 1px solid gray;
-    }
-
-    div.contactusform h2 {
-      font-size: 18px;
-    }
-
-    div.contactusform form {
-        margin-top: 20px;
-        display: block;
-        width: 100%
-    }
-
-    div.contactusform label{
-       display: block;
-       font-size: 15px;
-       margin: 14px 0 8px 0;
-       color: gray;
-    }
-
-    div.contactusform form input, button {
-        display: block;
-        border: 1px solid gray;
-        outline: 0 solid gray;
-        border-radius: 6px;
-        font-size: 14px;
-        padding: 10px 10px;
-        width: 100%;
-        box-sizing: border-box;
-        margin-bottom: 3px;
-    }
-
-    div.contactusform form input:hover {
-        border: 1px solid gray;
-        outline: 0 solid gray;
-    }
-
-    div.contactusform form input:active {
-        outline: 0 solid gray;
-    }
-
-    div.contactusform form button[type=submit] {
-        background-color: green;
-        cursor: pointer;
-        color: #fff;
-        transition: .5s;
-        font-weight: bold;
-        margin: 20px 0px;
-    }
-
-    div.contactusform form button[type=submit]:hover {
-        opacity: .5
-    }
-
-    div.contactusform form button[type=submit]:disabled {
-        opacity: .5;
-        cursor: none;
-    }
-
-    p.err {
-     color: red;
-     font-size: 11px;
-     margin: 0;
+  .grid-full {
+    grid-column: span 1;
   }
 }
-/* MOBILE VIEW */
- 
-/* DESKTOP VIEW */
-@media only screen and (min-width: 992px) {
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: "Roboto", "Helvetica Neue", "Helvetica", Arial, sans-serif;
-    background-color: rgb(225, 230, 231);
-  }
-  div.container {
-    display: flex;
-    height: 100vh;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
-  div.sub_container {
-    display: block;
-    margin: 0 0 0 250px;
-    height: 100vh;
-    padding: 0 15px 90px 15px;
-    width: 100%;
-    overflow-y: auto;
-    width: calc(100% - 250px);
-  }
-  div.sub_container h1 {
-    margin: 0px auto 25px auto;
-    color: #0e2e45;
-    font-size: 35px;
-    font-weight: 300;
-  }
 
-  div.grid {
-      display: grid;
-      column-gap: 30px;
-      grid-template-columns: auto auto;
-      align-items: flex-start;
-  }
-
-   div.contactusform {
-      margin: 30px 0 80px 0;
-      box-sizing: border-box;
-      border-radius: 12px;
-      padding: 20px 20px;
-      border: 1px solid gray;
-   }
-
-    div.contactusform h2 {
-      font-size: 20px;
-    }
-
-    div.contactusform form {
-        margin-top: 20px;
-        display: block;
-        width: 100%
-    }
-
-    div.contactusform {
-        display: block;
-    }
-
-    div.contactusform label{
-       display: block;
-       margin: 14px 0 8px 0;
-       font-size: 15px;
-       color: gray;
-    }
-
-    div.contactusform form input, button {
-        display: block;
-        border: 1px solid gray;
-        outline: 0 solid gray;
-        border-radius: 6px;
-        font-size: 14px;
-        padding: 10px 10px;
-        width: 100%;
-        box-sizing: border-box;
-        margin-bottom: 3px;
-    }
-
-    div.contactusform form input:hover {
-        border: 1px solid gray;
-        outline: 0 solid gray;
-    }
-
-    div.contactusform form input:active {
-        outline: 0 solid gray;
-    }
-
-    div.contactusform form textarea {
-        border: 1px solid gray;
-        outline: 0 solid gray;
-        font-size: 15px;
-        width: 100%;
-        height: 160px;
-        border-radius: 3px;
-        margin-top: 10px;
-        padding: 10px 11px 0 11px;
-        resize: none;
-        box-sizing: border-box
-    }
-
-    div.contactusform form button[type=submit] {
-        background-color: green;
-        cursor: pointer;
-        color: #fff;
-        display: block;
-        margin: 20px auto;
-        width: 50%;
-        font-size: 16px;
-        transition: .5s
-    }
-
-    div.contactusform form button[type=submit]:hover {
-        opacity: .5
-    }
-
-    div.contactusform form button[type=submit]:disabled {
-        opacity: .5;
-        cursor: none;
-    }
-  
-    p.err {
-        color: red;
-        font-size: 11px;
-        margin: 0;
-    }
-}
-/* DESKTOP VIEW */
 </style>

@@ -4,8 +4,10 @@ const API = require("../api/api")
 const Uri = process.env.URI
 const check_user_session = require("../middlewares/check_user_session.js") 
 const req = require("express/lib/request");
+const LIMITERS = require("../middlewares/limiters")
 const sessionConfig = require("../middlewares/session");
 const session = require("express-session");
+
 
 
 router.use(session(sessionConfig));
@@ -33,21 +35,21 @@ router.get("/api/logout", API.logout);
  
 // POST REQUEST
 
-router.post("/api/register", API.register)
+router.post("/api/register", LIMITERS.register(), API.register)
 
-router.post("/api/resend-email-confirmation", API.ResendConfirmationMail)
+router.post("/api/resend-email-confirmation", LIMITERS.resendEmail(), API.ResendConfirmationMail)
 
-router.post("/api/login", API.login)
+router.post("/api/login", LIMITERS.login(), API.login)
 
-router.post("/api/submit_order", check_user_session, API.submit_order);
+router.post("/api/submit_order", check_user_session, LIMITERS.submitOrder(), API.submit_order);
 
 router.post("/paystack_webhook", API.paystack_webhook);
 
-router.post("/api/contact_us", API.contact_us);
+router.post("/api/contact_us", LIMITERS.contact(), API.contact_us);
 
-router.post("/api/send_reset_pass_email", API.send_reset_pass_email);
+router.post("/api/send_reset_pass_email", LIMITERS.resetPasswordEmail(), API.send_reset_pass_email);
 
-router.post("/api/reset_password", API.reset_password);
+router.post("/api/reset_password", LIMITERS.resetPassword(), API.reset_password);
  
 
 //PATCH REQUEST

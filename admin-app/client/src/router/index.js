@@ -1,7 +1,8 @@
 
 import { createRouter, createWebHistory } from "vue-router";
 
-import { useInteractiveStore } from '../stores/interactive';
+import { useInteractiveStore } from '@/stores/interactive'
+import { useAdminStore } from "@/stores/admin";
 
 const router = createRouter({
 
@@ -51,7 +52,8 @@ routes: [
     name: 'dashboard',
     component: () => import('../views/Dashboard.vue'),
     meta: {
-      title: 'Dashboard - Tech By Cas Admin'
+      title: 'Dashboard - Tech By Cas Admin',
+      requiresAuth: true
     }
   },
   {
@@ -59,7 +61,8 @@ routes: [
     name: 'items',
     component: () => import('../views/Items.vue'),
     meta: {
-      title: 'Menus - Tech By Cas Admin'
+      title: 'Menus - Tech By Cas Admin',
+      requiresAuth: true
     }
   },
   {
@@ -67,7 +70,8 @@ routes: [
     name: 'Add-Item',
     component: () => import('../views/Add-Item.vue'),
     meta: {
-      title: 'Add Item - Tech By Cas Admin'
+      title: 'Add Item - Tech By Cas Admin',
+      requiresAuth: true
     }
   },
   {
@@ -75,7 +79,8 @@ routes: [
     name: 'Customers',
     component: () => import('../views/Customers.vue'),
     meta: {
-      title: 'Customers - Tech By Cas Admin'
+      title: 'Customers - Tech By Cas Admin',
+      requiresAuth: true
     }
   },
   {
@@ -83,7 +88,8 @@ routes: [
     name: 'Orders',
     component: () => import('../views/Orders.vue'),
     meta: {
-      title: 'Orders - Tech By Cas Admin'
+      title: 'Orders - Tech By Cas Admin',
+      requiresAuth: true
     }
   },
   {
@@ -91,7 +97,8 @@ routes: [
     name: 'Analytics',
     component: () => import('../views/Analytics.vue'),
     meta: {
-      title: 'Analytics - Tech By Cas Admin'
+      title: 'Analytics - Tech By Cas Admin',
+      requiresAuth: true
     }
   },
   {
@@ -99,7 +106,8 @@ routes: [
     name: 'Settings',
     component: () => import('../views/Settings.vue'),
     meta: {
-      title: 'Settings - Tech By Cas Admin'
+      title: 'Settings - Tech By Cas Admin',
+      requiresAuth: true
     }
   },
   {
@@ -107,7 +115,8 @@ routes: [
     name: 'Order-History',
     component: () => import('../views/Order-History.vue'),
     meta: {
-      title: 'Order History - Tech By Cas Admin'
+      title: 'Order History - Tech By Cas Admin',
+      requiresAuth: true
     }
   },
   {
@@ -115,7 +124,8 @@ routes: [
     name: 'View-Order',
     component: () => import('../views/View-Order.vue'),
     meta: {
-      title: 'View Order - Tech By Cas Admin'
+      title: 'View Order - Tech By Cas Admin',
+      requiresAuth: true
     }
   },
   {
@@ -123,7 +133,8 @@ routes: [
     name: 'edit-item',
     component: () => import('../views/Edit-Item.vue'),
     meta: {
-      title: 'Edit Item - Tech By Cas Admin'
+      title: 'Edit Item - Tech By Cas Admin',
+      requiresAuth: true
     }
   },
 ],
@@ -142,14 +153,34 @@ scrollBehavior(to, from, savedPosition) {
 
 })
 
-router.beforeEach((to, from, next) => { // Used to Set Page Title
+router.beforeEach(async (to, from, next) => { // Used to Set Page Title
   
-  const interactive_store = useInteractiveStore()
+  const admin_store = useAdminStore();
+  const interactive_store = useInteractiveStore();
 
   document.title = to.meta.title || 'Tech By Cas Admin | Admin Panel.';
 
-  next();
+   // Wait for fetch if not done
+  if (!admin_store.isFetched) {
+    await admin_store.fetch_admin().catch(() => {}); // ignore errors
+  }
 
+  // Route requires auth & admin is authenticated → allow
+  if (to.meta.requiresAuth && admin_store.isAuthenticated) {
+    return next();
+  }
+
+  // Route requires auth & admin NOT authenticated → go to login
+  if (to.meta.requiresAuth && !admin_store.isAuthenticated) {
+    return next({ name: "login" });
+  }
+
+  // Route does NOT require auth & admin IS authenticated → go to dashboard
+  if (!to.meta.requiresAuth && admin_store.isAuthenticated) {
+    return next({ name: "dashboard" });
+  } 
+   
+  next();
 
 })
 

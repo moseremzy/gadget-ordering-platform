@@ -10,7 +10,7 @@ const app = express();
 
 
 app.use(cors({
-  origin: "http://localhost:8082",   // your Vue frontend
+  origin: "http://localhost:8080",   // your Vue frontend
   credentials: true,                 // 🔥 THIS IS REQUIRED FOR COOKIES
 }));
 

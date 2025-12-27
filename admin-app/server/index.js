@@ -8,7 +8,7 @@ const app = express();
 const path = require("path")
 
 app.use(cors({
-  origin: "http://localhost:8083",   // your Vue frontend
+  origin: "http://localhost:8081",   // your Vue frontend
   credentials: true,                 // 🔥 THIS IS REQUIRED FOR COOKIES
 }));
 

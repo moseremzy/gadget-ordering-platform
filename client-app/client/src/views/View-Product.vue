@@ -52,11 +52,7 @@
         </div>
        
        <div class = "cards">
-        <div class="card">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield mx-auto mb-3 text-primary"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
-          <h2>Always Authentic</h2>
-          <p>We only sell 100% authentic products</p>
-        </div>
+
         <div class="card">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-truck mx-auto mb-3 text-primary"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path><path d="M15 18H9"></path><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path><circle cx="17" cy="18" r="2"></circle><circle cx="7" cy="18" r="2"></circle></svg>
           <h2>Fast Shipping</h2>
@@ -67,6 +63,18 @@
           <svg style="color: green;" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-circle mx-auto mb-3 text-whatsapp"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path></svg>
           <h2>Fast Support</h2>
           <p>Quick customer support</p>
+        </div>
+
+         <div class="card">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-rotate-ccw mx-auto mb-3 text-primary">
+          <path d="M3 2v6h6"></path>
+          <path d="M3 8a9 9 0 1 1 2.83 6.36"></path>
+        </svg>
+          <h2>Easy Returns</h2>
+          <p>Return policy that lets you shop at ease</p>
         </div>
 
         <div class="card">

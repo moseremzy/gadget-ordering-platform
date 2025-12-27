@@ -97,11 +97,7 @@ let tab_clicked = ref("");
 const route = useRoute()
 const router = useRouter()
 
-if (!admin_store.isAuthenticated) { //if user no get session redirect to login
-
-    router.push({ path: "/login" })
-
-}
+ 
 
 watch( () => admin_store.isAuthenticated,
 

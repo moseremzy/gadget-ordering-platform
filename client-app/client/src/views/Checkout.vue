@@ -278,7 +278,7 @@ async function checkout() {
            
        } catch (error) {
 
-         interactive_store.backend_message = error.response?.data?.message
+         interactive_store.backend_message = typeof(error.response.data) == 'string' ? error.response.data : error.response?.data?.message
 
          interactive_store.display_error_modal_box(true)
            

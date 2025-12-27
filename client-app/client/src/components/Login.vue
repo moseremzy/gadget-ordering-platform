@@ -71,10 +71,17 @@ onUpdated(() => {
 //resend this user verification email
 async function send_confirmation_mail(email) {
 
+    try {
+
     const response = await API.ResendConfirmationMail({ confirmationEmail: email});
 
     router.push({ name: "email-activation", query: { confirmationEmail: email} })
-
+      
+    } catch (error) {
+     
+     console.log(error)
+     
+    }
 }
 
 
@@ -175,10 +182,8 @@ async function validation() {
 
       await send_confirmation_mail(formvalues.email)
 
-      }
-  
+      }  
     }
-
   }
 }
 </script>
