@@ -106,7 +106,6 @@ import { useRoute, useRouter } from 'vue-router'
 
 const interactive_store = useInteractiveStore();
 const customers_store = useCustomersStore();
-const customers = reactive(customers_store.customers);
 const admin_store = useAdminStore()
 
 const route = useRoute()
@@ -120,13 +119,6 @@ const endDate = ref('');
 // Pagination State
 const currentPage = ref(1);
 const itemsPerPage = 20;
-
-
-if (!admin_store.isAuthenticated) { //if user no get session redirect to login
-
-    router.push({ path: "/login" })
-
-}
 
 
 watch( () => admin_store.isAuthenticated,
@@ -150,6 +142,13 @@ watch( () => admin_store.isAuthenticated,
 );
 
 
+const customers = computed(() => {
+
+ return customers_store.customers
+
+})
+
+
 watch( // Reset pagination
   [() => interactive_store.query, () => selectedStatus.value, () => startDate.value, () => endDate.value],
   () => {
@@ -160,7 +159,7 @@ watch( // Reset pagination
 
 // Filtered Customers
 const filteredCustomers = computed(() => {
-  return customers.filter(customer => {
+  return customers.value.filter(customer => {
     const customerDate = new Date(customer.created_at)
 
     const start = startDate.value

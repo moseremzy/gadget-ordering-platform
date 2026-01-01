@@ -2,7 +2,7 @@
   <!-- Status Filter -->
     <div class="status-filter-container">
       <label for="">Order Status</label>
-      <select id="status-filter" :style = "status_color"  @change = "Update_Status" class="status-filter-select" v-model = "order.order_status">
+      <select id="status-filter" :style = "status_color"  @change = "UpdateOrderStatus" class="status-filter-select" v-model = "order.order_status">
         <option style = "color:  gray;" value="pending">Pending</option>
         <option style = "color: #007BFF;" value="confirmed">Confirmed</option>
         <option style = "color: #6F42C1;" value="out for delivery">Out for Delivery</option>
@@ -17,13 +17,11 @@
 
 import { computed, reactive, toRefs, ref} from 'vue'
 
-import API from '../../api'
+import API from '../../api/index'
 
 import { useInteractiveStore } from '@/stores/interactive'
 
 const interactive_store = useInteractiveStore()
-
-let description = ref("")
 
 const props = defineProps({
 
@@ -34,76 +32,32 @@ const props = defineProps({
 const { order } = toRefs(props)
  
 
-async function Update_Status() {
+async function UpdateOrderStatus() {
 
     interactive_store.toggle_loading_overlay(true) //show overlay
 
-    switch (order.value.order_status) {
-        
-        case "pending":
-
-            description.value = "Your Order Has Been Recieved And is Awaiting Confirmation."
-            
-            break;
-
-        case "confirmed":
-
-            description.value = "Your Order Has Been Confirmed For Processing."
-
-            break;
-
-        case "out for delivery":
-
-            description.value = "Your Order is on its Way! it Will be With You Shortly."
-
-            break;
-
-        case "delivered": 
-
-            description.value = "Your Order Has Arrived! Thank You For Choosing us. We Look Forward to Serving You Again."
-
-            break;
-
-        case "cancelled": 
-
-            description.value = "Your Order Has Been Cancelled! Thank You For Choosing us. We Look Forward to Serving You Again."
-
-            break;
-
-        case "returned": 
-
-            description.value = "Your Order Has Been Returned! Thank You For Choosing us. We Look Forward to Serving You Again."
-
-            break;
-
-    }
+    try {
 
     const response = await API.update_order_status({
         
-        status: order.value.order_status, 
+      order_status: order.value.order_status, 
+      
+      order_id: order.value.order_id,
         
-        order_id: order.value.order_id,
-        
-        description: description.value
-        
-    }) 
+    })
 
-    if (response.message === "success") { 
-
-        interactive_store.backend_message = "Status Updated Succesfully"
-        
-        interactive_store.display_success_alert_box()
-
-    } else {
-
-        interactive_store.backend_message = "Error Occured, Try Again"
-
-        interactive_store.display_error_alert_box()
+    interactive_store.backend_message = "Order Status Updated Succesfully"
+    
+    interactive_store.display_success_alert_box()
+ 
+    } catch (error) {
+      
+      console.log(error)
 
     }
 
     interactive_store.toggle_loading_overlay(false) //remove overlay
-    
+   
 }
 
 
@@ -194,7 +148,7 @@ const status_color = computed(() =>  {
 }
 .status-filter-container label {
   display: block;
-  font-size: 16px;
+  font-size: 15px;
 }
 .status-filter-select {
   padding: 8px;
@@ -202,7 +156,7 @@ const status_color = computed(() =>  {
   text-align: center;
   border: 1px solid #ccc;
   border-radius: 4px;
-  margin-top: 3px;
+  margin-top: 0px;
   margin-bottom: 10px; /* Add space below inputs */
 }
 .status-filter-select:hover {

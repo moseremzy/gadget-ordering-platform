@@ -22,19 +22,7 @@ module.exports = class API {
 //register users
 static async register(req, res) {
 
-    let temporal_data = req.body;
-
-    const data = {
-
-      fullname: temporal_data.fullname,
-
-      phone: temporal_data.phone,
-      
-      email: temporal_data.email,
-      
-      password: temporal_data.password
-    
-    }
+    let data = req.body;
 
     try {
 
@@ -366,16 +354,19 @@ static async submit_order(req, res) {
 
     const data = req.body;
 
-    let products = JSON.parse(data.products)
+    let stockError;
 
-    let authorization_info;
+    let priceError;
+
+    let products = JSON.parse(data.products)
 
     try {
 
       data.confirmation_pin = HELPERS.generateConfirmationPin()
 
+      data.payment_reference =  HELPERS.generatePaymentReference()
+      
       data.user_id = req.session.user_id
-
 
       async function DerivedProducts(products) { //This function helps updates products with latest stock_quantity values
 
@@ -406,9 +397,11 @@ static async submit_order(req, res) {
         if (product[0]) { //if you find am for db
     
           products.forEach((item) => { //update the stock quantity of products array for each object
-    
+             
             item.product_id == products[counter].product_id ? item.stock_quantity = product[0].stock_quantity : null
     
+            item.product_id == products[counter].product_id ? item.latest_price = product[0].price : null
+
           })
     
         }
@@ -481,29 +474,23 @@ static async submit_order(req, res) {
   
      })
 
-     return res.status(200).json({
-      success: true,
-      message: "success",
-      confirmation_pin: data.confirmation_pin,
-      authorization_info: authorization_info
-    });
-
   }
+
+  const orderData = {
+    user_id: req.session.user_id,
+    total_amount: data.total_amount,
+    payment_method: data.payment_method,
+    total_items: data.total_items,
+    delivery_fee: data.delivery_fee,
+    confirmation_pin: data.confirmation_pin,
+    payment_reference: data.payment_reference
+  };
 
   switch (data.payment_method) {
 
     case 'cash on delivery':
 
-    const orderData = {
-      user_id: req.session.user_id,
-      total_amount: data.total_amount,
-      payment_method: data.payment_method,
-      total_items: data.total_items,
-      delivery_fee: data.delivery_fee,
-      confirmation_pin: data.confirmation_pin
-    };
-
-    const stockError = HELPERS.stock_availability(await DerivedProducts(products));
+    stockError = HELPERS.stock_availability(await DerivedProducts(products));
 
     if (stockError) {
       return res.status(400).json({
@@ -512,22 +499,53 @@ static async submit_order(req, res) {
       });
     }
 
+    priceError = HELPERS.stock_price(await DerivedProducts(products));
+
+    if (priceError) {
+      return res.status(400).json({
+        success: false,
+        message: priceError
+      });
+    }
+
     await keep_for_db(data, orderData)
     
+    return res.status(200).json({
+      success: true,
+      message: "success",
+    }); 
+
     break;
 
-  case 'card payment':
+  case 'online payment':
+
+    stockError = HELPERS.stock_availability(await DerivedProducts(products));
+
+    if (stockError) {
+      return res.status(400).json({
+        success: false,
+        message: stockError
+      });
+    }
+
+    priceError = HELPERS.stock_price(await DerivedProducts(products));
+
+    if (priceError) {
+      return res.status(400).json({
+        success: false,
+        message: priceError
+      });
+    }
 
     const params = {  // Payload for Paystack
         email: data.email,
-        amount: data.total_order_cost * 100,
-        reference: `${data.order_id}`, // Use your order ID as the reference
+        amount: data.total_amount * 100,
+        reference: `${data.payment_reference}`, // Use your order ID as the reference
         metadata: {
             name: data.customer_name,
             phone: data.phone,
-            confirmation_pin: data.confirmation_pin,
         },
-        callback_url: "https://mosesfoodorderingapp.kelvinspice.com.ng/account/payment-verification",
+        callback_url: "http://localhost:8080/account/payment-verification",
     };
 
     try {
@@ -542,19 +560,21 @@ static async submit_order(req, res) {
               },
           }
       );
+      
+      await keep_for_db(data, orderData) 
 
-        authorization_info = response.data
+      return res.status(200).json({
+        success: true,
+        message: "success",
+        authorization_info: response.data
+      });   
+      
+    } catch (error) {
 
-        authorization_info.status == true ?
-        
-        await keep_for_db(data) : message = "error occured" //only keep the data if authorization url was created succcsefully
-
-      } catch (error) {
-
-        return res.status(500).json({
-          success: false,
-          message: "Problem connecting to paystack",
-        });    
+      return res.status(500).json({
+        success: false,
+        message: "Problem connecting to paystack",
+      });    
 
       }
 
@@ -572,6 +592,324 @@ static async submit_order(req, res) {
   }
 
 }
+
+
+// verify user paystack payment manually
+static async verify_payment(req, res) {
+
+  const { reference } = req.body;
+
+  if (!reference) {
+    return res.status(400).json({success: false, message: 'Payment reference is required' });
+  }
+
+  try {
+    // 1. Find order
+    const order = await new Promise((resolve, reject) => {
+      db.query(
+        `SELECT * FROM orders WHERE payment_reference = ?`,
+        [reference],
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result[0]);
+        }
+      );
+    });
+
+    if (!order) {
+      return res.status(404).json({success: false, message: 'Order not found' });
+    }
+
+    // 2. Idempotency check
+    if (order.payment_status === 'success') {
+      return res.status(200).json({
+        success: true,
+        message: 'Payment already confirmed',
+        confirmation_pin: order.confirmation_pin,
+        payment_status: 'success',
+        reference
+      });
+    }
+
+    // 3. Verify with Paystack
+    const response = await axios.get(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      {
+        headers: {
+          Authorization: `Bearer ${PAYSTACK_KEY}`,
+        },
+      }
+    );
+
+    const data = response.data.data;
+
+    // 4. Handle success
+    if (data.status === 'success') {
+
+      // Amount validation (Paystack sends amount in kobo)
+      if (data.amount !== order.total_amount * 100) {
+        return res.status(400).json({success: false, message: 'Amount mismatch detected' });
+      }
+
+      await new Promise((resolve, reject) => {
+        db.query(
+          `UPDATE orders 
+           SET payment_status = 'success'
+           WHERE payment_reference = ?`,
+          [reference],
+          (err) => (err ? reject(err) : resolve())
+        );
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: 'Payment successful',
+        confirmation_pin: order.confirmation_pin,
+        payment_status: 'success',
+        reference
+      });
+    }
+
+    // 5. Handle non-success cases
+    const failedStatuses = ['failed', 'abandoned', 'reversed'];
+
+    if (failedStatuses.includes(data.status)) {
+      await new Promise((resolve, reject) => {
+        db.query(
+          `UPDATE orders 
+           SET payment_status = 'failed'
+           WHERE payment_reference = ?`,
+          [reference],
+          (err) => (err ? reject(err) : resolve())
+        );
+      });
+
+      return res.status(200).json({
+        success: false,
+        message: 'Payment not successful',
+        payment_status: 'failed'
+      });
+      
+    }
+
+    // 6. Still pending
+    return res.status(200).json({
+      message: 'Payment is still pending',
+      payment_status: 'pending'
+    });
+
+  } catch (error) {
+
+    console.log(error)
+
+    return res.status(500).json({success: false, message: 'Payment verification error' });
+  
+  }
+
+}
+
+
+
+//verify payment using webhook
+static async paystack_webhook(req, res) {
+
+  try {
+    
+    const hash = crypto.createHmac('sha512', PAYSTACK_KEY)
+                       .update(JSON.stringify(req.body))
+                       .digest('hex');
+    if (hash !== req.headers["x-paystack-signature"]) {
+      return res.status(400).send("Invalid signature");
+    }
+
+    const event = req.body;
+
+    const { reference, amount } = event.data;
+
+    // 1. confirm reference
+    const order = await new Promise((resolve, reject) => {
+      db.query(
+        `SELECT * FROM orders WHERE payment_reference = ?`,
+        [reference],
+        (err, result) => err ? reject(err) : resolve(result[0])
+      );
+    });
+
+    if (!order) return res.status(404).send("Order not found");
+
+    // Amount validation
+    if (amount !== order.total_amount * 100) {
+      return res.status(400).send("Amount mismatch detected");
+    }
+
+    const updateOrderStatus = (status) =>
+      new Promise((resolve, reject) => {
+        db.query(
+          `UPDATE orders SET payment_status=? WHERE payment_reference=?`,
+          [status, reference],
+          (err, result) => (err ? reject(err) : resolve(result))
+        );
+      });
+
+    switch (event.event) {
+      
+      case "charge.success":
+      
+      await updateOrderStatus("success");
+      
+       break;
+      
+      case "charge.failed":
+        
+      await updateOrderStatus("failed");
+        
+       break;
+      
+      default:
+        
+      console.log("Unhandled event type:", event.event);
+    
+    }
+  
+  } catch (err) {
+    
+    console.log("Webhook error:", err.message);
+
+  }
+
+  res.sendStatus(200);
+
+}
+
+
+// verify user paystack payment using cron(periodically)
+static async cron_payment_verification() {
+  
+  try {
+    
+    // 1. Fetch eligible pending orders
+    const pendingOrders = await new Promise((resolve, reject) => {
+      db.query(
+        `
+        SELECT *
+        FROM orders
+        WHERE payment_status = 'pending'
+          AND created_at <= NOW() - INTERVAL 10 MINUTE
+          AND payment_method = 'online payment'
+          AND verification_attempts < 3
+        `,
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        }
+      );
+    });
+
+    if (!pendingOrders.length) {
+      console.log('No pending payments to verify');
+      return;
+    }
+
+    // 2. Loop through orders
+    for (const order of pendingOrders) {
+      
+      const reference = order.payment_reference;
+
+      try {
+        // 3. Verify with Paystack
+        const response = await axios.get(
+          `https://api.paystack.co/transaction/verify/${reference}`,
+          {
+            headers: {
+              Authorization: `Bearer ${PAYSTACK_KEY}`,
+            },
+          }
+        );
+
+        const data = response.data.data;
+
+        // 4. SUCCESS
+        if (data.status === 'success') {
+
+          // Amount validation
+          if (data.amount !== order.total_amount * 100) {
+            console.error(`Amount mismatch for ${reference}`);
+            continue;
+          }
+
+          await new Promise((resolve, reject) => {
+            db.query(
+              `
+              UPDATE orders
+              SET payment_status = 'success'
+              WHERE payment_reference = ?
+              `,
+              [reference],
+              (err) => (err ? reject(err) : resolve())
+            );
+          });
+
+          continue;
+
+        }
+
+        // 5. FAILED
+        if (['failed', 'abandoned', 'reversed'].includes(data.status)) {
+          await new Promise((resolve, reject) => {
+            db.query(
+              `
+              UPDATE orders
+              SET payment_status = 'failed'
+              WHERE payment_reference = ?
+              `,
+              [reference],
+              (err) => (err ? reject(err) : resolve())
+            );
+          });
+
+          continue;
+        }
+
+        // 6. STILL PENDING → increment attempts
+        await new Promise((resolve, reject) => {
+          db.query(
+            `
+            UPDATE orders
+            SET verification_attempts = verification_attempts + 1
+            WHERE payment_reference = ?
+            `,
+            [reference],
+            (err) => (err ? reject(err) : resolve())
+          );
+        });
+
+      } catch (err) {
+        
+        console.error(`Verification error for ${reference}:`, err.message);
+        // Increment attempts on error too
+        await new Promise((resolve, reject) => {
+          db.query(
+            `
+            UPDATE orders
+            SET verification_attempts = verification_attempts + 1
+            WHERE payment_reference = ?
+            `,
+            [reference],
+            (err) => (err ? reject(err) : resolve())
+          );
+        });
+      }
+    }
+
+  } catch (err) {
+    
+    console.error('Cron payment verification failed:', err.message);
+  
+  }
+
+}
+
+
 
 
 
@@ -939,222 +1277,7 @@ static async fetch_orders (req, res) {
 }
 
 
-// verify user card payment manually
-static async verify_payment (req, res) {
-
-  const { reference } = req.params;
-
-  let status, description;
-
-  try {
-    const response = await axios.get(`https://api.paystack.co/transaction/verify/${reference}`, {
-      headers: {
-        Authorization: `Bearer ${PAYSTACK_KEY}`,
-      },
-    });
-
-    const paymentData = response.data.data;
-
-    if (["ongoing", "pending", "processing", "queued"].includes(paymentData.status)) {
-
-      description = 'The payment has been initiated but is awaiting confirmation from the payment gateway'
-
-      status = 'Payment Pending'
-
-    } else if (["abandoned"].includes(paymentData.status)) {
-
-      description = 'The payment process was not completed. No payment attempt was recoreded'
-
-      status = 'Payment Abandoned'
-
-    } else if (["failed"].includes(paymentData.status)) {
-
-      description = paymentData.gateway_response
-
-      status = 'Payment Failed'
-
-    } else if (["reversed"].includes(paymentData.status)) {
-
-      description = 'The payment has been reversed'
-
-      status = 'Payment Reversed'
-
-    } else { //success
-
-      description = 'Your Order Has Been Recieved And is Awaiting Confirmation'
-
-      status = 'Pending'
-
-    }
-
-    const order_query = `UPDATE orders 
-      SET status= ?,
-      description= ?
-      WHERE order_id= ?`
-
-      await new Promise( (resolve, reject) => {
-
-        db.query(order_query, [status, description, reference], (err, result) => {
-
-          if (err) {
-
-            reject(err)
-          
-          } else {
-
-            resolve(result)
-
-          }
-
-        })
-
-      })
-    
-
-    if (paymentData.status === "success") { //if verification na success
-
-      res.json({ message: "Payment successful", data: paymentData });
-    
-    } else { //if na anyother status including fail
-
-      res.status(400).json({ message: "Payment verification failed", data: paymentData });
-
-    }
-
-  } catch (error) {
-
-    res.status(500).send("Error verifying payment");
-
-  }
-
-}
-
-
-
-
-//verify payment using webhook
-static async paystack_webhook (req, res) {
  
-    
-  try {
-
-      let order_query;
-      
-      // Verify the signature
-      const hash = crypto.createHmac('sha512', PAYSTACK_KEY).update(JSON.stringify(req.body)).digest('hex');
-      
-      if (hash != req.headers["x-paystack-signature"]) {
-          
-        return res.status(400).send("Invalid signature");
-        
-      }
-      
-      const event = req.body;
-
-      const { reference, gateway_response } = event.data;
-      
-      switch (event.event) { // Handle the event
-      
-      case "charge.success":
-         
-      order_query = `UPDATE orders 
-      SET status= ?,
-      description= ?
-      WHERE order_id= ?`
-
-      await new Promise( (resolve, reject) => {
-
-        db.query(order_query, ['Pending', 'Your Order Has Been Recieved And is Awaiting Confirmation', reference], (err, result) => {
-
-          if (err) {
-
-            reject(err)
-          
-          } else {
-
-            resolve(result)
-
-          }
-
-        })
-
-      })
-         
-        break;
-      
-      case "charge.failed":  // Handle failed payments
-      
-      order_query = `UPDATE orders 
-      SET status= ?,
-      description= ?
-      WHERE order_id= ?`
-
-      await new Promise( (resolve, reject) => {
-
-        db.query(order_query, ['Payment Failed', gateway_response, reference], (err, result) => {
-
-          if (err) {
-
-            reject(err)
-          
-          } else {
-
-            resolve(result)
-
-          }
-
-        })
-
-      })
-       
-        break;
-
-        case "charge.reversal":  // Handle automatic reversals
-      
-        order_query = `UPDATE orders 
-        SET status= ?,
-        description= ?
-        WHERE order_id= ?`
-  
-        await new Promise( (resolve, reject) => {
-  
-          db.query(order_query, ['Payment Reversed', 'Your funds has been reversed. contact customer support for more info', reference], (err, result) => {
-  
-            if (err) {
-  
-              reject(err)
-            
-            } else {
-  
-              resolve(result)
-  
-            }
-  
-          })
-  
-        })
-         
-          break;
-      
-      // Add more cases for other events as needed
-      
-      default:
-      
-        console.log("Unhandled event type:", event.event);
-        
-        break;
-
-      }
-
-  } catch(err) {
-      
-    console.log(err.message)
-      
-  }
-
-  res.sendStatus(200);   // Respond to Paystack
-
-}   
 
 
 // Verify User Email

@@ -185,27 +185,23 @@ async function validation() {
           
     if (phonevalidated() && emailvalidated() && passwordvalidated()) {
 
-     interactive_store.toggle_loading_overlay(true)
-
-     try {
-
-      const response = await API.register(formvalues);
+    interactive_store.toggle_loading_overlay(true)
+   
+    try {
         
-      interactive_store.backend_message = "success"
-            
-      interactive_store.display_success_alert_box()
+    const response = await API.register(formvalues);
 
-      router.push({ name: "login"})
+    return router.push({ name: "email-activation", query: {confirmationEmail: formvalues.email,}, params: {confirmationCode: response.message} })
+    
+    } catch (error) {
 
-     } catch (error) {
-
-      console.log(error)
-         
+     console.log(error.message)
+  
     }
 
-  }
-
-  interactive_store.toggle_loading_overlay(false)
+    interactive_store.toggle_loading_overlay(false)
+ 
+ }
 
 }
 

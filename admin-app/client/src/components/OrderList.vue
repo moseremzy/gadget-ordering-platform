@@ -1,7 +1,6 @@
 <template>
   
   <div>
-  <!-- <CANCELORDERMODAL :id  = _id :user_id = user_id /> -->
 
   <div class = "grid3" v-if = "orders.length > 0">
    <template v-for = "order in orders" :key = "order.order_id">
@@ -20,38 +19,51 @@
 
     <router-link :to = "'/account/view-order/'+order.order_id" id = "link">View..</router-link> 
 
+    <div class = "payment_status">
+    <PAYMENTSTATUS :order = order />
+    <div>
     <p>Payment - {{order.payment_method}}</p>
     <p>Confirmation pin - {{order.confirmation_pin}}</p>
+    </div>
+    </div>
     <hr>
 
-    <div id = "price_buttons">
+    <div class="order-footer">
+    <!-- PRICE -->
+    <div class="order-price">
+        <span>Order Total</span>
+        <h2>
+        {{ new Intl.NumberFormat('en-NG', {
+            style: 'currency',
+            currency: 'NGN'
+        }).format(order.total_amount) }}
+        </h2>
+    </div>
+
+    <!-- STATUS / ACTIONS -->
+    <div class="order-status-area">
       
-      <h2>Order Price - {{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(order.total_amount)}}</h2>
-      
-       <!-- confirm/reject order button  -->
-       
-       <CONFIRMREJECTSTATUS :order = order v-if = "order.order_status == 'pending'" />
+       <CONFIRMREJECTSTATUS v-if="order.order_status === 'pending'" :order="order" /> <!-- Pending: show actions -->
 
-       <!-- confirm/reject order button  -->
+       <div v-else class="order-status-row"> <!-- Otherwise: show statuses -->
+        <ORDERSTATUS :order="order" />
+        </div>
+    </div>
 
+    </div>
 
-       <!-- Status Filter -->
-    
-       <STATUSFILTER :order = order v-else/>
+  </div>
 
-        <!-- Status Filter -->
+ </template>
 
-    </div>  
+ </div>
 
-    
-
-</div>
-</template>
-</div>
 <ITEMSNOTFOUND v-else>
    No {{category}} Orders
 </ITEMSNOTFOUND>
+
 </div>
+
 </template>
 
 
@@ -70,7 +82,9 @@ import SUCCESSALERTBOX from "@/components/alert_box/success.vue";
 
 import ERRORALERTBOX from "@/components/alert_box/error.vue";
 
-import STATUSFILTER from './status_components/StatusFilter.vue';
+import ORDERSTATUS from './status_components/OrderStatus.vue';
+
+import PAYMENTSTATUS from './status_components/PaymentStatus.vue';
 
 import { computed, reactive, toRefs, ref} from 'vue'
 
@@ -97,173 +111,203 @@ const { orders, order_items, category } = toRefs(props)
 </script>
 
 <style scoped>
+
+/* shared base styles */
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Roboto","Helvetica Neue","Helvetica",Arial,sans-serif;
+}
+
+hr {
+  margin: 0;
+  border: 1px solid rgb(218, 215, 215);
+}
+
+#link {
+  font-weight: bold;
+}
+
+.payment_status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0 0 0;
+}
+
 /* MOBILE VIEW */
 @media only screen and (max-width: 700px) {
-* {
-    margin: 0;
-    padding: 0;
-    font-family: "Roboto" ,"Helvetica Neue","Helvetica",Arial,sans-serif;
-}
+
 div.grid3 {
-    border-radius: 7px;
-    width: 100%;
-    height: auto;
-    box-sizing: border-box;
-    margin: 0;
+  border-radius: 7px;
+  width: 100%;
 }
+
 div.order {
-    padding: 13px;
-    border: 1px solid rgb(192, 189, 189);
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,.2),0 6px 20px 0 rgba(0,0,0,.19);
-    border-radius: 7px;
-    margin: 0px 0 20px 0;
-    background-color: white;
+  padding: 13px;
+  border: 1px solid rgb(192, 189, 189);
+  box-shadow: 0 4px 8px rgba(0,0,0,.2), 0 6px 20px rgba(0,0,0,.19);
+  border-radius: 7px;
+  margin-bottom: 20px;
+  background-color: white;
 }
+
 div#id_date {
-    display: flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }
-div#id_date p{
-    font-size: 1.4rem;
+
+div#id_date p {
+  font-size: 1.4rem;
 }
-div#image_quantity{
-    margin: 5px 0 30px 0;
-    font-size: 15px;
+
+div#image_quantity {
+  margin: 5px 0 30px 0;
+  font-size: 15px;
 }
-div#image_quantity img{
-    display: inline-block;
-    margin-right: 10px;
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 100%;
-    float: left;
+
+div#image_quantity img {
+  margin-right: 10px;
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 100%;
+  float: left;
 }
-#link {
-    font-weight: bold;
+
+div.order p {
+  clear: both;
+  font-size: 1.5rem;
+  text-align: right;
+  margin: 10px 0;
+  font-weight: bold;
 }
-div.order p{
-    clear: both;
-    font-size: 1.5rem;
-    text-align: right;
-    margin: 10px 0;
-    font-weight: bold;
+
+/* footer layout */
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* ❗ was flex-end */
+  margin-top: 12px;
 }
-hr {
-    margin: 0;
-    border: 1px solid rgb(218, 215, 215);
+
+
+.order-price h2 {
+  font-size: 15px;
+  font-weight: bold;
 }
-div#price_buttons {
-    display: flex;
-    justify-content: space-between;
+
+.order-status-area {
+  display: flex;
+  align-items: center;
 }
-div#price_buttons h2{
-    font-size: 15px;
-    font-weight: bold;
-    margin: 9px 5px 7px 0;
+
+.order-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 8px;
 }
-div#price_buttons button {
-    margin: 10px 4px 0 4px;
-    padding: 5px 20px;
-    font-size: 15px;
-    font-weight: bold;
-    margin-left: 10px;
-    color: white;
-}
-#reject {
-    background-color: rgb(145, 76, 76);
-    border: 1px solid rgb(145, 76, 76);
-}
-#confirm {
-    background-color: green;
-    border: 1px solid green;
-}
+
+
 }
 
 /* DESKTOP VIEW */
 @media only screen and (min-width: 700px) {
-* {
-    margin: 0;
-    padding: 0;
-    font-family: "Roboto" ,"Helvetica Neue","Helvetica",Arial,sans-serif;
-}
+
 div.grid3 {
-    padding: 0;
-    border-radius: 7px;
-    width: 100%;
-    height: auto;
-    box-sizing: border-box;
-    margin: auto;
-    display: grid;
-    grid-template-columns: auto auto;
-    gap: 10px;
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 10px;
 }
+
 div.order {
-    padding: 13px;
-    border: 1px solid rgb(192, 189, 189);
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,.2),0 6px 20px 0 rgba(0,0,0,.19);
-    border-radius: 7px;
-    background-color: white;
+  padding: 13px;
+  border: 1px solid rgb(192, 189, 189);
+  box-shadow: 0 4px 8px rgba(0,0,0,.2), 0 6px 20px rgba(0,0,0,.19);
+  border-radius: 7px;
+  background-color: white;
 }
+
 div#id_date {
-    display: flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }
-div#id_date p{
-    font-size: 1.5rem;
+
+div#id_date p {
+  font-size: 1.5rem;
 }
-div#image_quantity{
-    margin: 5px 0 30px 0;
-    font-size: 16px;
+
+div#image_quantity {
+  margin: 5px 0 30px 0;
+  font-size: 16px;
 }
-div#image_quantity img{
-    display: inline-block;
-    margin-right: 10px;
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 100%;
-    float: left;
+
+div#image_quantity img {
+  margin-right: 10px;
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 100%;
+  float: left;
 }
-#link {
-    font-weight: bold;
+
+div.order p {
+  clear: both;
+  font-size: 1.7rem;
+  text-align: right;
+  margin: 10px 0;
+  font-weight: bold;
 }
-div.order p{
-    clear: both;
-    font-size: 1.7rem;
-    text-align: right;
-    margin: 10px 0;
-    font-weight: bold;
+
+/* footer layout */
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* ❗ was flex-end */
+  margin-top: 12px;
 }
-hr {
-    margin: 0;
-    border: 1px solid rgb(218, 215, 215);
+
+
+.order-price span {
+  font-size: 12px;
+  color: #777;
+  display: block;
 }
-div#price_buttons {
-    display: flex;
-    justify-content: space-between;
+
+.order-price h2 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 4px;
 }
-div#price_buttons h2{
-    font-size: 15px;
-    font-weight: bold;
-    margin: 9px 5px 7px 0;
+
+.order-status-area {
+  display: flex;
+  align-items: center;
 }
-div#price_buttons button {
-    margin: 10px 4px 0 4px;
-    padding: 5px 20px;
-    font-size: 15px;
-    font-weight: bold;
-    margin-left: 10px;
-    color: white;
+
+.order-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 8px;
 }
+
+
+}
+
+/* buttons (unchanged) */
 #reject {
-    background-color: rgb(145, 76, 76);
-    border: 1px solid rgb(145, 76, 76);
+  background-color: rgb(145, 76, 76);
+  border: 1px solid rgb(145, 76, 76);
 }
+
 #confirm {
-    background-color: green;
-    border: 1px solid green;
+  background-color: green;
+  border: 1px solid green;
 }
-}
+
 </style>
  

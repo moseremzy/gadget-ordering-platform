@@ -9,7 +9,7 @@
        <li><router-link exact-active-class = "active-link" to = "/account/customers"><font-awesome-icon class="fa-solid fa-user icons" icon="fa-solid fa-user"/> Customers</router-link></li> 
        <li><router-link exact-active-class = "active-link" to = "/account/analytics"><font-awesome-icon class="fa-solid fa-chart-line icons" icon="fa-solid fa-chart-line"/> Analytics</router-link></li> 
        <li><router-link exact-active-class = "active-link" to = "/account/settings"><font-awesome-icon class="fa-solid fa-user-cog icons" icon="fa-solid fa-user-cog"/>Account Settings</router-link></li> 
-       <li @click.prevent = "logout" v-if = "admin_store.admin_isAuthenticated"><router-link to="#" class = "link" style="color: red;"><font-awesome-icon  class="fa-solid fa-sign-out icons" style="color: red;" icon="fa-solid fa-sign-out"/>Log Out</router-link></li>
+       <li @click.prevent = "logout" v-if = "admin_store.isAuthenticated"><router-link to="#" class = "link" style="color: red;"><font-awesome-icon  class="fa-solid fa-sign-out icons" style="color: red;" icon="fa-solid fa-sign-out"/>Log Out</router-link></li>
     </ul>
 </div>
 </template>

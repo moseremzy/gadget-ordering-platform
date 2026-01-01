@@ -202,6 +202,8 @@ const products_store = useProductStore()
 
 const settingStore = useSettingStore()
 
+alert('reach here')
+
 const products = computed(() => {
 
   return products_store.products

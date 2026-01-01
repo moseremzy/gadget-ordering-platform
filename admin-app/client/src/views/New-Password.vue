@@ -2,9 +2,11 @@
 
   <div id="body">
  
-  <SUCCESSALERTBOX>{{backend_message}}</SUCCESSALERTBOX>
+  <SUCCESSALERTBOX>{{interactive_store.backend_message}}</SUCCESSALERTBOX>
 
-  <ERRORALERTBOX>{{backend_message}}</ERRORALERTBOX>
+  <ERRORALERTBOX>{{interactive_store.backend_message}}</ERRORALERTBOX>
+
+  <LoadingOverlay/>
 
   <div class="create_pass_form">
   <h1>Create New Password</h1>
@@ -21,10 +23,9 @@
 </template>
 
 <script setup>
-import API from '../api'
+import API from '../api/index'
 import { useRoute, useRouter } from 'vue-router'
-import SUCCESSALERTBOX from "@/components/alert_box/success.vue";
-import ERRORALERTBOX from "@/components/alert_box/error.vue";
+import LoadingOverlay from "../components/modals/loading_overlay.vue";
 import { onMounted, onUnmounted, onUpdated, reactive, toRaw, ref, watch} from 'vue'
 import { useInteractiveStore } from '@/stores/interactive'
 import { useAdminStore } from '@/stores/admin'
@@ -35,12 +36,6 @@ const interactive_store = useInteractiveStore()
 
 const route = useRoute()
 const router = useRouter()
- 
- 
-    let toggle = ref(false) 
-    let spinner = ref(false) 
-    let disablebtn = ref(false) 
-    let backend_message = ref('')
 
     let formvalues = reactive({
         password: "", 
@@ -54,14 +49,7 @@ const router = useRouter()
     })
 
     formvalues.token = route.params.id
-        
-
-    if (admin_store.admin_isAuthenticated) { //if user no get session redirect to login
-
-        router.push({ name: "home" })
-
-    }
-
+ 
          
   
 /* Hooks */
@@ -119,48 +107,30 @@ onUpdated(() => {
     async function ResetPassword() {
         
         if (passwordvalidated() && confirm_passwordvalidated()) {
+            
+          interactive_store.toggle_loading_overlay(true)
 
-            spinner.value = true
-            
-            disablebtn.value = true
-            
+          try {
+
             const response = await API.reset_password(formvalues);
 
-            if (response.message === "Password modified") {
-
-                disablebtn.value = false
-                
-                spinner.value = false
-
-                backend_message.value = "Password Reset Successful"
+            interactive_store.backend_message = "Password Reset Successful"
+        
+            interactive_store.display_success_alert_box()
             
-                interactive_store.display_success_alert_box()
+            router.push({name: "login"})
+
+           } catch (error) {
                 
-                router.push({path: "/login"})
+            console.log(error)
 
-            } else if (response.message === "Invalid token") {
-
-                backend_message.value = "Invalid token"
-
-                interactive_store.display_error_alert_box()
-
-                disablebtn.value = false
-
-                spinner.value = false
-
-            } else {
-                
-                backend_message.value = "An error occured, try again later"
-
-                interactive_store.display_error_alert_box()
-
-                disablebtn.value = false
-                
-                spinner.value = false
-                
-            }
+           }
+        
         }
+
+        interactive_store.toggle_loading_overlay(false)
     }
+      
       
 </script>
 

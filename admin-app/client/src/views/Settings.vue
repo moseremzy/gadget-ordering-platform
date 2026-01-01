@@ -54,7 +54,7 @@
 
             <!-- Submit Button -->
             <div class="form-group grid-full">
-                <button type="submit" @click.prevent = "UploadItem" class="submit-button">Submit</button>
+                <button type="submit" @click.prevent = "updateAdmin" class="submit-button">Submit</button>
             </div>
             </form>
             </div>
@@ -85,7 +85,7 @@
             
             <!-- Submit Button -->
             <div class="form-group grid-full">
-                <button type="submit" @click.prevent = "UploadItem" class="submit-button">Submit</button>
+                <button type="submit" @click.prevent = "update_admin_pass" class="submit-button">Submit</button>
             </div>
             </form>
             </div>
@@ -105,7 +105,7 @@ import { useSettingStore } from '@/stores/settings'
 import { useCustomersStore } from '@/stores/customers'
 import HEADER from "../components/Header.vue";
 import SIDEBAR from "../components/SideBar.vue"; 
-import API from "../api"
+import API from "../api/index"
 import { useRoute, useRouter } from 'vue-router'
 import { onMounted, onUnmounted, onUpdated, reactive, toRaw, ref, watch} from 'vue'
 
@@ -118,13 +118,12 @@ const settings_store = useSettingStore()
 const route = useRoute()
 const router = useRouter()
 
-console.log(settings_store.fee_same_city)
 
 let admin_info = reactive({
 
-    ...admin_store.admin,
+  ...admin_store.admin,
 
-    ...settings_store.settings
+  ...settings_store.settings
 
 })
  
@@ -363,27 +362,25 @@ function confirm_password_validated() {
 
 
 
-async function updateAdmin(e) {
+async function updateAdmin() {
 
-    if (emailvalidated() && phonevalidated() && samecityvalidated() && samestatevalidated() && otherstatevalidate()) {
+    if (emailvalidated() && phonevalidated() && samecityvalidated() && samestatevalidated() && otherstatevalidated()) {
 
         interactive_store.toggle_loading_overlay(true)
 
-        const response = await API.update_admin_info(admin_info);
+        try {
 
-        if (response.message === "success") {
+        const response = await API.update_admin_info(admin_info);
 
         interactive_store.backend_message = "Your profile was updated succesfully"
         
         interactive_store.display_success_alert_box()
         
-        } else {
+        } catch (error) {
 
-        interactive_store.backend_message = "Error occured, please try again"
-        
-        interactive_store.display_error_alert_box()
-
-        }
+          console.log(error)
+          
+        }  
 
         interactive_store.toggle_loading_overlay(false)
         
@@ -394,15 +391,15 @@ async function updateAdmin(e) {
 
 
 
-async function update_admin_pass(e) {
+async function update_admin_pass() {
 
     if (old_password_validated() && new_password_validated() && confirm_password_validated()) {
 
         interactive_store.toggle_loading_overlay(true)
 
-        const response = await API.update_admin_pass(password);
+        try {
 
-        if (response.message === "Updated") {
+        const response = await API.update_admin_pass(password);
         
         interactive_store.backend_message = "Password Updated"
         
@@ -413,30 +410,10 @@ async function update_admin_pass(e) {
         password.new_password = ""
             
         password.confirm_password = ""
-        
-        } else if (response.message === "Old password incorrect") {
 
-        interactive_store.backend_message = "Old password is Incorrect"
-        
-        interactive_store.display_error_alert_box()
-
-        password.old_password = ""
-        
-        password.new_password = ""
-            
-        password.confirm_password = ""
-            
-        } else {
-
-        interactive_store.backend_message = "Error occured, please try again"
-        
-        interactive_store.display_error_alert_box()
-
-        password.old_password = ""
-        
-        password.new_password = ""
-            
-        password.confirm_password = ""
+        } catch (error) {
+         
+         console.log(error)
 
         }
 

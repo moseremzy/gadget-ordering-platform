@@ -8,7 +8,7 @@
 
     <ERRORALERTBOX>{{interactive_store.backend_message}}</ERRORALERTBOX>
 
-  <!--side bar--> <SIDEBAR/>
+    <SIDEBAR/>
 
      <div class="sub_container" :style = "interactive_store.sub_container_css">
 
@@ -134,7 +134,7 @@ let filteredOrders = computed(() => { //search for orders
 
     return orders_store.orders.filter((order) => {
 
-    return order.status !== "Payment pending" && order.status !== "Payment Failed" && order.status !== "Payment Abandoned" && order.status !== "Payment Reversed" && order.status !== "pending" && order.status !== "Cancelled" && order.status !== "Delivered";
+    return order.order_status === 'confirmed' || order.order_status === 'out for delivery';
 
   })
 
@@ -158,14 +158,13 @@ let filteredOrderItems = computed(() => { //search for orders
 
     return orders_store.order_items.filter((order) => {
 
-    return order.status !== "Payment pending" && order.status !== "Payment Failed" && order.status !== "Payment Abandoned" && order.status !== "Payment Reversed" && order.status !== "pending" && order.status !== "Cancelled" && order.status !== "Delivered";
+    return order.order_status === 'confirmed' || order.order_status === 'out for delivery';
 
   })
 
 }
 
 })
-
 
 
 onMounted(() => {

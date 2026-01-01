@@ -6,9 +6,8 @@ const API = require("../api/api")
 
 //CRON JOBS
 
-// cronroutes.get('/open_shop', API.open_market);
+cronroutes.post('/cron_payment_verification', API.cron_payment_verification);
 
-// cronroutes.get('/close_shop', API.close_market);
 
 
 module.exports = cronroutes

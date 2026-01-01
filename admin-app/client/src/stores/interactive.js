@@ -28,6 +28,8 @@ export const useInteractiveStore = defineStore("interactive", {
 
        display_error_alert: false, //for error adding item to cart
 
+       display_success_modal: false,
+
        display_confirmation_modal: false,
 
        display_cancel_order_modal: false,
@@ -119,7 +121,7 @@ export const useInteractiveStore = defineStore("interactive", {
 
         },
 
-        toggle_cancel_order_modal(state, data) { //toggle main nav
+        toggle_cancel_order_modal(state, data) { //toggle cancel order modal
 
             this.display_cancel_order_modal = state
 
@@ -130,6 +132,12 @@ export const useInteractiveStore = defineStore("interactive", {
         toggle_confirmation_modal(state) { //toggle main nav
 
             this.display_confirmation_modal = state
+
+        },
+
+        display_success_modal_box(action) { //display error box if i add item succesfully
+  
+            this.display_success_modal = action
 
         },
 

@@ -16,13 +16,13 @@
 
     <h1>Order ID - #{{order.order_id}}</h1>
  
-    <CONFIRMREJECTSTATUS :order = order v-if = "order.status == 'pending'" />
+    <CONFIRMREJECTSTATUS :order = order v-if = "order.order_status == 'pending'" />
 
     <!-- Status Filter --> 
 
-    <STATUSFILTER :order = order v-else/>
+    <ORDERSTATUS :order = order v-else/>
     
-    <PAYMENTFILTER :order = order />
+    <PAYMENTSTATUS :order = order />
 
     <!-- Status Filter -->
 
@@ -128,7 +128,7 @@
 
 <!-- <button @click="generateReceipt(order)" class = "generate-receipt-btn">Generate Receipt</button> -->
 
-<CANCELORDER :order = order v-if = "order.status != 'Delivered' && order.status != 'Cancelled'"/>
+<CANCELORDER :order = order v-if = "order.order_status != 'delivered' && order.order_status != 'cancelled'"/>
 
 </div> <!-- SUB_CONTAINER -->
 </div> <!-- CONTAINER -->
@@ -138,12 +138,12 @@
 import { useRoute, useRouter} from 'vue-router'
 import { ref, reactive, computed, watch } from 'vue';
 import HEADER from '../components/Header.vue';
-import PAYMENTFILTER from '../components/status_components/PaymentFilter.vue';
+import PAYMENTSTATUS from '../components/status_components/PaymentStatus.vue';
 import CANCELORDER from '../components/status_components/CancelOrder.vue'
 import CONFIRMREJECTSTATUS from '../components/status_components/ConfirmRejectStatus.vue'
 import OVERLAY from '../components/modals/loading_overlay.vue';
 import ITEMSLIST from '../components/ItemsList.vue';
-import STATUSFILTER from '../components/status_components/StatusFilter.vue';
+import ORDERSTATUS from '../components/status_components/OrderStatus.vue';
 import RECEIPT from "@/components/Receipt.vue";
 import SIDEBAR from '../components/SideBar.vue';
 import { useInteractiveStore } from '@/stores/interactive'

@@ -9,6 +9,12 @@ export default class API {
     return api.post("/api/register", formdata).then(res => res.data);
   }
 
+  //resend confirmation email
+  static async ResendConfirmationMail(info) {
+    return api.post('/api/resend-email-confirmation', info)
+  }
+  
+
   //login
   static async login(formdata) {
     return api.post("/api/login", formdata).then(res => res.data);
@@ -44,10 +50,21 @@ export default class API {
     return await api.post("/api/update_photo", info)
   }
 
+  
+  //cancel order
+  static async cancel_order(info) {
+    return await api.post("/api/cancel_order", info)
+  }
+
+  //confirm order
+  static async confirm_order(info) {
+    return await api.post("/api/confirm_order", info)
+  }
+
   // GET
 
   //Verify Email
-  static async emailVerification(id) {
+   static async emailVerification(id) {
     return api.get(`/api/confirm-email/${id}`).then(res => res.data);
   }
 
@@ -85,16 +102,24 @@ export default class API {
     return api.patch("/api/update_item", info).then(res => res.data)
   }
 
-  static async update_user_info(info) {
-    return api.patch("/api/update_user_info", info).then(res => res.data);
+  static async update_admin_info(info) {
+    return api.patch("/api/update_admin_info", info).then(res => res.data);
+  }
+
+  static async update_order_status(info) {
+    return api.patch("/api/update_order_status", info).then(res => res.data);
+  }
+
+  static async update_payment_status(info) {
+    return api.patch("/api/update_payment_status", info).then(res => res.data);
   }
 
   static async update_address(info) {
     return api.patch("/api/update_address", info).then(res => res.data);
   }
 
-  static async update_password(info) {
-    return api.patch("/api/update_password", info).then(res => res.data);
+  static async update_admin_pass(info) {
+    return api.patch("/api/update_admin_pass", info).then(res => res.data);
   }
 
 }

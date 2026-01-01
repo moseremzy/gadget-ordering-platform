@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 
 module.exports = class MIDDLEWARES {
  
@@ -18,6 +19,14 @@ static generateConfirmationPin() {
   return Math.floor(1000 + Math.random() * 9000); // Generates a 4-digit PIN
 
 }
+
+
+static generatePaymentReference(length = 10) { //for order id
+
+  return crypto.randomBytes(length).toString('hex').slice(0, length);
+
+}
+
 
 // Check Stock Availability
 static stock_availability(products) {
@@ -63,6 +72,42 @@ static stock_availability(products) {
   if (slightly_available) {
     
     message += slightly_available + "available but not in this quantity.";
+  
+  }
+
+  return message;
+
+}
+
+
+// Check Stock Price
+static stock_price(products) {
+
+  let price_change = "";
+
+  const result = products.filter(item =>
+    
+    item.price != item.latest_price
+  
+  );
+
+  if (result.length === 0) {
+    
+    return null; // no problem
+  
+  }
+
+  result.forEach(item => {
+      
+    price_change += `${item.name}, `;
+    
+  });
+
+  let message = "";
+
+  if (price_change) {
+    
+    message += price_change + "Underwent price change. Please clear your cart, refresh page and re-order.";
   
   }
 

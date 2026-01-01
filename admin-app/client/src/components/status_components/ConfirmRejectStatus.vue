@@ -18,7 +18,7 @@
 
 <script setup>
 
-import API from "../../api";
+import API from "../../api/index";
 
 import CANCELORDERMODAL from "@/components/modals/cancel_order_modal.vue";
 
@@ -44,16 +44,14 @@ function reject_order(order) {
 
     interactive_store.toggle_cancel_order_modal(true,
     {
-        id: order.order_id,
-        user_id: order.user_id,
-        customer_name: order.customer_name,
-        customer_email: order.email,
+        order_id: order.order_id,
+        user_id: order.user_id
     })
     
 }
 
 
-async function confirm_order(id, owner_id) {
+async function confirm_order(order_id, user_id) {
     
     interactive_store.toggle_loading_overlay(true) //display loading overlay
 
@@ -61,33 +59,30 @@ async function confirm_order(id, owner_id) {
 
      description: 'Your order has been confirmed for processing',
 
-     id: id,
+     order_id: order_id,
 
-     owner_id: owner_id
+     user_id: user_id
 
     }
+
+    try {
     
     const response = await API.confirm_order(confirmationPayload); //send confirmation request
 
-    if (response.message === "success") {
-
        await orders_store.fetch_orders() //update store with fresh orders
-
-       interactive_store.toggle_loading_overlay(false) //remove loading overlay
 
        interactive_store.backend_message = "Order Confirmed"
         
        interactive_store.display_success_alert_box()
         
-    } else {
+    } catch (error) {
 
-       interactive_store.toggle_loading_overlay(false) //remove loading overlay
-
-       interactive_store.backend_message = "Error Occured, Please Try Again"
+       console.log(error)
         
-       interactive_store.display_error_alert_box()
-
     }
+
+    interactive_store.toggle_loading_overlay(false) //remove loading overlay 
+
 }
 
  

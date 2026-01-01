@@ -31,10 +31,8 @@ function reject_order(order) {
 
     interactive_store.toggle_cancel_order_modal(true,
     {
-        id: order.order_id,
-        user_id: order.user_id,
-        customer_name: order.customer_name,
-        customer_email: order.customer_email,
+        order_id: order.order_id,
+        user_id: order.user_id
     })
     
 }

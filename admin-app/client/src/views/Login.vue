@@ -144,6 +144,22 @@ function passwordvalidated() {
 }
 
 
+//resend this user verification email
+async function send_confirmation_mail(email) {
+
+    try {
+
+    const response = await API.ResendConfirmationMail({ confirmationEmail: email});
+
+    router.push({ name: "email-activation", query: { confirmationEmail: email} })
+      
+    } catch (error) {
+     
+     console.log(error)
+     
+    }
+}
+
 
 async function validation() {
     
@@ -165,7 +181,11 @@ async function validation() {
         
     } catch (error) {
 
-    console.log(error)
+    if (error.response?.data?.message === 'Account not verified. Please verify your email') {
+
+      await send_confirmation_mail(formvalues.email)
+
+      }  
         
     }
 

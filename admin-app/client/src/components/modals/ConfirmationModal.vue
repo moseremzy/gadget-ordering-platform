@@ -61,7 +61,7 @@ import { useproductStore } from '@/stores/products';
 
 import {toRefs, ref, computed, reactive, onMounted, watch } from 'vue';
 
-import API from '../../api'
+import API from '../../api/index'
 
 const interactive_store = useInteractiveStore();
 

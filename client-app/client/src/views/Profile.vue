@@ -2,6 +2,7 @@
 
  <div>
 
+
  <HEADER/> 
 
  <SUCCESSALERTBOX>{{interactive_store.backend_message}}</SUCCESSALERTBOX>
@@ -22,17 +23,17 @@
       <div class="tab-container">
         <button
           class="tab"
-          :class="{ active: activeTab === 'profile' }"
-          @click="activeTab = 'profile'"
-        >
-          Profile
-        </button>
-        <button
-          class="tab"
           :class="{ active: activeTab === 'history' }"
           @click="activeTab = 'history'"
         >
           Order History
+        </button>
+        <button
+          class="tab"
+          :class="{ active: activeTab === 'profile' }"
+          @click="activeTab = 'profile'"
+        >
+          Profile
         </button>
       </div>
 
@@ -204,7 +205,7 @@
         <font-awesome-icon class="fa-solid fa-box-open" id = "box"  icon="fa-solid fa-box-open"/>
         <h1>No orders yet</h1>
         <p>You haven't placed any orders yet. Start shopping.</p>
-        <router-link class = "link" href="/products">View Products</router-link>
+        <router-link class = "link" to="/shop?category=all">View Products</router-link>
     </div>
     </div>
     
@@ -268,7 +269,7 @@ let password = reactive({
 })
 
 
-const activeTab = ref('profile')
+const activeTab = ref('history')
 const route = useRoute()
 const router = useRouter()
  

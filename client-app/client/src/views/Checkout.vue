@@ -48,8 +48,8 @@
         </div>
 
         <div class = "payment_method" v-else>
-        <input type = "radio" id = "card" v-model = "payment_method" value = "card payment" name = "payment_method">
-        <label for = "card">Card Payment</label>
+        <input type = "radio" id = "card" v-model = "payment_method" value = "online payment" name = "payment_method">
+        <label for = "card">Online Payment (Paystack)</label>
         </div> 
         </div>
 
@@ -244,6 +244,12 @@ async function checkout() {
 
         let order = {
 
+            email: `${user_store.user.email}`,
+
+            customer_name: `${user_store.fullname}`,
+
+            phone: `${user_store.user.phone}`,
+
             payment_method: payment_method.value,
 
             total_amount: products_store.cart_total_amount,
@@ -260,21 +266,31 @@ async function checkout() {
 
         const response = await API.submit_order(order)
 
-        if (response.success  && response.authorization_info) { //if na card payment
+        switch (payment_method.value) {
+            
+            case 'online payment':
+
+            if (response.authorization_info) { //if na online payment
            
-          window.location.replace(response.authorization_info.data.authorization_url);
+              window.location.replace(response.authorization_info.data.authorization_url);
+            
+            }
+            
+            break;
 
-       } else { //if na cash on delivery
+            case 'cash on delivery':
 
-         await orders_store.fetch_orders() //refetch orders
+            await orders_store.fetch_orders() //refetch orders
 
-         localStorage.setItem('cart_products', JSON.stringify([])); //empty cart for localstorage
+            localStorage.setItem('cart_products', JSON.stringify([])); //empty cart for localstorage
 
-         products_store.cart = [] //empty cart products for store
+            products_store.cart = [] //empty cart products for store
 
-         router.push({path: `/account/payment-verification`, query:{trxref: response.reference, reference: response.reference, type: 'cash', confirmation_pin: response.confirmation_pin}})
+            router.push('/account/profile')
+       
+            break;
 
-       }
+        }
            
        } catch (error) {
 

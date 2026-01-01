@@ -1,4 +1,5 @@
 <template>
+  
   <div class="container" :style="interactive_store.container_css">
 
     <OVERLAY/>
@@ -17,10 +18,12 @@
 
       <!-- Filters Section -->
       <div class="filters-container">
-        <!-- Status Filter -->
+        <!-- Order Status Filter -->
+
+        <div style = "display: flex; flex-direction: column;">
         <div class="status-filter-container">
-          <label for="status-filter" class="status-filter-label">Filter by Status</label>
-          <select id="status-filter" v-model="selectedStatus" class="status-filter-select">
+          <label for="status-filter" class="status-filter-label">Filter by Order Status</label>
+          <select id="status-filter" v-model="selectedOrderStatus" class="status-filter-select">
             <option value="">All</option>
             <option value="pending">Pending</option>
             <option value="confirmed">Confirmed</option>
@@ -29,6 +32,21 @@
             <option value="cancelled">Cancelled</option>
             <option value="returned">Returned</option>
           </select>
+        </div>
+
+        <!-- Payment Status Filter -->
+        <div class="status-filter-container">
+          <label for="status-filter" class="status-filter-label">Filter by Payment Status</label>
+          <select id="status-filter" v-model="selectedPaymentStatus" class="status-filter-select">
+            <option value="">All</option>
+            <option value="pending">Pending</option>
+            <option value="success">Success</option>     
+            <option value="failed">Failed</option>        
+            <option value="abandoned">Abandoned</option> 
+            <option value="reversed">Reversed</option>    
+            <option value="refunded">Refunded</option>    
+          </select>
+        </div>
         </div>
 
         <!-- Date Range Filter -->
@@ -114,7 +132,8 @@ const route = useRoute()
 const router = useRouter()
 
 // Filters
-const selectedStatus = ref('');
+const selectedOrderStatus = ref('');
+const selectedPaymentStatus = ref('');
 const startDate = ref('');
 const endDate = ref('');
 
@@ -122,13 +141,6 @@ const endDate = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 20;
 
-
-
-if (!admin_store.isAuthenticated) { //if user no get session redirect to login
-
-    router.push({ path: "/login" })
-
-}
 
 
 watch( () => admin_store.isAuthenticated,
@@ -154,19 +166,12 @@ watch( () => admin_store.isAuthenticated,
 
 
 watch( // Reset pagination
-  [() => interactive_store.query, () => selectedStatus.value, () => startDate.value, () => endDate.value],
+  [() => interactive_store.query, () => selectedOrderStatus.value, () => selectedPaymentStatus.value, () => startDate.value, () => endDate.value],
   () => {
     currentPage.value = 1; 
   }
 );
-
-// const orders = route.query.user_id ? reactive(orders_store.orders.filter((order) => { //fetch only orders when belong to user with this id
-
-//      alert('dkd')
-
-//      return order.user_id == route.query.user_id
-
-// })) : reactive(orders_store.orders);
+ 
 
 const orders = computed(() => {
 
@@ -191,7 +196,9 @@ const filteredOrders = computed(() => {
       ? new Date(`${endDate.value}T23:59:59`)
       : null
 
-    const matchesStatus = !selectedStatus.value || order.order_status === selectedStatus.value
+    const matchesOrderStatus = !selectedOrderStatus.value || order.order_status === selectedOrderStatus.value
+
+    const matchesPaymentStatus = !selectedPaymentStatus.value || order.payment_status === selectedPaymentStatus.value
 
     const matchesStartDate =
       !start || orderDate >= start
@@ -202,7 +209,8 @@ const filteredOrders = computed(() => {
     const matchesID = !interactive_store.query || order.order_id == interactive_store.query
 
     return (
-      matchesStatus &&
+      matchesOrderStatus &&
+      matchesPaymentStatus &&
       matchesStartDate &&
       matchesEndDate &&
       matchesID
@@ -401,7 +409,7 @@ onMounted(() => { // Clear Query on Mount
 
 .status-filter-label,
 .date-filter-label {
-  font-size: 16px;
+  font-size: 15px;
   margin-bottom: 5px; /* Add space below labels */
   color: #333;
 }

@@ -10,7 +10,7 @@
 
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" @click = "interactive_store.toggle_cancel_order_modal(false, null)">&times;</button>
-          <h4 class="modal-title">Reject Order With ID {{interactive_store.cancel_order_data.id}} </h4>
+          <h4 class="modal-title">Reject Order With ID {{interactive_store.cancel_order_data.order_id}} </h4>
         </div>
         <div class="modal-body">
           <p>Why do you want to cancel this order?</p>
@@ -41,7 +41,7 @@ import { useOrdersStore } from '@/stores/orders'
 
 const orders_store = useOrdersStore()
 
-import API from "../../api";
+import API from "../../api/index";
 
 const interactive_store = useInteractiveStore()
 
@@ -50,8 +50,6 @@ const admin_store = useAdminStore()
 
 let cancellation_reason = ref("")
 let cancellation_reason_err = ref("")
-let spinner = ref(false)
-let disablebtn = ref(false)
 let description_counter = ref(null)
 let backend_message = ref('')
 
@@ -100,41 +98,29 @@ async function submit_cancellation(e) {
 
         }
 
-        disablebtn.value = true
-        
-        e.target.innerText = "Cancelling Order...";
+        interactive_store.toggle_loading_overlay(true)
 
+        try {
+          
         const response = await API.cancel_order(cancellationPayload); //send cancellation request
-
-        if (response.message === "success") {
         
         interactive_store.backend_message = "Order Cancelled Successfully"
 
         interactive_store.toggle_cancel_order_modal(false, null) //hide the cancel modal
 
         interactive_store.display_success_alert_box() //display success box
-       
-        e.target.innerText = "Submit" //return button text back
-        
-        disablebtn.value = false 
 
         await orders_store.fetch_orders()
        
-       } else {
-
-        interactive_store.backend_message = "Error occured, please try again"
+       } catch (error) {
         
         interactive_store.toggle_cancel_order_modal(false, null) //hide the cancel modal
-
-        interactive_store.display_error_alert_box() //display success box
-        
-        e.target.innerText = "Submit"
-        
-        disablebtn.value = false
 
         }
 
         cancellation_reason.value = ""
+
+        interactive_store.toggle_loading_overlay(false)
         
     }  
 

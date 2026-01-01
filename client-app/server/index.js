@@ -4,6 +4,7 @@ const express = require("express");
 const port = process.env.PORT || 9000;
 const router = require("./routes/router.js");
 const cronroutes = require("./routes/cronroutes.js");
+const cron = require('./middlewares/cron.js');
 const cors = require("cors");
 const path = require("path");
 const app = express();

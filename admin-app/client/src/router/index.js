@@ -45,6 +45,22 @@ routes: [
       title: 'Create New Password - Tech By Cas Admin'
     }
   },
+  {
+    path: '/email-activation',
+    name: 'email-activation',
+    component: () => import('../views/Email-Activation.vue'),
+    meta: {
+      title: 'Email Verification - Tech By Cas'
+    }
+  },
+  {
+    path: '/email-confirmation/:id',
+    name: 'email-confirmation',
+    component: () => import('../views/Email-Confirmation.vue'),
+    meta: {
+      title: 'Email Confirmation - Tech By Cas'
+    }
+  },
 
   //DASHBOARD PAGES
   {
@@ -107,15 +123,6 @@ routes: [
     component: () => import('../views/Settings.vue'),
     meta: {
       title: 'Settings - Tech By Cas Admin',
-      requiresAuth: true
-    }
-  },
-  {
-    path: '/account/order-history',
-    name: 'Order-History',
-    component: () => import('../views/Order-History.vue'),
-    meta: {
-      title: 'Order History - Tech By Cas Admin',
       requiresAuth: true
     }
   },

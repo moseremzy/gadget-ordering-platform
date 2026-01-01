@@ -1,4 +1,11 @@
 <template>
+ <div class = "home_container">
+
+  <ERRORALERTBOX>{{interactive_store.backend_message}}</ERRORALERTBOX>
+
+  <SUCCESSMODAL>{{interactive_store.backend_message}}</SUCCESSMODAL>
+
+  <LoadingOverlay/>
   <div class="forgot_pass_form" >
   <h1>Forgot Password</h1>
   <p>Enter your email and we'll send you a link to reset your password.</p>
@@ -9,32 +16,29 @@
   <form>
     <input type="email" v-model = "formvalues.email" name="email" id="email" placeholder="Email">
     <small class="err">{{formvalues_err.email_err}}</small>
-    <button type="submit" @click.prevent = "SendMail" id="loginbtn" :disabled = "disablebtn"><font-awesome-icon v-if = "spinner"  class="fa-solid fa-spinner fa-spin" id = "spinner" icon="fa-solid fa-spinner"/> Next</button>
+    <button type="submit" @click.prevent = "SendMail" id="loginbtn" :disabled = "disablebtn">Next</button>
     </form>
     </div>
+ </div>
 </template>
   
 <script setup>
-import API from '../api';
+import API from '../api/index';
+import LoadingOverlay from "../components/modals/loading_overlay.vue";
 import { useRoute, useRouter } from 'vue-router'
+import SUCCESSMODAL from '../components/modals/SuccessModal.vue'
 import { onMounted, onUnmounted, onUpdated, reactive, toRaw, ref, watch, nextTick } from 'vue'
 import MIDDLEWARES from "../middlewares/middlewares"
 import { useAdminStore } from '@/stores/admin'
+import { useInteractiveStore } from '@/stores/interactive'
 
 const admin_store = useAdminStore()
-
+const interactive_store = useInteractiveStore()
 
 const route = useRoute()
 
 const router = useRouter()
  
-
-let toggle = ref(false)
-let spinner = ref(false)
-let disablebtn = ref(false)
-let screenwidth = ref(undefined)
-let backend_err = ref(false)
-
 let formvalues = reactive({
     email: ""
 })
@@ -43,12 +47,6 @@ let formvalues_err = reactive({
     email_err: ""
 })
 
-
-if (admin_store.admin_isAuthenticated) { //if user no get session redirect to login
-
-    router.push({ name: "home" })
-
-}
 
 
 /* hook */
@@ -84,34 +82,29 @@ function emailvalidated() {
 }
                 
 async function SendMail() {
+
 if (emailvalidated()) {
-    disablebtn.value = true;
-    spinner.value = true;
+
+    interactive_store.toggle_loading_overlay(true)
+    
+    try {
+
     const response = await API.send_reset_pass_email(formvalues);
 
-    switch (response.message) {
+    interactive_store.backend_message = response.message
+    
+    interactive_store.display_success_modal_box(true)
 
-        case "mail sent":
-        backend_err.value = response.message
-        disablebtn.value = false
-        spinner.value = false
-        break;
+    } catch (error) {
 
-        case "We cannot find your email":
-        backend_err.value = response.message
-        disablebtn.value = false
-        spinner.value = false
-        break;
-
-        case "error occured":
-        backend_err.value = response.message
-        disablebtn.value = false
-        spinner.value = false
-        break;
+       console.log(error)
         
-    }  
+    }
 
   }
+
+  interactive_store.toggle_loading_overlay(false)
+    
 }
 
 </script>

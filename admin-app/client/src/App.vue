@@ -6,21 +6,35 @@
 
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 
-import { useInteractiveStore } from '@/stores/interactive'
+import { useSettingStore } from '@/stores/settings'
 
 import { useOrdersStore } from '@/stores/orders'
 
-import { useCustomersStore } from '@/stores/customers'
-
 import { useAdminStore } from '@/stores/admin'
 
-const interactiveStore = useInteractiveStore()
+import { useProductStore } from './stores/products';
 
-const admin_store = useAdminStore()
+import { useCustomersStore } from './stores/customers'
 
-const orders_store = useOrdersStore()
+import { useCategoriesStore } from './stores/categories';
+
+import { useInteractiveStore } from './stores/interactive';
+
+import API from "./api/index";
+
+const admin_store = useAdminStore(); // Access the admin
+
+const ordersStore = useOrdersStore(); //Access the orders store
 
 const customers_store = useCustomersStore()
+
+const products_store = useProductStore()
+
+const categoriesStore = useCategoriesStore();
+
+const settingStore = useSettingStore();
+
+const interactiveStore = useInteractiveStore();
 
 const windowWidth = ref(window.innerWidth)
 
@@ -59,27 +73,42 @@ const updateWindowWidth = () => {
  
 onMounted(() => {
 
-  window.addEventListener('resize', updateWindowWidth)
+window.addEventListener('resize', updateWindowWidth)
 
-  setInterval(async () => { //polling for orders
+setInterval(async () => {   // In App.vue (your polling function)
 
-        await orders_store.fetch_orders()
+  try {
+
+    await admin_store.fetch_admin().catch(err => { // Try to fetch user but DON'T block the app if it fails
+
+        console.log("Admin fetch failed (not logged in).", err); 
       
-  }, 120 * 1000); //2 minutes
+    });
 
+    if (admin_store.isAuthenticated) {
 
-  setInterval(async () => { //polling for admin mainly for session
+        await Promise.all([
 
-        await admin_store.fetch_admin()
-      
-  }, 120 * 1000); //2 minutes
+        ordersStore.fetch_orders(),
 
+        products_store.fetch_products(),
 
-  setInterval(async () => { //polling for customers
+        customers_store.fetch_customers(),
 
-        await customers_store.fetch_customers()
-      
-  }, 120 * 1000); //2 minutes
+        categoriesStore.fetch_categories(),
+
+        settingStore.fetch_settings()
+
+        ]);
+    }       
+  
+  } catch (error) {
+    
+    console.error("Polling error:", error);
+  
+  }
+
+}, 300000); // 5 minutes
 
 })
 

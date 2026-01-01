@@ -6,11 +6,14 @@ const path = require("path")
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const db = require("../middlewares/database")
-const MIDDLEWARES = require("../middlewares/mails")
+const MAILS = require("../middlewares/mails.js");
+const HELPERS = require("../middlewares/helpers")
 
 module.exports = class API {
 
 //POST REQUESTS
+
+confirm_order
 
 //register users
 static async register(req, res) {
@@ -51,6 +54,8 @@ static async register(req, res) {
 
      data.password = await bcrypt.hash(data.password, 12); //encrypt the password
 
+     data.confirmation_code = uuidv4() //create uniq confirmation code
+
      const sql = 'INSERT INTO admin SET ?'
 
       await new Promise( (resolve, reject) => {
@@ -71,10 +76,7 @@ static async register(req, res) {
 
     })
 
-    return res.status(200).json({
-      success: true,
-      message: "success",
-    });
+    return await MAILS.SendConfirmationMail(req, res, data.email, data.confirmation_code)
 
     }
         
@@ -137,6 +139,19 @@ static async register(req, res) {
     
   } else { //if he match 
 
+    if (admin[0].account_status === "Unverified") { //if user neva verify account
+      
+    this_user = admin[0]
+
+    return res.status(403).json({
+      success: false,
+      message: "Account not verified. Please verify your email",
+      isAuthenticated: req.session.isAuthenticated,
+      admin: this_user
+    });
+      
+    } else { //if account verified, log am in
+
     date.setHours(date.getHours() + 2); // session expires in 2 hours
 
     req.session.cookie.expires = date;
@@ -157,6 +172,8 @@ static async register(req, res) {
       isAuthenticated: true
     });
 
+   }
+
   }
      
   } else { //if user no dey
@@ -169,7 +186,9 @@ static async register(req, res) {
   }
       
   } catch (error) {
-      
+    
+    console.log(error.message)
+
     return res.status(500).json({
       success: false,
       message: "An error occurred. Please try again.",
@@ -178,6 +197,63 @@ static async register(req, res) {
   }
 
 }
+
+
+
+
+// Resend Confirmation Email
+static async ResendConfirmationMail (req, res) {
+
+  const confirmationEmail = req.body.confirmationEmail //i dey use d email too just incase user wan verify through register or login page. since confirmation code no dey available for those pages
+
+  try {
+
+    const admin_query = `SELECT * FROM admin WHERE email= ?`
+
+    const admin = await new Promise( (resolve, reject) => {
+
+      db.query(admin_query, [confirmationEmail], (err, result) => {
+
+        if (err) {
+
+          reject(err)
+        
+        } else {
+
+          resolve(result)
+
+        }
+
+      })
+
+    })
+   
+   if (admin.length > 0) { //if the admin dey
+     
+      return await MAILS.SendConfirmationMail(req, res, admin[0].email, admin[0].confirmation_code)
+
+    } else { //if e no dey
+
+      return res.status(401).json({
+        success: false,
+        message: "Invalid Request",
+      });
+
+    }
+
+  } catch (err) {
+
+    console.log(err.message)
+    
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred. Please try again.",
+    });    
+
+  } 
+
+}
+
 
 
 //upload item
@@ -230,12 +306,11 @@ static async upload_items(req, res) {
 
 
 
+
 //send reset password email to user
 static async send_reset_pass_email (req, res) {
 
   let data = req.body
-
-  let message;
 
   try {
 
@@ -260,13 +335,13 @@ static async send_reset_pass_email (req, res) {
     })
   
     
-  if (admin[0]) { //if the user dey
+  if (admin[0]) { //if the admin dey
 
    const token = uuidv4()
 
    const password_reset_token = `UPDATE admin 
-      SET password_reset_token= ?
-      WHERE email= ?`
+    SET password_reset_token = ? 
+    WHERE email = ?`;
 
       await new Promise( (resolve, reject) => { //update user password token
 
@@ -286,23 +361,25 @@ static async send_reset_pass_email (req, res) {
 
       })
 
-  let result = await MIDDLEWARES.send_reset_pass_email(req, res, admin[0].email, token)
-
-  message = result.message
+   await MAILS.send_reset_pass_email(req, res, admin[0].email, token)
    
    } else { //if email no dey, just still tell dem say i don send am, make dem for rest
 
-  message = "We cannot find your email"
+    return res.status(401).json({
+      success: false,
+      message: "We cannot find your email",
+    });
 
    }
 
   } catch (error) {
 
-  message = "error occured"
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred. Please try again.",
+    });  
     
   }
-
-  res.json({message: message})
 
 }
 
@@ -314,8 +391,6 @@ static async reset_password (req, res) {
   const password = req.body.password
 
   const token = req.body.token
-
-  let message
 
   try {
 
@@ -368,21 +443,28 @@ static async reset_password (req, res) {
       })
 
 
-  message = "Password modified"
+    return res.status(200).json({
+      success: true,
+      message: "success",
+    });
     
   } else { //if token no exist
 
-  message = "Invalid token"
+    return res.status(401).json({
+      success: false,
+      message: "Invalid token",
+    });
 
   }
 
   } catch (error) {
 
-  message = "error occured"
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred. Please try again.",
+    });  
     
   }
-
-  res.json({message: message})
 
 }
 
@@ -392,28 +474,47 @@ static async reset_password (req, res) {
 //cancel order
 static async cancel_order (req, res) {
 
-  let description = req.body.description
-
-  let order_id = req.body.id
-
-  let user_id = req.body.user_id
-
-  let customer_name = req.body.customer_name
-
-  let customer_email = req.body.customer_email
-
-  let message;
+  let { description, order_id, user_id } = req.body
 
   try {
 
+    const user_query = `SELECT * FROM users WHERE user_id= ?` //first of all find the user
+
+    const user = await new Promise( (resolve, reject) => {
+  
+      db.query(user_query, [user_id], (err, result) => {
+  
+        if (err) {
+  
+          reject(err)
+        
+        } else {
+  
+          resolve(result)
+  
+        }
+  
+      })
+  
+    })
+
+    if (!user[0]) { //if this user doesnt exist
+      
+      return res.status(401).json({
+        success: false,
+        message: "User was not found",
+      });  
+
+    }
+
    const status_query = `UPDATE orders 
-      SET status= ?,
+      SET order_status= ?,
       description= ?
       WHERE order_id= ?`
 
-      await new Promise( (resolve, reject) => { //update user password token
+      await new Promise( (resolve, reject) => { //update order
 
-        db.query(status_query, ['Cancelled', description, order_id], (err, result) => {
+        db.query(status_query, ['cancelled', description, order_id], (err, result) => {
 
           if (err) {
 
@@ -429,43 +530,171 @@ static async cancel_order (req, res) {
 
     })
 
-    await MIDDLEWARES.send_user_cancellation_email(req, res, customer_email, customer_name, order_id, description)
-
-    message = "success"
+    
+    await MAILS.send_user_cancellation_email(req, res, user[0].email, user[0].fullname, order_id, description)
 
   } catch (error) {
 
-    message = "error occured"
+    return res.status(500).json({
+      success: false,
+      message: "An error occured. please try again",
+    });
     
   }
-
-    res.json({message: message})
 
 }
 
 
 
-//cancel order
+//confirm order
 static async confirm_order (req, res) {
 
-  let description = req.body.description
-
-  let order_id = req.body.id
-
-  let user_id = req.body.user_id
-
-  let message;
+  const { description, order_id, user_id } = req.body
 
   try {
 
+    const user_query = `SELECT * FROM users WHERE user_id= ?` //first of all find the user
+
+    const user = await new Promise( (resolve, reject) => {
+  
+      db.query(user_query, [user_id], (err, result) => {
+  
+        if (err) {
+  
+          reject(err)
+        
+        } else {
+  
+          resolve(result)
+  
+        }
+  
+      })
+  
+    })
+
+    if (!user[0]) { //if this user doesnt exist
+      
+      return res.status(401).json({
+        success: false,
+        message: "User was not found",
+      });  
+
+    }
+
+    //Get Order Items
+    const order_items_query = `SELECT * FROM order_items WHERE order_id= ?` //first of all find the user
+
+    const order_items = await new Promise( (resolve, reject) => {
+  
+      db.query(order_items_query, [order_id], (err, result) => {
+  
+        if (err) {
+  
+          reject(err)
+        
+        } else {
+  
+          resolve(result)
+  
+        }
+  
+      })
+  
+    })
+
+
+    async function DerivedProducts() {
+
+    for (const item of order_items) {
+        
+      const product_query = `SELECT * FROM products WHERE product_id= ?`
+    
+        const product = await new Promise( (resolve, reject) => {
+      
+          db.query(product_query, [item.product_id], (err, result) => {
+      
+            if (err) {
+      
+              reject(err)
+            
+            } else {
+      
+              resolve(result)
+      
+            }
+      
+          })
+      
+        })
+    
+        if (product[0]) { //if you find am for db
+    
+          order_items.forEach((item) => { //update the stock quantity of products array for each object
+             
+            item.product_id == product[0].product_id ? item.stock_quantity = product[0].stock_quantity : null
+
+            item.product_id == product[0].product_id ? item.name = product[0].name : null
+
+          })
+    
+        }
+
+    }
+
+    return order_items
+
+  }
+
+  let stockError = HELPERS.stock_availability(await DerivedProducts());
+
+    if (stockError) {
+      return res.status(400).json({
+        success: false,
+        message: stockError
+      });
+    }
+
+
+    //Update Stock Quanntity
+    for (const item  of order_items) { 
+
+      const item_quantity = item.quantity
+      
+      const product_id = item.product_id
+
+      const products_query = `
+        UPDATE products
+        SET stock_quantity = stock_quantity - ?
+        WHERE product_id = ?
+          AND stock_quantity >= ?
+      `
+      await new Promise((resolve, reject) => {
+        
+        db.query(products_query, [item_quantity, product_id, item_quantity],
+          
+          (err, result) => {
+          
+            if (err) reject(err)
+          
+            else resolve(result)
+          
+          })
+
+      })
+    
+    }
+
+
+   //Update Order Status
    const status_query = `UPDATE orders 
-      SET status= ?,
+      SET order_status= ?,
       description= ?
       WHERE order_id= ?`
 
       await new Promise( (resolve, reject) => { //update user password token
 
-        db.query(status_query, ['Confirmed', description, order_id], (err, result) => {
+        db.query(status_query, ['confirmed', description, order_id], (err, result) => {
 
           if (err) {
 
@@ -481,15 +710,21 @@ static async confirm_order (req, res) {
 
       })
 
-    message = "success"
+    return res.status(200).json({
+      success: true,
+      message: "success",
+    });
 
   } catch (error) {
 
-    message = "error occured"
+    console.log(error.message)
+
+    return res.status(500).json({
+      success: false,
+      message: "An error occured. please try again",
+    });
     
   }
-
-    res.json({message: message})
 
 }
 
@@ -923,6 +1158,92 @@ static async fetch_settings (req, res) {
 
 }
 
+
+
+// Verify admin Email
+static async emailVerification (req, res) {
+
+  const confirmationCode = req.params.id
+
+  try {
+    
+    const admin_query = `SELECT * FROM admin WHERE confirmation_code= ?`
+
+    const admin = await new Promise( (resolve, reject) => {
+
+      db.query(admin_query, [confirmationCode], (err, result) => {
+
+        if (err) {
+
+          reject(err)
+        
+        } else {
+
+          resolve(result)
+
+        }
+
+      })
+
+    })
+
+
+    if (admin.length > 0 && admin[0].account_status === "Unverified") {
+
+      const account_status_query = `UPDATE admin 
+      SET account_status= ?
+      WHERE email= ?`
+
+      await new Promise( (resolve, reject) => {
+
+        db.query(account_status_query, ['Verified', admin[0].email], (err, result) => {
+
+          if (err) {
+
+            reject(err)
+          
+          } else {
+
+            resolve(result)
+
+          }
+
+        })
+
+      })
+
+      return res.status(200).json({ // Success
+        success: true,
+        message: "Email Verification Succesful"
+      }); 
+
+     } else if (admin.length > 0 && admin[0].account_status === "Verified") {
+
+      return res.status(200).json({ // Success
+        success: true,
+        message: "Email is Already Verified"
+      }); 
+    
+     } else {
+
+      return res.status(400).json({ // Failure
+        success: false,
+        message: "Email Verification Failed",
+     });  
+
+    }
+
+  } catch (error) {
+
+    return res.status(400).json({ // Failure
+      success: false,
+      message: "Email Verification Failed"
+   }); 
+
+  }
+
+}
+
 //logout user
 static async logout (req, res) {
 
@@ -1006,18 +1327,15 @@ static async update_item (req, res) {
 //update admin info
 static async update_admin_info (req, res) {
 
-  let message;
-
   try {
 
   const admin_query = `UPDATE admin 
-  SET email= ?,
-  phone= ?
+  SET phone= ?
   WHERE admin_id= ?`
 
   await new Promise( (resolve, reject) => {
 
-    db.query(admin_query, [req.body.email, req.body.phone, req.body.admin_id], (err, result) => {
+    db.query(admin_query, [req.body.phone, req.body.admin_id], (err, result) => {
 
       if (err) {
 
@@ -1036,12 +1354,13 @@ static async update_admin_info (req, res) {
 
   //account setting update
   const settings_query = `UPDATE settings 
-  SET service_fee= ?
-  WHERE id= ?`
+  SET fee_same_city = ?,
+  fee_same_state = ?,
+  fee_other_state = ?`
 
   await new Promise( (resolve, reject) => {
 
-    db.query(settings_query, [req.body.website_info.service_fee, req.body.website_info.id], (err, result) => {
+    db.query(settings_query, [req.body.fee_same_city, req.body.fee_same_state, req.body.fee_other_state], (err, result) => {
 
       if (err) {
 
@@ -1057,18 +1376,21 @@ static async update_admin_info (req, res) {
 
   })
 
-  message = "success"
+  return res.status(200).json({
+    success: true,
+    message: "success",
+  });
     
 } catch (error) {
 
-  message = "error occured"
-    
+  return res.status(500).json({
+    success: false,
+    message: "An error occurred. Please try again.",
+  });  
+
 }
 
-  res.json({message: message})
-
 }
-
 
 
 //update admin passwowrd
@@ -1077,8 +1399,6 @@ static async update_admin_pass (req, res) {
   let information = req.body
 
   let admin_id = req.session.admin_id
-
-  let message
 
   try {
 
@@ -1102,11 +1422,25 @@ static async update_admin_pass (req, res) {
 
     })
 
-    if (admin.length > 0) { //if the admin dey
+    if (admin.length == 0) { //if the admin dey
 
-      const isMatch = await bcrypt.compare(information.old_password, admin[0].password); //compare the current pass, with the old one if he match 
+      return res.status(400).json({
+        success: false,
+        message: "Bad Request",
+      });  
+
+    }
       
-      if (isMatch) { //if he match use am replace old one
+    const isMatch = await bcrypt.compare(information.old_password, admin[0].password); //compare the current pass, with the old one if he match 
+      
+      if (!isMatch) { //if he match use am replace old one
+
+        return res.status(401).json({
+          success: false,
+          message: "Old password incorrect",
+        });
+
+      }
 
       const hashed_pass = await bcrypt.hash(information.new_password, 12);
       
@@ -1132,27 +1466,19 @@ static async update_admin_pass (req, res) {
 
       })
 
-      message = "Updated"
-
-      } else { //if pass no match
-
-      message = "Old password incorrect"
-
-      }
-
-    } else { //if user nor dey
-
-      message = "error occured"
-
-    }
+    return res.status(200).json({
+      success: true,
+      message: "Password Updated",
+    });
     
-} catch (error) {
+  } catch (error) {
 
-  message = "error occured"
-    
-}
-
-  res.json({message: message})
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred. Please try again.",
+    });   
+      
+  }
 
 }
 
@@ -1160,27 +1486,22 @@ static async update_admin_pass (req, res) {
 
 
 
-//update user profile
+//update order status
 static async update_order_status (req, res) {
 
-  let order_status = req.body.status
+  let order_status = req.body.order_status
 
   let order_id = req.body.order_id
-
-  let description = req.body.description
-
-  let message
 
   try {
 
   const order_query = `UPDATE orders 
-  SET status= ?,
-  description= ?
+  SET order_status= ?
   WHERE order_id= ?`
 
   await new Promise( (resolve, reject) => {
 
-    db.query(order_query, [order_status, description, order_id], (err, result) => {
+    db.query(order_query, [order_status, order_id], (err, result) => {
 
       if (err) {
 
@@ -1196,18 +1517,69 @@ static async update_order_status (req, res) {
 
   })
 
-  message = "success"
-    
+  return res.status(200).json({
+    success: true,
+    message: "Order Status Updated",
+  });
+  
 } catch (error) {
 
-  message = "error occured"
-    
+  return res.status(500).json({
+    success: false,
+    message: "An error occurred. Please try again.",
+  });   
+
+ }
+
 }
 
-  res.json({message: message})
+
+//update payment status
+static async update_payment_status (req, res) {
+
+  let payment_status = req.body.payment_status
+
+  let order_id = req.body.order_id
+
+  try {
+
+  const order_query = `UPDATE orders 
+  SET payment_status= ?
+  WHERE order_id= ?`
+
+  await new Promise( (resolve, reject) => {
+
+    db.query(order_query, [payment_status, order_id], (err, result) => {
+
+      if (err) {
+
+        reject(err)
+      
+      } else {
+
+        resolve(result)
+
+      }
+
+    })
+
+  })
+
+  return res.status(200).json({
+    success: true,
+    message: "Payment Status Updated",
+  });
+  
+} catch (error) {
+
+  return res.status(500).json({
+    success: false,
+    message: "An error occurred. Please try again.",
+  });   
+
+ }
 
 }
-
 
 //CRON JOBS
 

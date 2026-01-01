@@ -39,6 +39,11 @@ export default class API {
     return api.post("/api/reset_password", info).then(res => res.data)
   }
 
+  //Reset password
+  static async verify_payment(info) {
+    return api.post("/api/verify_payment", info).then(res => res.data)
+  }
+
   // GET
 
   //Verify Email

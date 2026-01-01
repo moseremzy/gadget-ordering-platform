@@ -52,6 +52,58 @@ module.exports = class MIDDLEWARES {
           next();
         });
     }
+
+
+    // Check Stock Availability
+    static stock_availability(products) {
+
+      let out_of_stock = "";
+
+      let slightly_available = "";
+
+      const result = products.filter(item =>
+        
+        item.quantity > item.stock_quantity
+      
+      );
+
+      if (result.length === 0) {
+        
+        return null; // no problem
+      
+      }
+
+      result.forEach(item => {
+        
+        if (item.stock_quantity === 0) {
+          
+          out_of_stock += `${item.name}, `;
+        
+        } else {
+          
+          slightly_available += `${item.name}, `;
+        
+        }
+      
+      });
+
+      let message = "";
+
+      if (out_of_stock) {
+        
+        message += out_of_stock + "are out of stock. ";
+      
+      }
+
+      if (slightly_available) {
+        
+        message += slightly_available + "available but not in this quantity.";
+      
+      }
+
+      return message;
+
+    }
               
 }
     

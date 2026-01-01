@@ -16,6 +16,8 @@ router.use(session(sessionConfig));
 
 //GET REQUESTS 
 
+router.get("/api/confirm-email/:id", API.emailVerification);
+
 router.get("/api/fetch_admin", check_admin_session,  API.fetch_admin);
 
 router.get("/api/fetch_products", check_admin_session, API.fetch_products);
@@ -35,6 +37,8 @@ router.get("/api/logout", API.logout);
 
 router.post("/api/register", API.register)
 
+router.post("/api/resend-email-confirmation", API.ResendConfirmationMail)
+
 router.post("/api/login", API.login)
 
 router.post("/api/cancel_order", check_admin_session, API.cancel_order)
@@ -53,6 +57,8 @@ router.post("/api/reset_password", API.reset_password);
 //PATCH REQUEST
 
 router.patch("/api/update_order_status", check_admin_session, API.update_order_status)
+
+router.patch("/api/update_payment_status", check_admin_session, API.update_payment_status)
 
 router.patch("/api/update_item", check_admin_session, API.update_item)
 

@@ -2,7 +2,7 @@
   <!-- Status Filter -->
     <div class="payment-filter-container">
       <label for="">Payment Status</label>
-      <select id="payment-filter" :style = "payment_color" class="payment-filter-select" v-model = "order.payment_status">
+      <select id="payment-filter" :style = "payment_color"  @change = "UpdatePaymentStatus" class="payment-filter-select" v-model = "order.payment_status">
         <option value="pending" style="color:#f59e0b;">Pending</option>      <!-- Amber / Orange -->
         <option value="success" style="color:#16a34a;">Success</option>      <!-- Green -->
         <option value="failed" style="color:#dc2626;">Failed</option>        <!-- Red -->
@@ -17,7 +17,7 @@
 
 import { computed, reactive, toRefs, ref} from 'vue'
 
-import API from '../../api'
+import API from '../../api/index'
 
 import { useInteractiveStore } from '@/stores/interactive'
 
@@ -34,37 +34,36 @@ const props = defineProps({
 const { order } = toRefs(props)
  
 
-async function Update_Status() {
+
+
+async function UpdatePaymentStatus() {
 
     interactive_store.toggle_loading_overlay(true) //show overlay
 
-    const response = await API.update_order_status({
-        
-        status: order.value.status, 
-        
-        order_id: order.value.order_id,
-        
-        description: description.value
-        
-    }) 
+    try {
 
-    if (response.message === "success") { 
-
-        interactive_store.backend_message = "Status Updated Succesfully"
+    const response = await API.update_payment_status({
         
-        interactive_store.display_success_alert_box()
+      payment_status: order.value.payment_status, 
+      
+      order_id: order.value.order_id,
+        
+    })
 
-    } else {
-
-        interactive_store.backend_message = "Error Occured, Try Again"
-
-        interactive_store.display_error_alert_box()
+    interactive_store.backend_message = "Payment Status Updated Succesfully"
+    
+    interactive_store.display_success_alert_box()
+ 
+    } catch (error) {
+      
+      console.log(error)
 
     }
 
     interactive_store.toggle_loading_overlay(false) //remove overlay
-    
+   
 }
+
 
 
 const payment_color = computed(() => {
@@ -152,7 +151,7 @@ const payment_color = computed(() => {
 }
 .payment-filter-container label {
   display: block;
-  font-size: 16px;
+  font-size: 15px;
 }
 .payment-filter-select {
   padding: 8px;
@@ -160,7 +159,7 @@ const payment_color = computed(() => {
   text-align: center;
   border: 1px solid #ccc;
   border-radius: 4px;
-  margin-top: 3px;
+  margin-top: 0px;
   margin-bottom: 10px; /* Add space below inputs */
 }
 .payment-filter-select:hover {

@@ -28,8 +28,6 @@ router.get("/api/fetch_user", check_user_session,  API.fetch_user);
 
 router.get("/api/fetch_orders", check_user_session,  API.fetch_orders);
 
-router.get("/api/verify_payment/:reference", check_user_session,  API.verify_payment);
-
 router.get("/api/logout", API.logout);
 
  
@@ -44,6 +42,8 @@ router.post("/api/login", LIMITERS.login(), API.login)
 router.post("/api/submit_order", check_user_session, LIMITERS.submitOrder(), API.submit_order);
 
 router.post("/paystack_webhook", API.paystack_webhook);
+
+router.post("/api/verify_payment", check_user_session,  API.verify_payment);
 
 router.post("/api/contact_us", LIMITERS.contact(), API.contact_us);
 

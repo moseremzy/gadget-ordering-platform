@@ -174,12 +174,12 @@ var transporter = nodemailer.createTransport(smtpConfig);
 static async send_reset_pass_email(req, res, useremail, token, firstname) {
 
     const smtpConfig = {
-        host: 'techbycas.com',
+        host: 'lavexacore.com',
         port: 465,
         secure: true, // use SSL
         auth: {
-            user: 'support@techbycas.com',
-            pass: 'Techbycas1.'
+            user: 'support@lavexacore.com',
+            pass: 'Lavexacore1.'
         }
     };
 
@@ -199,7 +199,7 @@ var transporter = nodemailer.createTransport(smtpConfig);
       transporter.use('compile', hbs(handlebarOptions));
       
       var mailOptions = {
-        from: '"Tech By Cas" <support@techbycas.com>', // sender address
+        from: '"Tech By Cas" <support@lavexacore.com>', // sender address
         to: useremail,
         subject: 'Reset Password',
         attachments: [{
