@@ -153,4 +153,13 @@ div.products_section p{
     gap: 26px;
 }
 
+
+/* MOBILE */
+@media only screen and (max-width: 800px) {
+
+  div.home_container h1{
+    font-size: var(--container-mobile-font-size);
+  }
+
+}
 </style>

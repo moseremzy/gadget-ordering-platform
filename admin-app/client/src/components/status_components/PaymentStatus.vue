@@ -2,7 +2,7 @@
   <!-- Status Filter -->
     <div class="payment-filter-container">
       <label for="">Payment Status</label>
-      <select id="payment-filter" :style = "payment_color"  @change = "UpdatePaymentStatus" class="payment-filter-select" v-model = "order.payment_status">
+      <select id="payment-filter" :style = "payment_color"  @change = "UpdatePaymentStatus" :disabled="order.payment_method === 'online payment'" class="payment-filter-select" v-model = "order.payment_status">
         <option value="pending" style="color:#f59e0b;">Pending</option>      <!-- Amber / Orange -->
         <option value="success" style="color:#16a34a;">Success</option>      <!-- Green -->
         <option value="failed" style="color:#dc2626;">Failed</option>        <!-- Red -->

@@ -2,7 +2,6 @@
 
  <div>
 
-
  <HEADER/> 
 
  <SUCCESSALERTBOX>{{interactive_store.backend_message}}</SUCCESSALERTBOX>
@@ -181,9 +180,9 @@
     <div class="order-card" v-for="order in orders" :key = "order.order_id">
         <div class="order-header">
         <div>
-            <p class="order-id">Order #{{order.order_id}}</p>
-            <p class="order-date">Placed on {{MIDDLEWARES.formatted_date(order.created_at)}}</p>
-            <p class="order-date">Delivery on {{order.delivery_date === null ? '--' : MIDDLEWARES.formatted_date(order.delivery_date)}}</p>
+        <p class="order-id">Order #{{order.order_id}}</p>
+        <p class="order-date">Placed on {{MIDDLEWARES.formatted_date(order.created_at)}}</p>
+        <p class="order-date">Delivery on {{order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : '...'}}</p>
         </div>
         <span :class="`status ${order.order_status}`">{{order.order_status}}</span>
         </div>
@@ -674,6 +673,11 @@ textarea {
   color: #2bff8a;
 }
 
+.status.confirmed {
+  background: rgba(46, 139, 132, 0.15);
+  color: rgb(0, 174, 255);
+}
+
 
 .status.pending {
   background: rgba(255, 215, 0, 0.15);
@@ -790,6 +794,48 @@ p.err {
 
 .send-btn {
   width: 150px;
+}
+
+}
+
+/* MOBILE */
+@media only screen and (max-width: 800px) {
+
+  div.home_container h1{
+    font-size: var(--container-mobile-font-size);
+  }
+
+  .order-history-container {
+    padding: 30px 0px;
+  }
+
+  
+.contact-form h2 {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.contact-form p {
+  color: #aaa;
+  font-size: 16px !important;
+  margin: 0px 0 10px 0 !important;
+}
+
+form .row {
+  display: flex;
+  gap: 0px;
+  flex-wrap: wrap;
+}
+
+.field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+label {
+  margin-bottom: 6px;
 }
 
 }

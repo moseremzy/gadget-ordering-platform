@@ -71,8 +71,4 @@ router.patch("/api/update_admin_pass", check_admin_session, API.update_admin_pas
 
 //DELETE REQUEST
 
-router.delete("/api/delete_item", check_admin_session, API.delete_item)
-
-
-
 module.exports = router

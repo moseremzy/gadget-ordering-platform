@@ -26,6 +26,10 @@
 
     <!-- Status Filter -->
 
+    <CANCELORDERMODAL/>
+
+    <CONFIRMORDERMODAL/>
+
     <div class = "flex_container">
 
     <div class = "order_details">
@@ -128,7 +132,7 @@
 
 <!-- <button @click="generateReceipt(order)" class = "generate-receipt-btn">Generate Receipt</button> -->
 
-<CANCELORDER :order = order v-if = "order.order_status != 'delivered' && order.order_status != 'cancelled'"/>
+<CANCELORDERBTN :order = order v-if = "order.order_status != 'delivered' && order.order_status != 'cancelled'"/>
 
 </div> <!-- SUB_CONTAINER -->
 </div> <!-- CONTAINER -->
@@ -139,7 +143,9 @@ import { useRoute, useRouter} from 'vue-router'
 import { ref, reactive, computed, watch } from 'vue';
 import HEADER from '../components/Header.vue';
 import PAYMENTSTATUS from '../components/status_components/PaymentStatus.vue';
-import CANCELORDER from '../components/status_components/CancelOrder.vue'
+import CANCELORDERBTN from '../components/status_components/CancelOrderBtn.vue'
+import CANCELORDERMODAL from "@/components/modals/cancel_order_modal.vue";
+import CONFIRMORDERMODAL from "@/components/modals/confirm_order_modal.vue";
 import CONFIRMREJECTSTATUS from '../components/status_components/ConfirmRejectStatus.vue'
 import OVERLAY from '../components/modals/loading_overlay.vue';
 import ITEMSLIST from '../components/ItemsList.vue';

@@ -549,7 +549,7 @@ static async cancel_order (req, res) {
 //confirm order
 static async confirm_order (req, res) {
 
-  const { description, order_id, user_id } = req.body
+  const { delivery_date, description, order_id, user_id } = req.body
 
   try {
 
@@ -689,12 +689,13 @@ static async confirm_order (req, res) {
    //Update Order Status
    const status_query = `UPDATE orders 
       SET order_status= ?,
+      delivery_date = ?,
       description= ?
       WHERE order_id= ?`
 
       await new Promise( (resolve, reject) => { //update user password token
 
-        db.query(status_query, ['confirmed', description, order_id], (err, result) => {
+        db.query(status_query, ['confirmed', delivery_date, description, order_id], (err, result) => {
 
           if (err) {
 
@@ -1143,7 +1144,8 @@ static async fetch_settings (req, res) {
         store_city: all_settings[0].store_city,
         fee_same_state: all_settings[0].fee_same_state,
         fee_same_city: all_settings[0].fee_same_city,
-        fee_other_state: all_settings[0].fee_other_state
+        fee_other_state: all_settings[0].fee_other_state,
+        whatsapp: all_settings[0].whatsapp
       }
     });
     
@@ -1356,11 +1358,13 @@ static async update_admin_info (req, res) {
   const settings_query = `UPDATE settings 
   SET fee_same_city = ?,
   fee_same_state = ?,
-  fee_other_state = ?`
+  fee_other_state = ?,
+  whatsapp = ?
+  `
 
   await new Promise( (resolve, reject) => {
 
-    db.query(settings_query, [req.body.fee_same_city, req.body.fee_same_state, req.body.fee_other_state], (err, result) => {
+    db.query(settings_query, [req.body.fee_same_city, req.body.fee_same_state, req.body.fee_other_state, req.body.whatsapp], (err, result) => {
 
       if (err) {
 
@@ -1577,147 +1581,8 @@ static async update_payment_status (req, res) {
     message: "An error occurred. Please try again.",
   });   
 
+  }
+
  }
-
-}
-
-//CRON JOBS
-
-//open market
-static async open_market(req, res) {
-
-  try {
-
-  const settings_query = `UPDATE settings 
-  SET market_status= ?
-  WHERE id= ?`
-
-  await new Promise( (resolve, reject) => {
-
-    db.query(settings_query, ['open', 1], (err, result) => {
-
-      if (err) {
-
-        reject(err)
-      
-      } else {
-
-        resolve(result)
-
-      }
-
-    })
-
-  })
-    
-  } catch (error) {
-
-    console.log(error.message)
-    
-  }
-
-}
-
-
-//close market
-static async close_market(req, res) {
-
-  try {
-
-  const settings_query = `UPDATE settings 
-  SET market_status= ?
-  WHERE id= ?`
-
-  await new Promise( (resolve, reject) => {
-
-    db.query(settings_query, ['close', 1], (err, result) => {
-
-      if (err) {
-
-        reject(err)
-      
-      } else {
-
-        resolve(result)
-
-      }
-
-    })
-
-  })
-    
-  } catch (error) {
-
-    console.log(error.message)
-    
-  }
-
-}
-
-
-//DELETE REQUESTS
-
-//delete item
-static async delete_item(req, res) {
-
-  const item_name = req.body.item_name;
-
-  let message;
-
-  try {
-   
-    const item_query = `SELECT * FROM items WHERE name= ?`;
-   
-    const item = await new Promise((resolve, reject) => {
-   
-      db.query(item_query, [item_name], (err, result) => {
-   
-        if (err) {
-   
-          reject(err);
-   
-        } else {
-   
-          resolve(result);
-   
-        }
-   
-      });
-   
-    });
-
-    if (!item.length) {
-   
-      return res.json({ message: "Item not found" });
-   
-    }
-
-    const delete_query = `DELETE FROM items WHERE name= ?`;
-   
-    db.query(delete_query, item_name); // Delete item from database
-
-    const imagePath = path.resolve(__dirname, '../../kelvinspice_gallery/', item[0].image);
-
-    if (fs.existsSync(imagePath)) {
-
-      fs.unlinkSync(imagePath); // Delete image from folder
-
-    } else {
-
-      console.log('Image not found:', imagePath);
-
-    }
-
-    message = "Delete successful";
-
-  } catch (error) {
-    
-    message = "Error occurred";
-
-  }
-
-  res.json({ message: message });
-
-}
 
 }

@@ -2,7 +2,7 @@
   <div>
     <!-- WhatsApp Floating Button -->
     <a
-      href="https://wa.me/2347063131606"
+      :href="`https://wa.me/${settings_store.whatsapp}`"
       target="_blank"
       class="whatsapp-float"
       aria-label="Chat with us on WhatsApp"
@@ -11,6 +11,15 @@
     </a>
   </div>
 </template>
+
+<script setup>
+ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+ import { useSettingStore } from '../stores/settings'
+
+ const settings_store = useSettingStore()
+
+</script>
+
 
 <style scoped>
 /* WhatsApp Floating Button */
@@ -38,7 +47,3 @@
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 </style>
-
-<script setup>
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-</script>

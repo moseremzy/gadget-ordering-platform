@@ -17,8 +17,6 @@ export const useSettingStore = defineStore("settings", {
         const response = await API.fetch_settings();
 
         this.settings = response.all_settings;
-      
-        console.log(this.settings)
 
       }
     

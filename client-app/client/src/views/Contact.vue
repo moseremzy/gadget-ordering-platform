@@ -32,7 +32,7 @@
         <div class="icon"><font-awesome-icon class="fa-solid fa-phone blue" icon="fa-solid fa-phone" /></div>
         <div class="details">
         <h4>Phone Lines</h4>
-        <p class="blue">+234 810 841 8727</p>
+        <p class="blue">{{settings_store.whatsapp}}</p>
         </div>
     </div>
 
@@ -40,7 +40,7 @@
         <div class="icon"><font-awesome-icon class="fa-solid fa-envelope blue" icon="fa-solid fa-envelope" /></div>
         <div class="details">
         <h4>Email</h4>
-        <p class="blue">gadget360ng@gmail.com</p>
+        <p class="blue">support@techbycas.com</p>
         </div>
     </div>
 
@@ -116,7 +116,9 @@ import { onMounted, onUnmounted, onUpdated, reactive, toRaw, ref, watch} from 'v
 import MIDDLEWARES from "../middlewares/middlewares"
 import API from "../api/index";
 import { useInteractiveStore } from '@/stores/interactive'
+import { useSettingStore } from '@/stores/settings'
 const interactive_store = useInteractiveStore()
+const settings_store = useSettingStore()
 
 
 let formvalues = reactive({
@@ -325,6 +327,10 @@ textarea {
   p.err {
       color: red;
       font-size: 12px;
+  }
+ 
+  div.home_container h1{
+    font-size: var(--container-mobile-font-size);
   }
 
 }

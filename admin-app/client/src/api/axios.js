@@ -1,10 +1,11 @@
 import axios from "axios";
+const base_url = process.env.VUE_APP_API_BASE_URL
 import { useInteractiveStore } from "../stores/interactive";
 
 axios.defaults.withCredentials = true;
 
 const api = axios.create({
-  baseURL: "http://localhost:7000", // your backend URL
+  baseURL: `${base_url}`, // your backend URL
 });
 
 // Response interceptor for global error handling

@@ -20,7 +20,7 @@
     <!-- LEFT SECTION -->
     <div class="cart-items">
       <div class="cart-item" v-for = "item in products_store.cart_products" :key = "item.product_id">
-        <img :src="'http://localhost:8080/images/'+item.main_image" alt="" />
+        <img :src="`${base_url}/images/${item.main_image}`" alt="" />
 
         <div class="item-details">
           <h3>{{ item.name }}</h3>
@@ -93,6 +93,7 @@ import { onMounted, onUnmounted, onUpdated, reactive, toRaw, ref, watch} from 'v
 import MIDDLEWARES from "../middlewares/middlewares"
 import { useInteractiveStore } from '@/stores/interactive'
 import { useSettingStore } from '@/stores/settings'
+const base_url = process.env.VUE_APP_API_BASE_URL
 
 const products_store = useProductStore()
 const interactive_store = useInteractiveStore()
@@ -252,8 +253,8 @@ div.home_container h1{
   color: #fff;
   font-size: 22px;
   cursor: pointer;
-  width: 36px;
-  height: 44px;
+  width: 30px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -355,6 +356,75 @@ div.home_container h1{
   .order-summary {
     width: 100%;
 }
+
+.order-summary h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+}
+ 
+div.home_container h1{
+    font-size: var(--container-mobile-font-size);
+}
+
+.quantity-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  background: #111;
+  border-radius: 12px;
+  gap: 6px;
+  margin-left: 3px;
+  padding: 4px 8px;
+}
+
+/* Quantity box */
+.quantity-box {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  background-color: #0d0d0d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 40px;
+  overflow: hidden;
+  height: 44px;
+  min-width: 85px;
+  justify-content: space-between;
+  padding: 0 5px;
+}
+
+.qty-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  width: 30px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s ease;
+}
+
+.qty-btn:hover {
+  color: var(--primary-blue);
+}
+
+.qty-value {
+  color: #fff;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.delete-btn {
+  background: rgb(235, 76, 76);
+  border-radius: 30%;
+  font-size: 13px;
+  border: 1px solid rgb(231, 74, 74);
+  padding: 4px 8px;
+  margin-left: 8px;
+}
+ 
 }
 
 </style>

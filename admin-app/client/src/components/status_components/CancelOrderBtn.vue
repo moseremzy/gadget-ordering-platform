@@ -1,16 +1,13 @@
 <template>
   <div>
 
-    <CANCELORDERMODAL/>
-
-    <button id="reject" @click="reject_order(order)">Cancel Order</button> 
+    <button id="reject" @click="reject_order(order)">Cancel Oer</button> 
   
   </div>
 </template>
 
 <script setup>
-import API from "../../api";
-import CANCELORDERMODAL from "@/components/modals/cancel_order_modal.vue";
+import API from "../../api/index"; 
 import { computed, reactive, toRefs, ref } from 'vue';
 import { useInteractiveStore } from '@/stores/interactive';
 import { useOrdersStore } from '@/stores/orders';

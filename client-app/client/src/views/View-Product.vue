@@ -20,7 +20,7 @@
 
        <div class = "image"> 
 
-        <img :src="'http://localhost:8082/images/'+product[0].main_image" :alt="product[0].name">
+        <img :src="`${base_url}/images/${product[0].main_image}`" :alt="product[0].name">
 
        </div>
 
@@ -188,6 +188,7 @@ import FOOTER from "@/components/Footer.vue";
 import SIDEBAR from "@/components/Sidebar.vue";
 import { onMounted, onUnmounted, onUpdated, watch, computed, reactive, toRefs, ref} from 'vue'
 import MIDDLEWARES from "../middlewares/middlewares"
+const base_url = process.env.VUE_APP_API_BASE_URL
 
 import { useProductStore } from '@/stores/products'
 import { useSettingStore } from '@/stores/settings'
@@ -201,8 +202,6 @@ const router = useRouter()
 const products_store = useProductStore()
 
 const settingStore = useSettingStore()
-
-alert('reach here')
 
 const products = computed(() => {
 
@@ -431,13 +430,13 @@ div.image {
 }
 
 .card h2 {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: bold;
   margin: 5px 0;
 }
 
 .card p {
-  font-size: 13px;
+  font-size: 15px;
   margin: 5px 0;
   color: rgb(141, 139, 139);
 }
@@ -533,5 +532,14 @@ div.image {
       align-self: top;
       margin: 0px 0 0 0;
   }
+}
+
+/* MOBILE */
+@media only screen and (max-width: 800px) {
+
+  div.home_container h1{
+    font-size: var(--container-mobile-font-size);
+  }
+
 }
 </style>

@@ -7,17 +7,16 @@
         <h3>Contact Us</h3>
         <p>We’d love to hear from you! Reach us anytime.</p>
         <p><font-awesome-icon icon="fa-solids fa-location" style="color: var(--primary-blue);"/> 18 Asemota street airport Benin city</p>
-        <p><font-awesome-icon icon="fa-solids fa-phone" /> +234 7063131606</p>
-        <p><font-awesome-icon icon="fa-solids fa-phone" /> +234 7063131606</p>
+        <p><font-awesome-icon icon="fa-solids fa-phone" /> {{ settings_store.whatsapp }}</p>
         <div class="contact-icons">
           <a
-            href="https://wa.me/2348012345678"
+            :href="`https://wa.me/${settings_store.whatsapp}`"
             target="_blank"
             aria-label="WhatsApp"
           >
         <font-awesome-icon class = "whatsapp" icon="fa-brands fa-whatsapp" />
           </a>
-          <a href="mailto:support@gadgethub.com" aria-label="Email">
+          <a href="mailto:support@techbycas.com" aria-label="Email">
             <font-awesome-icon icon="fa-solid fa-envelope" />
           </a>
         </div>
@@ -55,6 +54,9 @@
 </template>
 
 <script setup>
+ import { useSettingStore } from '../stores/settings'
+
+ const settings_store = useSettingStore()
 </script>
 
 <style scoped>

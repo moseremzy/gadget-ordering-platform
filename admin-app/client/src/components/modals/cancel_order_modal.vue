@@ -10,7 +10,7 @@
 
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" @click = "interactive_store.toggle_cancel_order_modal(false, null)">&times;</button>
-          <h4 class="modal-title">Reject Order With ID {{interactive_store.cancel_order_data.order_id}} </h4>
+          <h4 class="modal-title">Reject Order With ID {{interactive_store.order_data.order_id}} </h4>
         </div>
         <div class="modal-body">
           <p>Why do you want to cancel this order?</p>
@@ -92,7 +92,7 @@ async function submit_cancellation(e) {
 
             const cancellationPayload = { //info to be sent
 
-            ...interactive_store.cancel_order_data,
+            ...interactive_store.order_data,
 
             description: cancellation_reason.value,
 

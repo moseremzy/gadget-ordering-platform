@@ -1181,7 +1181,8 @@ static async fetch_settings (req, res) {
         store_city: all_settings[0].store_city,
         fee_same_state: all_settings[0].fee_same_state,
         fee_same_city: all_settings[0].fee_same_city,
-        fee_other_state: all_settings[0].fee_other_state
+        fee_other_state: all_settings[0].fee_other_state,
+        whatsapp: all_settings[0].whatsapp
       }
     });
     

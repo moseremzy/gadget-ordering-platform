@@ -6,9 +6,11 @@ const router = require("./routes/router.js")
 const cors = require("cors");
 const app = express();
 const path = require("path")
+const base_url = process.env.BASE_URL
+
 
 app.use(cors({
-  origin: "http://localhost:8081",   // your Vue frontend
+  origin: `${base_url}`,   // your Vue frontend
   credentials: true,                 // 🔥 THIS IS REQUIRED FOR COOKIES
 }));
 

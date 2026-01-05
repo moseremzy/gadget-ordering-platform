@@ -7,7 +7,7 @@
 
     <!-- Product Image -->
     <div class="image-box">
-      <img :src="'http://localhost:8082/images/'+product.main_image" />
+      <img :src="`${base_url}/images/${product.main_image}`" />
     </div>
 
     <!-- Product Details -->
@@ -37,6 +37,8 @@ import Condition from '../components/Condition.vue'
 import Availability from '../components/Availability.vue'
 import Category from '../components/Category.vue'
 import { useProductStore } from '@/stores/products'
+const base_url = process.env.VUE_APP_API_BASE_URL
+
  
 const products_store = useProductStore()
 
@@ -111,7 +113,7 @@ function AddToCart(product, quantity) {
 }
 .image-box img {
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: contain;
 }
 

@@ -394,7 +394,7 @@ div.item {
 
   div.delivery_pin h1{
       color: var(--primary-blue);
-      font-size: 16px;
+      font-size: 16px !important;
       margin: 5px 20px;
   }
 
@@ -465,6 +465,13 @@ div.item {
       column-gap: 50px;
       align-items: flex-start;
       grid-template-columns: 50% auto;
+  }
+}
+
+/* MOBILE */
+@media only screen and (max-width: 800px) {
+  div.home_container h1{
+    font-size: var(--container-mobile-font-size);
   }
 }
 </style>

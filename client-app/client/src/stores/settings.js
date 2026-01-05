@@ -16,6 +16,8 @@ export const useSettingStore = defineStore("settings", {
       
       fee_other_state: 0,
 
+      whatsapp: null,
+
     }),
     
     actions: {

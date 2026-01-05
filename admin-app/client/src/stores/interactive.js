@@ -34,7 +34,9 @@ export const useInteractiveStore = defineStore("interactive", {
 
        display_cancel_order_modal: false,
 
-       cancel_order_data: null, // data of order to be cancelled
+       display_confirm_order_modal: false,
+
+       order_data: null, // data of order to be cancelled
 
        display_loading_overlay: false,
 
@@ -125,7 +127,16 @@ export const useInteractiveStore = defineStore("interactive", {
 
             this.display_cancel_order_modal = state
 
-            this.cancel_order_data = data
+            this.order_data = data
+
+        },
+
+
+        toggle_confirm_order_modal(state, data) { //toggle cancel order modal
+
+            this.display_confirm_order_modal = state
+
+            this.order_data = data
 
         },
 

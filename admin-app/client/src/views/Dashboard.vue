@@ -10,6 +10,10 @@
 
     <SIDEBAR/>
 
+    <CANCELORDERMODAL/>
+
+    <CONFIRMORDERMODAL/>
+
      <div class="sub_container" :style = "interactive_store.sub_container_css">
 
       <!--header--> <HEADER page_name = "dashboard" />
@@ -78,6 +82,8 @@ import ORDERLIST from '../components/OrderList.vue';
 import LoadingOverlay from '../components/modals/loading_overlay.vue';
 import HEADER from '../components/Header.vue';
 import SIDEBAR from '../components/SideBar.vue';
+import CANCELORDERMODAL from "@/components/modals/cancel_order_modal.vue";
+import CONFIRMORDERMODAL from "@/components/modals/confirm_order_modal.vue";
 import { onMounted, onUnmounted, onUpdated, reactive, computed, toRaw, ref, watch} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useInteractiveStore } from '@/stores/interactive'

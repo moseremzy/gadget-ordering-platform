@@ -259,6 +259,10 @@ div.home_container h1{
     font-size: 12px;
   }
 
+  div.home_container h1{
+    font-size: var(--container-mobile-font-size);
+  }
+
 }
 
 </style>

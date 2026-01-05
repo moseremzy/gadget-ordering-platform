@@ -52,6 +52,12 @@
             <p class="err">{{ admin_info_error.other_state_err }}</p>
             </div>
 
+            <div class="form-group grid-full">
+            <label for = "whatsapp" class = "form-label">Whatsapp Support</label>
+            <input type = "text" placeholder="Whatsapp Support" v-model = "admin_info.whatsapp" id = "whatsapp" class = "form-input">
+            <p class="err">{{ admin_info_error.whatsapp_err }}</p>
+            </div>
+
             <!-- Submit Button -->
             <div class="form-group grid-full">
                 <button type="submit" @click.prevent = "updateAdmin" class="submit-button">Submit</button>
@@ -133,7 +139,8 @@ let admin_info_error = reactive({
     phone_err: "", 
     same_city_err: "",  
     same_state_err: "",
-    other_state_err: ""
+    other_state_err: "",
+    whatsapp_err: "",
 })
 
 
@@ -192,6 +199,7 @@ onUpdated(() => {
     samecityvalidated()
     samestatevalidated()
     otherstatevalidated()
+    whatsappvalidated()
 
     old_password_validated()
     new_password_validated()
@@ -238,13 +246,36 @@ function phonevalidated() {
     
         admin_info_error.phone_err = "Invalid phone number";
     
-    } else if (phone_length > 11) {
+    } else if (phone_length != 11) {
     
-        admin_info_error.phone_err = "Cannot be 12 digits long"
+        admin_info_error.phone_err = "Invalid phone number"
     
     } else {
         
         admin_info_error.phone_err = ""
+        
+        return true
+
+    }         
+}
+
+
+
+function whatsappvalidated() {
+    
+    let whatsapp_length = admin_info.whatsapp.length;
+    
+    if (admin_info.whatsapp === "") {
+    
+        admin_info_error.whatsapp_err = "Please fill field";
+    
+    } else if (whatsapp_length != 14) {
+    
+        admin_info_error.whatsapp_err = "Invalid whatsapp number"
+    
+    } else {
+        
+        admin_info_error.whatsapp_err = ""
         
         return true
 
@@ -364,7 +395,7 @@ function confirm_password_validated() {
 
 async function updateAdmin() {
 
-    if (emailvalidated() && phonevalidated() && samecityvalidated() && samestatevalidated() && otherstatevalidated()) {
+    if (emailvalidated() && phonevalidated() && samecityvalidated() && samestatevalidated() && otherstatevalidated() && whatsappvalidated()) {
 
         interactive_store.toggle_loading_overlay(true)
 

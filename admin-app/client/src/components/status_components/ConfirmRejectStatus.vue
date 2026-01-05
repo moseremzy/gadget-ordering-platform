@@ -2,13 +2,11 @@
   
   <div>
 
-  <CANCELORDERMODAL/>
-
   <div class = "confirm_reject">
 
       <button id = "reject" @click = "reject_order(order)">Reject</button> 
      
-      <button id = "confirm" @click = "confirm_order(order.order_id, order.user_id)">Confirm</button>
+      <button id = "confirm" @click = "confirm_order(order)">Confirm</button>
   
   </div>
 
@@ -19,8 +17,6 @@
 <script setup>
 
 import API from "../../api/index";
-
-import CANCELORDERMODAL from "@/components/modals/cancel_order_modal.vue";
 
 import { computed, reactive, toRefs, ref} from 'vue'
 
@@ -51,40 +47,15 @@ function reject_order(order) {
 }
 
 
-async function confirm_order(order_id, user_id) {
+function confirm_order(order) {
+
+    interactive_store.toggle_confirm_order_modal(true,
+    {
+        order_id: order.order_id,
+        user_id: order.user_id
+    })
     
-    interactive_store.toggle_loading_overlay(true) //display loading overlay
-
-    const confirmationPayload = { //info to be sent
-
-     description: 'Your order has been confirmed for processing',
-
-     order_id: order_id,
-
-     user_id: user_id
-
-    }
-
-    try {
-    
-    const response = await API.confirm_order(confirmationPayload); //send confirmation request
-
-       await orders_store.fetch_orders() //update store with fresh orders
-
-       interactive_store.backend_message = "Order Confirmed"
-        
-       interactive_store.display_success_alert_box()
-        
-    } catch (error) {
-
-       console.log(error)
-        
-    }
-
-    interactive_store.toggle_loading_overlay(false) //remove loading overlay 
-
 }
-
  
 </script>
 
