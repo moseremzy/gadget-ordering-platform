@@ -63,22 +63,23 @@
       <div class="row">
         <div class="field">
           <label>Full Name <span>*</span></label>
-          <input type="text" id = "full_name" placeholder="Your full name" required/>
+          <input type="text" id = "full_name" v-model = "formvalues.fullname" placeholder="Your full name" required/>
         </div>
         <div class="field">
           <label>Phone Number <span>*</span></label>
-          <input type="text" id = "phone" placeholder="+234 xxx xxxx xxx" required/>
+          <input type="text" id = "phone" v-model = "formvalues.phone" placeholder="+234 xxx xxxx xxx" required/>
         </div>
       </div>
 
       <div class="field">
         <label>Email Address</label>
-        <input type="email" placeholder="your.email@example.com" required/>
+        <input type="email" placeholder="your.email@example.com" v-model = "formvalues.email" required/>
       </div>
 
       <div class="field">
         <label>Message <span>*</span></label>
         <textarea
+          v-model = "formvalues.message"
           placeholder="Tell us about the gadgets you’re looking for, any questions you have, or how we can help you..."
           required
         ></textarea>
@@ -122,8 +123,7 @@ const settings_store = useSettingStore()
 
 
 let formvalues = reactive({
-    firstname: "",
-    lastname: "",
+    fullname: "",
     phone: "",
     email: "",
     message: ""
@@ -158,8 +158,7 @@ async function submit() {
 function clear_fields() {
     formvalues.email = ""
     formvalues.phone = ""
-    formvalues.firstname = ""
-    formvalues.lastname = ""
+    formvalues.fullname = ""
     formvalues.message = ""
 }
 

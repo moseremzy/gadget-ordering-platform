@@ -23,7 +23,7 @@
     <form enctype = "multipart/form-data" method = "post" action = "/update_photo">
     <div class = "profile">
         <!-- <small style="font-size: 11px; color: gray; margin-bottom: 20px; display: block;">Note: images larger than 3mb won't display</small> -->
-        <img :src= "'http://localhost:8081/images/'+item_info.main_image" id = "profile_photo">
+        <img :src="`${base_url}/images/${item_info.main_image}`" id = "profile_photo">
                 <label for = "file"> <font-awesome-icon style = "font-size: 14px;"  class="fa-solid fa-camera" icon="fa-solid fa-camera"/> Change Photo
                 <input type = "file" @change = "updatePhoto" id = "file" name = "image" ref = "itemImage" accept="image/*"></label>
         </div>
@@ -144,6 +144,8 @@ const router = useRouter()
 const products_store = useProductStore();
 
 const categories_store = useCategoriesStore()
+
+const base_url = process.env.VUE_APP_API_BASE_URL
 
 let description_counter = ref(null)
 

@@ -12,7 +12,7 @@
     
     <template v-for = "item in (order_items).filter((order_item) => order_item.order_id === order.order_id).slice(0, 2)" :key = "item.name">
     <div id = "image_quantity">
-    <img :src = "'http://localhost:8081/images/'+item.main_image" :alt="item.name"> 
+    <img :src="`${base_url}/images/${item.main_image}`" :alt="item.name"> 
     {{item.product_name}} x {{item.quantity}}
     </div>
     </template>
@@ -91,6 +91,8 @@ import { computed, reactive, toRefs, ref} from 'vue'
 import { useOrdersStore } from '@/stores/orders'
 
 import { useInteractiveStore } from '@/stores/interactive'
+
+const base_url = process.env.VUE_APP_API_BASE_URL
 
 const interactive_store = useInteractiveStore()
 

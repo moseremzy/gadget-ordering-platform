@@ -61,7 +61,7 @@
       <template v-for = "item in order_items" :key = "item.name">
       <div class="menu-item">
         <div class="item-image">
-          <img :src = "'http://localhost:8081/images/'+item.main_image" :alt="item.name">
+          <img :src="`${base_url}/images/${item.main_image}`" :alt="item.name">
         </div>
         <div class="item-details">
           <h3 class="item-name">{{item.product_name}} x {{item.quantity}}</h3>
@@ -167,6 +167,7 @@ const interactive_store = useInteractiveStore()
 
 const admin_store = useAdminStore()
 
+const base_url = process.env.VUE_APP_API_BASE_URL
 
 if (!admin_store.isAuthenticated) { //if user no get session redirect to login
 

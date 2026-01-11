@@ -1,5 +1,7 @@
 const multer = require("multer");
 const path = require("path");
+const axios = require("axios");
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_API_KEY;
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -104,6 +106,47 @@ module.exports = class MIDDLEWARES {
       return message;
 
     }
+
+
+    static async refundPayment(req, res, reference) {
+      
+      const payload = {
+      
+        transaction: reference
+      
+      };
+
+      try {
+        
+      const response = await axios.post(
+        "https://api.paystack.co/refund",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+      if (response.data.status == false) {
+        return res.status(500).json({
+          success: false,
+          message: "could not process refund. please try again",
+        }); 
+      }
+    
+      return response.data;
+
+      } catch (error) {
+
+        return res.status(500).json({
+          success: false,
+          message: "could not process refund. please try again",
+        }); 
+    }
+
+  }
               
 }
     

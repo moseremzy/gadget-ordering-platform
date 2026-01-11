@@ -19,20 +19,14 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(router);
 app.use('/images', express.static(path.join(__dirname, "../../product-images")));
-
-
-// app.use(express.static(path.join(__dirname, "/dist")));
-
-
-
  
  
-// if (process.env.NODE_ENV === 'production') {
-//     app.use(express.static(__dirname+"/dist/"))
-//     app.get("*", (req, res) => {
-//         res.sendFile(__dirname+"/dist/index.html")
-//     })
-// }
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(__dirname+"/dist/"))
+    app.get("*", (req, res) => {
+        res.sendFile(__dirname+"/dist/index.html")
+    })
+}
 
 
 

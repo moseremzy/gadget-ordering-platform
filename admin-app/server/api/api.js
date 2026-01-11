@@ -9,11 +9,11 @@ const db = require("../middlewares/database")
 const MAILS = require("../middlewares/mails.js");
 const HELPERS = require("../middlewares/helpers")
 
+
 module.exports = class API {
 
 //POST REQUESTS
 
-confirm_order
 
 //register users
 static async register(req, res) {
@@ -186,8 +186,6 @@ static async register(req, res) {
   }
       
   } catch (error) {
-    
-    console.log(error.message)
 
     return res.status(500).json({
       success: false,
@@ -474,7 +472,11 @@ static async reset_password (req, res) {
 //cancel order
 static async cancel_order (req, res) {
 
-  let { description, order_id, user_id } = req.body
+  let { description, order_id, user_id } = req.body;
+
+  let status_query;
+
+  let status_value;
 
   try {
 
@@ -507,14 +509,56 @@ static async cancel_order (req, res) {
 
     }
 
-   const status_query = `UPDATE orders 
+    const order_query = `SELECT * FROM orders WHERE order_id= ? 
+    AND payment_method= ? 
+    AND payment_status= ? 
+    AND refund_status!= ?` //first of all find the user
+
+    const order = await new Promise( (resolve, reject) => {
+  
+      db.query(order_query, [order_id, 'online payment', 'success', 'refunded'], (err, result) => {
+  
+        if (err) {
+  
+          reject(err)
+        
+        } else {
+  
+          resolve(result)
+  
+        }
+  
+      })
+  
+    }) //Now find the order mainly to extract he reference
+
+
+    if (order[0]) { //if the order dey and na online payment, payment status na success and dem neva refund before
+
+     await HELPERS.refundPayment(req, res, order[0].payment_reference)
+      
+     status_query = `UPDATE orders 
+      SET order_status= ?,
+      description= ?,
+      refund_status= ?
+      WHERE order_id= ?`
+
+     status_value = ['cancelled', description, 'pending', order_id]
+     
+    } else {
+
+     status_query = `UPDATE orders 
       SET order_status= ?,
       description= ?
       WHERE order_id= ?`
 
+     status_value = ['cancelled', description, order_id]
+
+    }
+
       await new Promise( (resolve, reject) => { //update order
 
-        db.query(status_query, ['cancelled', description, order_id], (err, result) => {
+        db.query(status_query, status_value, (err, result) => {
 
           if (err) {
 

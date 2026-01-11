@@ -3,8 +3,6 @@ require("dotenv").config();
 const express = require("express");
 const port = process.env.PORT || 9000;
 const router = require("./routes/router.js");
-const cronroutes = require("./routes/cronroutes.js");
-const cron = require('./middlewares/cron.js');
 const cors = require("cors");
 const path = require("path");
 const app = express();
@@ -23,7 +21,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // ✅ Routes
 app.use(router);
-app.use("/", cronroutes);
 
 // ✅ Static files
 app.use('/images', express.static(path.join(__dirname, "../../product-images")));

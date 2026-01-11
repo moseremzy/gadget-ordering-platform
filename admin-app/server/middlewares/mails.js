@@ -170,13 +170,13 @@ var transporter = nodemailer.createTransport(smtpConfig);
 //send order cancellation email to user
 static async send_user_cancellation_email(req, res, useremail, fullname, order_id, reason) {
     
-    const smtpConfig = {
-        host: 'lavexacore.com',
-        port: 465,
-        secure: true, // use SSL
+    var smtpConfig = {
+        host: 'mail.xnfthub.com', // Zoho SMTP host
+        port: 465, // SSL port
+        secure: true, // Use SSL
         auth: {
-            user: 'support@lavexacore.com',
-            pass: 'Lavexacore1.'
+            user: 'support@xnfthub.com', // Replace with your Zoho email address
+            pass: 'Xnfthub1..' // Use your Zoho app-specific password (if you have 2FA enabled)
         }
     };
 
@@ -195,7 +195,7 @@ static async send_user_cancellation_email(req, res, useremail, fullname, order_i
   transporter.use('compile', hbs(handlebarOptions));
 
   const mailOptions = {
-      from: '"Tech By Cas" <support@lavexacore.com>', // sender address
+      from: '"Tech By Cas" <support@xnfthub.com>', // sender address
       to: useremail,
       subject: 'Order Cancellation',
       attachments: [{

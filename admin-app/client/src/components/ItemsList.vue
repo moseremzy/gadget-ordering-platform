@@ -30,7 +30,7 @@
         <Availability class = "right-badge" :product = item />
         <Status class = "left-badge" :product = item />
         <div class="item-image">
-          <img :src = "'http://localhost:8081/images/'+item.main_image" :alt="item.name" />
+          <img :src="`${base_url}/images/${item.main_image}`" :alt="item.name" />
         </div>
         <div class="item-details">
           <h3 class="item-name">{{ item.name }}</h3>
@@ -75,6 +75,8 @@ import Pagination from './Pagination.vue';  // Import the Pagination component
 import { useInteractiveStore } from '@/stores/interactive'
 
 import { useCategoriesStore } from '@/stores/categories'
+
+const base_url = process.env.VUE_APP_API_BASE_URL
 
 const route = useRoute()
 

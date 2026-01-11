@@ -12,6 +12,7 @@ const HELPERS = require("../middlewares/helpers.js");
 const MAILS = require("../middlewares/mails.js");
 const { count } = require('console');
 const PAYSTACK_KEY = process.env.PAYSTACK_API_KEY
+const base_url = process.env.BASE_URL
 
 
 module.exports = class API {
@@ -264,9 +265,9 @@ static async ResendConfirmationMail (req, res) {
  //send contact us email
 static async contact_us (req, res) {
 
-  const {email, firstname, lastname, phone, message} = req.body;
+  const {email, fullname, phone, message} = req.body;
 
-  await MAILS.contact_us_email(req, res, email, firstname, lastname, phone, message)    
+  await MAILS.contact_us_email(req, res, email, fullname, phone, message)    
   
 }
 
@@ -326,7 +327,7 @@ static async send_reset_pass_email (req, res) {
 
       })
 
-   await MAILS.send_reset_pass_email(req, res, user[0].email, token, user[0].firstname)
+   await MAILS.send_reset_pass_email(req, res, user[0].email, token, user[0].fullname)
    
    } else { //if email no dey, just still tell dem say i don send am, make dem for rest
 
@@ -545,7 +546,7 @@ static async submit_order(req, res) {
             name: data.customer_name,
             phone: data.phone,
         },
-        callback_url: "http://localhost:8080/account/payment-verification",
+        callback_url: `${base_url}/account/payment-verification`,
     };
 
     try {
@@ -598,7 +599,7 @@ static async submit_order(req, res) {
 static async verify_payment(req, res) {
 
   const { reference } = req.body;
-
+  
   if (!reference) {
     return res.status(400).json({success: false, message: 'Payment reference is required' });
   }
@@ -700,8 +701,6 @@ static async verify_payment(req, res) {
 
   } catch (error) {
 
-    console.log(error)
-
     return res.status(500).json({success: false, message: 'Payment verification error' });
   
   }
@@ -722,10 +721,11 @@ static async paystack_webhook(req, res) {
       return res.status(400).send("Invalid signature");
     }
 
-    const event = req.body;
-
-    const { reference, amount } = event.data;
-
+    const {reference, amount} = req.body.data;
+    
+    const { event } = req.body;
+    
+    
     // 1. confirm reference
     const order = await new Promise((resolve, reject) => {
       db.query(
@@ -742,16 +742,29 @@ static async paystack_webhook(req, res) {
       return res.status(400).send("Amount mismatch detected");
     }
 
-    const updateOrderStatus = (status) =>
-      new Promise((resolve, reject) => {
+    async function updateOrderStatus(status) {
+      await new Promise((resolve, reject) => {
         db.query(
           `UPDATE orders SET payment_status=? WHERE payment_reference=?`,
           [status, reference],
           (err, result) => (err ? reject(err) : resolve(result))
         );
       });
+    }
 
-    switch (event.event) {
+
+    async function updateRefundStatus(payment_status, refund_status) {
+      await new Promise((resolve, reject) => {
+        db.query(
+          `UPDATE orders SET payment_status = ?, refund_status = ? WHERE payment_reference = ?`,
+          [payment_status, refund_status, reference],
+          (err, result) => (err ? reject(err) : resolve(result))
+        );
+      });
+    }
+      
+
+    switch (event) {
       
       case "charge.success":
       
@@ -764,10 +777,22 @@ static async paystack_webhook(req, res) {
       await updateOrderStatus("failed");
         
        break;
+
+      case "refund.processed":
+      
+      await updateRefundStatus("success", "refunded");
+    
+      break;
+
+     case "refund.failed":
+    
+     await updateRefundStatus("success", "failed");
+    
+     break;
       
       default:
         
-      console.log("Unhandled event type:", event.event);
+      console.log("Unhandled event type:", event);
     
     }
   
@@ -794,7 +819,6 @@ static async cron_payment_verification() {
         SELECT *
         FROM orders
         WHERE payment_status = 'pending'
-          AND created_at <= NOW() - INTERVAL 10 MINUTE
           AND payment_method = 'online payment'
           AND verification_attempts < 3
         `,

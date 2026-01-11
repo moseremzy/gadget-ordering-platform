@@ -22,7 +22,7 @@
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
     .email-header {
-      background-color: #ff5722;
+      background-color: #00aeff;
       padding: 20px;
       text-align: center;
     }
@@ -45,7 +45,7 @@
     }
     .email-body a {
       display: inline-block;
-      background-color: #ff5722;
+      background-color: #00aeff;
       color: #ffffff;
       text-decoration: none;
       padding: 10px 20px;
@@ -54,14 +54,14 @@
       margin-top: 10px;
     }
     .email-body a:hover {
-      background-color: #e64a19;
+      background-color: #00aeff;
     }
     .email-footer {
-      background-color: #f1f1f1;
+      background-color: #00aeff;
       text-align: center;
       padding: 15px;
       font-size: 12px;
-      color: #666666;
+      color: white;
     }
     /* Responsive Styles */
     @media only screen and (max-width: 569px) {
@@ -83,21 +83,21 @@
 
     <!-- Body -->
     <div class="email-body">
-      <h1>Hello <b style="text-transform: capitalize;">{{firstname}},</b></h1>
-      <p>Your recent order with ID <b>{{order_id}}</b> was cancelled.</p>
+      <h1>Hello <b style="text-transform: capitalize;">{{fullname}},</b></h1>
+      <p>Your recent order with ID <b>#{{order_id}}</b> was cancelled.</p>
 
       <!-- Cancellation Reason -->
       <p><strong>Reason for Cancellation:</strong> <i>{{cancellation_reason}}</i></p>
 
       <p><strong>Refund Information:</strong></p>
       <p>If you made a payment for this order, please rest assured that your refund will be processed promptly. The refunded amount will be credited back to your original payment method within 3 business days. You will receive a notification once the refund is complete.</p>
-      <p>If you have any further questions or need assistance, please don't hesitate to reach out to our support team at <a href="mailto:support@kelvinsspice.com">support@kelvinsspice.com</a></p>
-      <p>Thank you for choosing Taste It. We hope to serve you again soon.</p>
+      <p>If you have any further questions or need assistance, please don't hesitate to reach out to our support team at <a href="mailto:support@techbycas.com">support@techbycas.com</a></p>
+      <p>Thank you for choosing Tech By Cas. We hope to serve you again soon.</p>
     </div>
 
     <!-- Footer -->
     <div class="email-footer">
-      &copy; Taste It. All Rights Reserved.
+      &copy; Tech By Cas. All Rights Reserved.
     </div>
   </div>
 </body>

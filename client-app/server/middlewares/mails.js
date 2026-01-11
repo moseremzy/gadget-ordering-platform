@@ -9,12 +9,12 @@ module.exports = class MIDDLEWARES {
   static async SendConfirmationMail(req, res, useremail, confirmationCode, fullname) {
 
     var smtpConfig = {
-        host: 'smtppro.zoho.com',
+        host: 'mail.techbycas.com',
         port:  465,
         secure: true,
         auth:{
-            user: 'support@Bravexacore.com',
-            pass: 'Bravexacore1.'
+            user: 'support@techbycas.com',
+            pass: 'Techbycas1.'
         }
     };
 
@@ -33,7 +33,7 @@ module.exports = class MIDDLEWARES {
     transporter.use('compile', hbs(handlebarOptions));
 
     const mailOptions = {
-        from: '"Tech By Cas" <support@bravexacore.com>', // sender address
+        from: '"Tech By Cas" <support@techbycas.com>', // sender address
         to: useremail,
         subject: 'Confirmation Email',
         attachments: [{
@@ -87,15 +87,15 @@ module.exports = class MIDDLEWARES {
 
 
 //Contact us Email
-static async contact_us_email(req, res, email, firstname, lastname, phone, message) {
+static async contact_us_email(req, res, email, fullname, phone, message) {
 
-    const smtpConfig = {
-        host: 'bravexacore.com',
-        port: 465,
-        secure: true, // use SSL
+    var smtpConfig = {
+        host: 'mail.xnfthub.com', // Zoho SMTP host
+        port: 465, // SSL port
+        secure: true, // Use SSL
         auth: {
-            user: 'support@bravexacore.com',
-            pass: 'Bravexacore1.'
+            user: 'support@xnfthub.com', // Replace with your Zoho email address
+            pass: 'Xnfthub1..' // Use your Zoho app-specific password (if you have 2FA enabled)
         }
     };
 
@@ -114,8 +114,8 @@ var transporter = nodemailer.createTransport(smtpConfig);
       transporter.use('compile', hbs(handlebarOptions));
       
       const mailOptions = {
-        from: '"Tech By Cas" <support@bravexacore.com>', // sender address
-        to: "agbaojemoses@gmail.com", //Tech By Cas email
+        from: '"Tech By Cas" <support@xnfthub.com>', // sender address
+        to: "techbycas@gmail.com", //Tech By Cas email
         subject: 'User Complaint',
         attachments: [{
             filename: 'logo.png',
@@ -125,8 +125,7 @@ var transporter = nodemailer.createTransport(smtpConfig);
         template: 'contactus_email', // the name of the template file i.e email.handlebars
         context:{
             email: email,
-            firstname: firstname,
-            lastname: lastname,
+            fullname: fullname,
             phone: phone,
             message: message,
         }
@@ -171,15 +170,15 @@ var transporter = nodemailer.createTransport(smtpConfig);
  
 
 //Password Reset  Email
-static async send_reset_pass_email(req, res, useremail, token, firstname) {
+static async send_reset_pass_email(req, res, useremail, token, fullname) {
 
-    const smtpConfig = {
-        host: 'lavexacore.com',
-        port: 465,
-        secure: true, // use SSL
+    var smtpConfig = {
+        host: 'mail.xnfthub.com', // Zoho SMTP host
+        port: 465, // SSL port
+        secure: true, // Use SSL
         auth: {
-            user: 'support@lavexacore.com',
-            pass: 'Lavexacore1.'
+            user: 'support@xnfthub.com', // Replace with your Zoho email address
+            pass: 'Xnfthub1..' // Use your Zoho app-specific password (if you have 2FA enabled)
         }
     };
 
@@ -199,7 +198,7 @@ var transporter = nodemailer.createTransport(smtpConfig);
       transporter.use('compile', hbs(handlebarOptions));
       
       var mailOptions = {
-        from: '"Tech By Cas" <support@lavexacore.com>', // sender address
+        from: '"Tech By Cas" <support@xnfthub.com>', // sender address
         to: useremail,
         subject: 'Reset Password',
         attachments: [{
@@ -210,7 +209,7 @@ var transporter = nodemailer.createTransport(smtpConfig);
         template: 'password_reset_mail', // the name of the template file i.e email.handlebars
         context:{
             token: token,
-            firstname: firstname
+            fullname: fullname
         }
       };      
         // Wrap sendMail in a Promise

@@ -1,7 +1,7 @@
 <template>
   <div>
 
-    <button id="reject" @click="reject_order(order)">Cancel Oer</button> 
+    <button id="reject" @click="reject_order(order)">Cancel Order</button> 
   
   </div>
 </template>

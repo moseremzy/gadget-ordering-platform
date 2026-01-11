@@ -113,6 +113,8 @@ async function submit_cancellation(e) {
         await orders_store.fetch_orders()
        
        } catch (error) {
+
+        console.log(error)
         
         interactive_store.toggle_cancel_order_modal(false, null) //hide the cancel modal
 
