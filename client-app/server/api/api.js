@@ -1093,6 +1093,7 @@ static async fetch_products (req, res) {
       product.stock_quantity,
       product.price,
       product.main_image,
+      product.main_video,
       category.name AS category_name
     FROM products AS product
     JOIN categories AS category

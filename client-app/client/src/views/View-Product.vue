@@ -18,11 +18,28 @@
 
        <div class = "grid">
 
-       <div class = "image"> 
+       <div class="media">
 
-        <img :src="`${base_url}/images/${product[0].main_image}`" :alt="product[0].name">
+        <!-- Main Image -->
+        <div class="image">
+          <img
+            :src="product[0].main_image"
+            :alt="product[0].name"
+          />
+        </div>
+
+        <!-- Product Video (only if exists) -->
+        <div class="video" v-if="product[0].main_video">
+          <video
+            :src="product[0].main_video"
+            controls
+            preload="metadata"
+            playsinline
+          ></video>
+        </div>
 
        </div>
+
 
        <div class = "info">
 
@@ -289,22 +306,42 @@ div.home_container h1{
     margin-top: 30px;
 }
 
-div.image {
-      border: 1px solid rgb(77, 77, 77);
-      padding: 28px;
-      background-color: rgb(43, 42, 42);
-      margin: auto;
-      border-radius: 15px;
-      display: block;
-  }
+.media {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
 
-  div.image img{
-      display: block;
-      width: 100%;
-      height: 400px;
-      object-fit: contain;
-      margin: auto;
-  }
+/* Image */
+.image {
+  border: 1px solid rgb(77, 77, 77);
+  padding: 20px;
+  background-color: rgb(43, 42, 42);
+  border-radius: 15px;
+}
+
+.image img {
+  width: 100%;
+  height: 400px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Video */
+.video {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: #000;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.video video {
+  width: 100%;
+  max-height: 360px;
+  object-fit: cover;
+  display: block;
+  background: #000;
+}
 
   div.info {
       color: var(--primary-white);
