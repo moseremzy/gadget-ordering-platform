@@ -2,21 +2,46 @@ const multer = require("multer");
 const path = require("path");
 const axios = require("axios");
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_API_KEY;
-const upload = require('./upload')
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../../../product-images'));
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname) || ".jpg"; // fallback
+    cb(null, Date.now() + ext);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024
+  },
+  fileFilter(req, file, cb) {
+    if (
+      file.mimetype === "image/jpeg" ||
+      file.mimetype === "image/png" ||
+      file.mimetype === "image/jpg" ||
+      file.mimetype === "image/webp"
+    ) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed"), false);
+    }
+  }
+});
 
 
 module.exports = class MIDDLEWARES {
 
     static handleUpload(req, res, next) {
-        upload.fields([
-          { name: 'image', maxCount: 1 },
-          { name: 'video', maxCount: 1 }
-        ])(req, res, function (err) {
+        upload.single("main_image")(req, res, function (err) {
           if (err) {
             if (err.code === "LIMIT_FILE_SIZE") {
               return res.status(400).json({
                 success: false,
-                message: "File is too large. Max 5MB for images, 50MB for videos"
+                message: "Image must not be larger than 5MB"
               });
             }
       
@@ -86,7 +111,6 @@ module.exports = class MIDDLEWARES {
     static async refundPayment(reference) {
       
       const payload = { transaction: reference };
-      
     
       try {
        
@@ -115,29 +139,6 @@ module.exports = class MIDDLEWARES {
       
       }
     
-    }
-
-
-    static getPublicIdFromUrl(url) {
-      // Remove the domain + upload/ part
-      // Example: https://res.cloudinary.com/dkebpp1vm/image/upload/v1768382594/products/images/1768382594680-FB_IMG_15504165582320214.jpg
-      // Returns: products/images/1768382594680-FB_IMG_15504165582320214
-    
-      // Split after /upload/
-      const parts = url.split("/upload/");
-      
-      if (parts.length < 2) return null; // invalid URL
-    
-      let publicIdWithVersionAndExt = parts[1];
-    
-      // Remove version prefix like v1768382594/
-      publicIdWithVersionAndExt = publicIdWithVersionAndExt.replace(/^v\d+\//, "");
-    
-      // Remove file extension
-      const publicId = publicIdWithVersionAndExt.replace(/\.[^/.]+$/, "");
-    
-      return publicId;
-      
     }
               
 }

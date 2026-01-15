@@ -50,6 +50,10 @@ export default class API {
     return await api.post("/api/update_photo", info)
   }
 
+   //update item video
+  static async update_video(info) {
+    return await api.post("/api/update_video", info)
+  }
   
   //cancel order
   static async cancel_order(info) {
@@ -59,6 +63,11 @@ export default class API {
   //confirm order
   static async confirm_order(info) {
     return await api.post("/api/confirm_order", info)
+  }
+
+  //retry initiating refund for user order
+  static async retry_refund(info) {
+    return await api.post("/api/retry_refund", info)
   }
 
   // GET
@@ -120,6 +129,11 @@ export default class API {
 
   static async update_admin_pass(info) {
     return api.patch("/api/update_admin_pass", info).then(res => res.data);
+  }
+
+  //DELETE
+  static async delete_video(info) {
+    return api.delete("/api/delete_video", info).then(res => res.data)
   }
 
 }

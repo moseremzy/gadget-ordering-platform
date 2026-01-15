@@ -51,8 +51,6 @@ router.post("/api/upload_items", check_admin_session, HELPERS.handleUpload, API.
   
 router.post("/api/update_photo", check_admin_session, HELPERS.handleUpload, API.update_photo);
 
-router.post("/api/update_video", check_admin_session, HELPERS.handleUpload, API.update_video);
-
 router.post("/api/send_reset_pass_email", API.send_reset_pass_email);
 
 router.post("/api/reset_password", API.reset_password);
@@ -74,7 +72,5 @@ router.patch("/api/update_admin_pass", check_admin_session, API.update_admin_pas
 
 
 //DELETE REQUEST
-
-router.delete("/api/delete_video", check_admin_session, API.delete_video)
 
 module.exports = router

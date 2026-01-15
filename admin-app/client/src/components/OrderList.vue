@@ -12,7 +12,7 @@
     
     <template v-for = "item in (order_items).filter((order_item) => order_item.order_id === order.order_id).slice(0, 2)" :key = "item.name">
     <div id = "image_quantity">
-    <img :src="`${base_url}/images/${item.main_image}`" :alt="item.name"> 
+    <img :src="`${item.main_image}`" :alt="item.name"> 
     {{item.product_name}} x {{item.quantity}}
     </div>
     </template>

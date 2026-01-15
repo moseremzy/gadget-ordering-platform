@@ -82,6 +82,13 @@
         <p class="err">{{item_info_error.image_err}}</p>
       </div>
 
+      <!-- Item Video Upload -->
+      <div class="form-group grid-full">
+        <label for="item-video" class="form-label">Upload Item Video (optional)</label>
+        <input type="file" id="item-video" class="form-input" ref="itemVideo" accept="video/*" />
+        <p class="err">{{item_info_error.video_err}}</p>
+      </div>
+
       <!-- Submit Button -->
       <div class="form-group grid-full">
         <button type="submit" @click.prevent = "UploadItem" class="submit-button">Submit</button>
@@ -123,6 +130,8 @@ let description_counter = ref(null)
 
 let itemImage = ref(null)
 
+let itemVideo = ref(null);
+
 let item_info = reactive({
     name: "",
     price: "",
@@ -139,8 +148,10 @@ let item_info_error = reactive({
     category_err: "",
     condition_err: "",
     quantity_err: "",
-    image_err: ""
-})
+    image_err: "",
+    video_err: ""   // 👈 add this
+});
+
 
 
 const categories = computed(() => {
@@ -290,50 +301,63 @@ async function UploadItem(e) {
             return;
         }
 
-        // Get the selected file
+        /* Image Validation */
         const fileInput = itemImage.value; //check if file was selected
-        if (!fileInput.files[0]) {
+        
+        let imageFile = fileInput.files[0];
+
+        if (!imageFile) {
             interactive_store.backend_message = "Please upload an image";
             interactive_store.display_error_alert_box();
             return;
         } 
 
         // Ensures only images are uploaded
-        if (fileInput.files[0].type != "image/png" && fileInput.files[0].type != "image/jpeg" && fileInput.files[0].type != "image/jpg") {
+        if (imageFile.type != "image/png" && imageFile.type != "image/jpeg" && imageFile.type != "image/jpg") {
             interactive_store.backend_message = "Invalid file";
             interactive_store.display_error_alert_box();
             return
         }
 
         
-        // allow slightly larger originals 10mb
-        if (fileInput.files[0].size > 10 * 1024 * 1024) {
+        // allow slightly larger originals 5mb
+        if (imageFile.size > 5 * 1024 * 1024) {
           interactive_store.backend_message = "Image too large";
           interactive_store.display_error_alert_box();
           return;
         }
 
-        let compressedImage;
+         /* Image Validation */
 
-        try {
 
-          compressedImage = await MIDDLEWARES.resizeImage(fileInput.files[0]);
+        /*  Video Validation (its optional) */
+  
+       // get selected video
+        const videoInput = itemVideo.value;
         
-        } catch {
-          
-          interactive_store.backend_message = "Image compression failed";
-          
-          interactive_store.display_error_alert_box();
-          
-          return;
-        
-        }
+        let videoFile = null;
 
-        if (compressedImage.size > 5 * 1024 * 1024) {
-          interactive_store.backend_message = "Compressed image still too large";
-          interactive_store.display_error_alert_box();
-          return;
-        }
+        if (videoInput.files[0]) {
+
+            videoFile = videoInput.files[0];
+
+            // Ensure file is a video
+            if (!videoFile.type.startsWith("video/")) {
+                interactive_store.backend_message = "Invalid video file";
+                interactive_store.display_error_alert_box();
+                return;
+            }
+
+            // Limit video size (e.g., 30MB)
+            if (videoFile.size > 30 * 1024 * 1024) {
+                interactive_store.backend_message = "Video too large (max 30MB)";
+                interactive_store.display_error_alert_box();
+                return;
+              }
+          }
+
+        /* Video Validation */
+
 
         // Prepare FormData
         const formData = new FormData();
@@ -343,7 +367,10 @@ async function UploadItem(e) {
         formData.append("product_condition", item_info.condition);
         formData.append("stock_quantity", item_info.quantity);
         formData.append("category_id", item_info.category_id);
-        formData.append("main_image", compressedImage, fileInput.files[0].name) // 👈 THIS FIXES EVERYTHING);
+        formData.append("image", imageFile, imageFile.name) // 👈 THIS FIXES EVERYTHING);
+        if (videoFile) { //only append if admin select am
+            formData.append("video", videoFile, videoFile.name);
+        }
 
         interactive_store.toggle_loading_overlay(true);
 
@@ -381,7 +408,10 @@ function resetForm() {
     item_info.category_id = "";
     if (itemImage.value) {
     itemImage.value.value = ""; // ✅ THIS is what clears the file input
-  }
+    }
+    if (itemVideo.value) {
+    itemVideo.value.value = ""; // clears video input
+    }
 }
 
 

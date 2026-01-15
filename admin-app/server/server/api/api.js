@@ -8,7 +8,6 @@ const { v4: uuidv4 } = require('uuid');
 const db = require("../middlewares/database")
 const MAILS = require("../middlewares/mails.js");
 const HELPERS = require("../middlewares/helpers")
-const cloudinary = require("../middlewares/cloudinary")
 
 
 module.exports = class API {
@@ -260,11 +259,9 @@ static async upload_items(req, res) {
 
   const data = req.body;
 
-  data.name = data.name.toLowerCase();
+  data.name = data.name.toLowerCase()
 
-  data.main_image = req.files.image ? req.files.image[0].path : null;
-  
-  data.main_video = req.files.video ? req.files.video[0].path : null;
+  data.main_image = req.file ? req.file.filename : null;
 
   try {
  
@@ -303,6 +300,7 @@ static async upload_items(req, res) {
   }
 
 }
+
 
 
 
@@ -873,11 +871,9 @@ static async retry_refund (req, res) {
 
     let item_id = req.body.item_id
 
-    let current_media_url = req.body.current_media_url
+    let current_image_name = req.body.current_image_name
 
-    let current_public_id = HELPERS.getPublicIdFromUrl(current_media_url)
-
-    let main_image = req.files.image ? req.files.image[0].path : null;
+    let main_image = req.file ? req.file.filename : null;
   
     try {
  
@@ -903,12 +899,13 @@ static async retry_refund (req, res) {
 
       })
 
-   // Delete the old image from Cloudinary if public_id exists
-    if (current_public_id) {
-      
-      await cloudinary.uploader.destroy(current_public_id, { resource_type: "image" });
-    
-    }
+    const imagePath = path.resolve(__dirname, '../../../product-images/', current_image_name);
+
+    if (fs.existsSync(imagePath)) {
+
+      fs.unlinkSync(imagePath); // Delete image from folder
+
+    }  
 
     return res.status(200).json({
       success: true,
@@ -921,67 +918,6 @@ static async retry_refund (req, res) {
     return res.status(500).json({
       success: false,
       message: "Failed to update product image",
-    }); 
- 
-   }
- 
- }
-
-
-
-  //CHANGE ITEM VIDEO
-  static async update_video (req, res) {
-
-    let item_id = req.body.item_id
-
-    let current_media_url = req.body.current_media_url
-
-    let current_public_id = HELPERS.getPublicIdFromUrl(current_media_url)
-
-    let main_video = req.files.video ? req.files.video[0].path : null;
-  
-    try {
- 
-      const item_photo_query = `UPDATE products 
-      SET main_video= ?
-      WHERE product_id= ?`
-
-      await new Promise( (resolve, reject) => { //update user password token
-
-        db.query(item_photo_query, [main_video, item_id], (err, result) => {
-
-          if (err) {
-
-            reject(err)
-          
-          } else {
-
-            resolve(result)
-
-          }
-
-        })
-
-      })
-
-   // Delete the old image from Cloudinary if public_id exists
-    if (current_public_id) {
-      
-      await cloudinary.uploader.destroy(current_public_id, { resource_type: "video" });
-    
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "success",
-      main_video: main_video
-    });
-     
-   } catch (error) {
-     
-    return res.status(500).json({
-      success: false,
-      message: "Failed to update product video",
     }); 
  
    }
@@ -1222,7 +1158,6 @@ static async fetch_products (req, res) {
       product.stock_quantity,
       product.price,
       product.main_image,
-      product.main_video,
       product.status,
       product.category_id,
       category.name AS category_name
@@ -1784,70 +1719,5 @@ static async update_payment_status (req, res) {
   }
 
  }
-
- //DELETE REQUESTS
-
- //Delete Item Video
- static async delete_video (req, res) {
-
-  try {
-
-    let item_id = req.body.item_id
-
-    let current_media_url = req.body.current_media_url
-
-    if (!current_media_url) {
-      
-      return res.status(400).json({ success: false, message: "No video URL provided" })
-    
-    }
-
-    let current_public_id = HELPERS.getPublicIdFromUrl(current_media_url)
-
-    // Delete the video from Cloudinary if public_id exists
-    if (current_public_id) {
-      
-      await cloudinary.uploader.destroy(current_public_id, { resource_type: "video" });
-    
-      const item_photo_query = `UPDATE products 
-      SET main_video= ?
-      WHERE product_id= ?`
-  
-      await new Promise( (resolve, reject) => { //update user password token
-  
-        db.query(item_photo_query, [null, item_id], (err, result) => {
-  
-          if (err) {
-  
-            reject(err)
-          
-          } else {
-  
-            resolve(result)
-  
-          }
-  
-        })
-  
-      })
-
-    }
-
-  return res.status(200).json({
-    success: true,
-    message: "success",
-  });
-   
- } catch (error) {
- 
-  return res.status(500).json({
-    success: false,
-    message: "Failed to delete product video",
-  }); 
-
- }
-
-}
-
 
 }

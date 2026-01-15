@@ -15,18 +15,33 @@
     <HEADER page_name = "edit-item"/> <!--header--> 
 
     <h1>Edit {{item_info.name}}</h1>
-
     <div class="add-item-form-container">
     <Status class = "left-badge" :product = item_info />
     <Availability class = "right-badge" :product = item_info />
     <!-- <h2 class="form-title"><slot name="form-title"></slot></h2> -->
-    <form enctype = "multipart/form-data" method = "post" action = "/update_photo">
-    <div class = "profile">
-        <!-- <small style="font-size: 11px; color: gray; margin-bottom: 20px; display: block;">Note: images larger than 3mb won't display</small> -->
-        <img :src="`${base_url}/images/${item_info.main_image}`" id = "profile_photo">
-                <label for = "file"> <font-awesome-icon style = "font-size: 14px;"  class="fa-solid fa-camera" icon="fa-solid fa-camera"/> Change Photo
-                <input type = "file" @change = "updatePhoto" id = "file" name = "image" ref = "itemImage" accept="image/*"></label>
+      <form enctype = "multipart/form-data" method = "post" action = "/update_photo">
+      <div class = "profile">
+        <!-- Image -->
+        <div>
+        <img :src="item_info.main_image" class="media">
+        <label for="imageFile">
+          <font-awesome-icon style="font-size: 14px;" icon="fa-solid fa-camera"/> Change Photo
+          <input type="file" @change="updateMedia('image')" id="imageFile" ref="imageInput" accept="image/*">
+        </label>
         </div>
+
+        
+      <!-- Video -->
+      <div>
+      <video v-if="item_info.main_video" :src="item_info.main_video" controls class = "media"></video>
+      <label for="videoFile">
+        <font-awesome-icon style="font-size: 14px;" icon="fa-solid fa-video"/> {{ item_info.main_video ? 'Change Video' : 'Add Video' }}
+        <input type="file" @change="updateMedia('video')" id="videoFile" ref="videoInput" accept="video/*">
+      </label>
+      <!-- Delete Video -->
+      <button v-if="item_info.main_video" @click.prevent = "deleteVideo(item_info.product_id)" class="delete-btn"><font-awesome-icon style="font-size: 14px;" icon="fa-solid fa-trash"/></button>
+      </div>
+    </div>
     </form>
     <form class="add-item-form grid-form">
       <!-- Item Name -->
@@ -150,6 +165,10 @@ const base_url = process.env.VUE_APP_API_BASE_URL
 let description_counter = ref(null)
 
 let itemImage = ref("")
+
+let imageInput = ref(null)
+
+let videoInput = ref(null)
 
 const item_id = route.params.item_id
 
@@ -358,86 +377,104 @@ function descriptionvalidated() {
     }
 }
 
+
+
+async function updateMedia(type) {
+  const fileInput = type === "image" ? imageInput.value : videoInput.value
+  const file = fileInput.files[0]
+
+  if (!file) {
+    interactive_store.backend_message = `Please upload a ${type}`
+    interactive_store.display_error_alert_box()
+    return
+  }
+
+  // Validate file type
+  const allowedImageTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"]
+  const allowedVideoTypes = ["video/mp4", "video/quicktime", "video/webm"]
+
+  if (type === "image" && !allowedImageTypes.includes(file.type)) {
+    interactive_store.backend_message = "Invalid image file"
+    interactive_store.display_error_alert_box()
+    return
+  }
+  if (type === "video" && !allowedVideoTypes.includes(file.type)) {
+    interactive_store.backend_message = "Invalid video file"
+    interactive_store.display_error_alert_box()
+    return
+  }
+
+  // Limit file sizes (image not more than 5mb, video not more than 30mb)
+  if ((type === "image" && file.size > 5 * 1024 * 1024) || (type === "video" && file.size > 30 * 1024 * 1024)) {
+    interactive_store.backend_message = type === "image" ? "Image can't be larger than 5MB" : "Video can't be larger than 30MB"
+    interactive_store.display_error_alert_box()
+    return
+  }
+
+  const formData = new FormData()
+  formData.append("item_id", item_info.product_id)
+  formData.append("current_media_url", type === "image" ? item_info.main_image : item_info.main_video)
+  formData.append(type, file, file.name)
+
+  interactive_store.toggle_loading_overlay(true)
+
+  try {
+    const response = type === "image" 
+      ? await API.update_photo(formData) 
+      : await API.update_video(formData) // create a separate API endpoint for video
+
+    if (type === "image") item_info.main_image = response.data.main_image
+    else item_info.main_video = response.data.main_video
+
+    interactive_store.backend_message = `${type.charAt(0).toUpperCase() + type.slice(1)} updated successfully`
+    
+    interactive_store.display_success_alert_box()
+  
+  } catch (error) {
+    
+    console.log(error)
+  
+  }
+
+  interactive_store.toggle_loading_overlay(false)
+}
+
+// Delete video
+async function deleteVideo(item_id) {
+
+  if (!item_info.main_video) return
+
+  interactive_store.toggle_loading_overlay(true)
+  
+  try {
+    
+    await API.delete_video({ data: {
+      
+      current_media_url: item_info.main_video,
+
+      item_id: item_id
+    
+      }
+    
+    })
+    
+    item_info.main_video = null
+    
+    interactive_store.backend_message = "Video deleted successfully"
+    
+    interactive_store.display_success_alert_box()
+  
+  } catch (error) {
+    
+    console.log(error) 
+
+  }
+
+  interactive_store.toggle_loading_overlay(false)
+
+}
+
  
-
-async function updatePhoto() {
-
-    // Get the selected file
-        const fileInput = itemImage.value; //check if file was selected
-        if (!fileInput.files[0]) {
-            interactive_store.backend_message = "Please upload an image";
-            interactive_store.display_error_alert_box();
-            return;
-        } 
-
-        // Ensures only images are uploaded
-        if (fileInput.files[0].type != "image/png" && fileInput.files[0].type != "image/jpeg" && fileInput.files[0].type != "image/jpg") {
-            interactive_store.backend_message = "Invalid file";
-            interactive_store.display_error_alert_box();
-            return
-        }
-
-        
-        // allow slightly larger originals 10mb
-        if (fileInput.files[0].size > 10 * 1024 * 1024) {
-          interactive_store.backend_message = "Image can't be larger 10mb";
-          interactive_store.display_error_alert_box();
-          return;
-        }
-
-        let compressedImage;
-
-        try {
-
-          compressedImage = await MIDDLEWARES.resizeImage(fileInput.files[0]);
-        
-        } catch {
-          
-          interactive_store.backend_message = "Image compression failed";
-          
-          interactive_store.display_error_alert_box();
-          
-          return;
-        
-        }
-
-        if (compressedImage.size > 5 * 1024 * 1024) {
-          interactive_store.backend_message = "Compressed image still too large";
-          interactive_store.display_error_alert_box();
-          return;
-        }
-
-
-        const formData = new FormData();
-        formData.append("current_image_name", item_info.main_image)
-        formData.append("item_id", item_info.product_id)
-        formData.append("main_image", compressedImage, fileInput.files[0].name) // 👈 THIS FIXES EVERYTHING);
-
-        interactive_store.toggle_loading_overlay(true);
-
-        try {
-            
-              const response = await API.update_photo(formData); // Ensure API.upload_items sends FormData properly
-
-              await products_store.fetch_products() //refetch items to update items
-
-              item_info.main_image = response.data.main_image
-
-              interactive_store.backend_message = "Photo Changed Succesfully";
-
-              interactive_store.display_success_alert_box();
-            
-        } catch (error) {
-            
-          console.log(error)
-        
-        }  
-
-        interactive_store.toggle_loading_overlay(false);
-
-    }
-
-
 
 async function UpdateItem(e) {
  
@@ -569,6 +606,11 @@ div.profile{
   width: 100%;
   margin: 0 auto 0 auto;
   text-align: center;
+  display: flex; 
+  gap: 5px;
+  flex-wrap: wrap; 
+  align-items: center; 
+  justify-content: center;
 }
 
 div.profile label {
@@ -582,20 +624,40 @@ div.profile label {
   cursor: pointer;
 }
 
-img#profile_photo {
+.media {
   display: block;
   margin: 0 auto 0 auto;
-  border-radius: 50%;
-  width: 100px;
-  height: 100px;
+  width: 130px;
+  height: 140px;
   image-rendering: auto;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   image-rendering: -webkit-optimize-contrast; 
 }
 
-input#file {
+input[type ='file'] {
   display: none;
+}
+
+.delete-btn {
+  background: #e63946;          /* red = delete */
+  border: none;
+  color: #ffffff;
+  padding: 4px 8px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-block;
+  margin-left: 4px;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+ 
+.delete-btn:hover {
+  background: #d62828;
+}
+
+.delete-btn:active {
+  transform: scale(0.95);
 }
 
 .form-title {

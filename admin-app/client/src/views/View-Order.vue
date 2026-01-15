@@ -53,6 +53,8 @@
         <p>{{order_items[0].address}}</p>
         </div>
 
+        <REFUNDSTATUS :order = order />
+
     </div> <!-- ORDER DETAILS -->
 
     <div class = "order_items">
@@ -149,6 +151,7 @@ import CONFIRMORDERMODAL from "@/components/modals/confirm_order_modal.vue";
 import CONFIRMREJECTSTATUS from '../components/status_components/ConfirmRejectStatus.vue'
 import OVERLAY from '../components/modals/loading_overlay.vue';
 import ITEMSLIST from '../components/ItemsList.vue';
+import REFUNDSTATUS from '../components/RefundStatus.vue'
 import ORDERSTATUS from '../components/status_components/OrderStatus.vue';
 import RECEIPT from "@/components/Receipt.vue";
 import SIDEBAR from '../components/SideBar.vue';
@@ -207,10 +210,7 @@ const order = computed(() =>  {
   })
 
 })
-
-console.log(order.value)
-
-
+ 
 if (!order.value) { //if item nor dey. redirect to page not found
 
    router.push({name: "dashboard"})

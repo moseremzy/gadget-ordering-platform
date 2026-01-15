@@ -30,7 +30,7 @@
         <Availability class = "right-badge" :product = item />
         <Status class = "left-badge" :product = item />
         <div class="item-image">
-          <img :src="`${base_url}/images/${item.main_image}`" :alt="item.name" />
+          <img :src="`${item.main_image}`" :alt="item.name" />
         </div>
         <div class="item-details">
           <h3 class="item-name">{{ item.name }}</h3>

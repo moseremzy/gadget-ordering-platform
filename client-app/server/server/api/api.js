@@ -721,15 +721,10 @@ static async paystack_webhook(req, res) {
       return res.status(400).send("Invalid signature");
     }
 
-    const { amount } = req.body.data;
-    
-    const reference =
-      req.body.data?.reference ||
-      req.body.data?.transaction_reference;
-  
- 
+    const {reference, amount} = req.body.data;
     
     const { event } = req.body;
+    
     
     // 1. confirm reference
     const order = await new Promise((resolve, reject) => {
@@ -743,10 +738,9 @@ static async paystack_webhook(req, res) {
     if (!order) return res.status(404).send("Order not found");
 
     // Amount validation
-    if (event.startsWith("charge.") && amount !== order.total_amount * 100) {
+    if (amount !== order.total_amount * 100) {
       return res.status(400).send("Amount mismatch detected");
     }
-
 
     async function updateOrderStatus(status) {
       await new Promise((resolve, reject) => {
@@ -759,11 +753,11 @@ static async paystack_webhook(req, res) {
     }
 
 
-    async function updateRefundStatus(refund_status) {
+    async function updateRefundStatus(payment_status, refund_status) {
       await new Promise((resolve, reject) => {
         db.query(
-          `UPDATE orders SET refund_status = ? WHERE payment_reference = ?`,
-          [refund_status, reference],
+          `UPDATE orders SET payment_status = ?, refund_status = ? WHERE payment_reference = ?`,
+          [payment_status, refund_status, reference],
           (err, result) => (err ? reject(err) : resolve(result))
         );
       });
@@ -786,13 +780,13 @@ static async paystack_webhook(req, res) {
 
       case "refund.processed":
       
-      await updateRefundStatus("refunded");
+      await updateRefundStatus("success", "refunded");
     
       break;
 
      case "refund.failed":
     
-     await updateRefundStatus("failed");
+     await updateRefundStatus("success", "failed");
     
      break;
       
