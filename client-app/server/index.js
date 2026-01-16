@@ -22,8 +22,6 @@ app.use(express.urlencoded({ extended: true }));
 // ✅ Routes
 app.use(router);
 
-// ✅ Static files
-app.use('/images', express.static(path.join(__dirname, "../../product-images")));
 
 // Production static serving (if needed)
 if (process.env.NODE_ENV === 'production') {

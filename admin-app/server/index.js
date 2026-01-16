@@ -18,7 +18,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(router);
-app.use('/images', express.static(path.join(__dirname, "../../product-images")));
+
  
  
 if (process.env.NODE_ENV === 'production') {

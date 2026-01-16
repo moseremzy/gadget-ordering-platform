@@ -38,8 +38,6 @@ gadget-ordering-platform/
 ├── database/
 │   ├── schema.sql     # Database schema
 │   └── sample_data.sql # Fake data for local development
-└── product-images/
-> Product images used for local development and demonstration.
 
 
 

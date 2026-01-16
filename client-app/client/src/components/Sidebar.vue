@@ -1,11 +1,11 @@
 <template>
   <div>
     <!-- ========= MOBILE SIDEBAR ========= -->
-    <div class="main_nav_container" v-if="store.display_main_nav">
+    <div class="main_nav_container" v-if="interactive_store.display_main_nav">
       <div class="header">
         <p>
           <font-awesome-icon
-            @click="store.toggle_main_nav(false)"
+            @click="interactive_store.toggle_main_nav(false)"
             class="fa-solid fa-xmark"
             id="xmark"
             icon="fa-solid fa-xmark"
@@ -16,58 +16,53 @@
       <div class="section">
         <h1>Menu</h1>
         <ul>
-          <li @click="store.toggle_main_nav(false)">
+          <li @click="interactive_store.toggle_main_nav(false)">
             <router-link to="/" class="link" exact-active-class="active-link">Home</router-link>
           </li>
-          <li @click="store.toggle_main_nav(false)">
-            <router-link to="/shop?category=all" class="link" exact-active-class="active-link">Shop</router-link>
+          <li @click="interactive_store.toggle_main_nav(false)">
+            <router-link to="/shop" class="link" exact-active-class="active-link">Shop</router-link>
           </li>
-          <li @click="store.toggle_main_nav(false)">
+          <li @click="interactive_store.toggle_main_nav(false)">
             <router-link to="/contact" class="link" exact-active-class="active-link">Contact</router-link>
           </li>
         </ul>
       </div>
 
-      <!-- <hr class="divider" />
+      <hr class="divider" />
 
       <div class="section categories">
         <h2>Categories</h2>
         <ul>
-          <li @click="store.toggle_main_nav(false)">
-            <router-link to="/" class="link">Consoles & Games</router-link>
-          </li>
-          <li @click="store.toggle_main_nav(false)">
-            <router-link to="/shop?category=phones" class="link">Phones</router-link>
-          </li>
-          <li @click="store.toggle_main_nav(false)">
-            <router-link to="/shop?category=laptops" class="link">Laptops</router-link>
-          </li>
-          <li @click="store.toggle_main_nav(false)">
-            <router-link to="/shop?category=accessories" class="link">Accessories</router-link>
-          </li>
-          <li @click="store.toggle_main_nav(false)">
-            <router-link to="/shop?category=headphones" class="link">Headphones</router-link>
+          <li 
+          v-for="category in categories"
+          :key="category.category_id"
+          @click="store.toggle_main_nav(false)">
+          <router-link 
+          :to="`/shop?category=${category.name}`" 
+          class="link">{{category.name}}</router-link>
           </li>
         </ul>
-      </div> -->
+      </div>
     </div>
 
     <!-- Overlay for Mobile Sidebar -->
-    <div class="hide_main_nav" @click="store.toggle_main_nav(false)" v-if="store.display_main_nav"></div>
+    <div class="hide_main_nav" @click="interactive_store.toggle_main_nav(false)" v-if="interactive_store.display_main_nav"></div>
 
     <!-- ========= DESKTOP NAVBAR ========= -->
     <div class="desktop_nav">
-      <!--  <div class="nav-left">
-        <router-link to="/shop?category=consoles" class="nav-link">Consoles & Games</router-link>
-        <router-link to="/shop?category=phones" class="nav-link">Phones</router-link>
-        <router-link to="/shop?category=laptops" class="nav-link">Laptops</router-link>
-        <router-link to="/shop?category=accessories" class="nav-link">Accessories</router-link>
-      </div>
-    -->
+       <div class="nav-left">
+        <router-link 
+          v-for="category in categories"
+          :key="category.category_id"
+          :to="`/shop?category=${category.name}`" 
+          class="nav-link"
+          >{{category.name}}
+        </router-link>
+       </div>
       <div class="nav-right">
-        <router-link to="/" class="nav-link">Home</router-link>
-        <router-link to="/shop?category=all" class="nav-link">All Products</router-link>
-        <router-link to="/contact" class="nav-link">Contact</router-link>
+        <router-link to="/" class="nav-link" exact-active-class="active-link">Home</router-link>
+        <router-link to="/shop" class="nav-link" exact-active-class="active-link">All Products</router-link>
+        <router-link to="/contact" class="nav-link" exact-active-class="active-link">Contact</router-link>
         <font-awesome-icon icon="fa-solid fa-moon" class="nav-icon" />
       </div>
     </div> 
@@ -77,19 +72,38 @@
 <script setup>
 import { useInteractiveStore } from "@/stores/interactive";
 import { useUserStore } from "@/stores/user";
+import { onMounted, onUnmounted, onUpdated, computed, reactive, toRaw, ref, watch} from 'vue'
+import { useCategoriesStore } from "@/stores/categories";
 import API from "../api";
 
 const user_store = useUserStore();
-const store = useInteractiveStore();
+const interactive_store = useInteractiveStore();
+const categories_store = useCategoriesStore()
+
+
+const categories = computed(() => {
+
+ return categories_store.categories
+
+})
+
 
 async function logout() {
+
   const response = await API.logout();
+  
   if (response.message === "success") {
+    
     user_store.logged_Out();
+    
     window.location.assign("/login");
+  
   } else {
+    
     window.location.assign("/");
+  
   }
+
 }
 </script>
 

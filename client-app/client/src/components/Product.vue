@@ -7,7 +7,7 @@
 
     <!-- Product Image -->
     <div class="image-box">
-      <img :src="`${base_url}/images/${product.main_image}`" />
+      <img :src="`${product.main_image}`" />
     </div>
 
     <!-- Product Details -->
