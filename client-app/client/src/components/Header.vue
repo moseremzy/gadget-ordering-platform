@@ -19,9 +19,9 @@
       </div>
 
        <!-- Searchbox in center (desktop only) -->
-      <!-- <div class="desktop-searchbox">
+      <div class="desktop-searchbox">
         <SEARCHBOX />
-      </div> -->
+      </div>
 
       <!-- Right Side Icons -->
       <div class="header-right">
@@ -55,10 +55,10 @@
       </div>
     </div>
 
-     <!-- Searchbox below header (mobile only) -->
-    <!-- <div class="mobile-searchbox">
+    <!-- Searchbox below header (mobile only) -->
+    <div class="mobile-searchbox">
       <SEARCHBOX />
-    </div> -->
+    </div>
   </div>
 </template>
 

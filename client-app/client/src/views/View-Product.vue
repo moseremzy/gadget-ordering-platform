@@ -361,6 +361,7 @@ div.home_container h1{
   }
 
   #description{
+      word-break: break-all;
       line-height: 25px;
       color: #aaa;
       font-size: 15px;
@@ -524,6 +525,7 @@ div.home_container h1{
   color: var(--primary-white);
 }
 .tab_info p{
+  word-break: break-all;
  font-size: 15px;
  line-height: 25px;
 }

@@ -1,236 +1,213 @@
 <template>
-<div>
-<div class = "modal-backdrop" v-if = 'interactive_store.query'></div>
-<div class = "search_container" v-if = 'interactive_store.query'>
-  <div class = "search">
-      
-  <SEARCHBOX />
-  
-  </div> 
- 
-  <h1>Search - <b style = "font-weight: lighter; display: inline; font-size: 16px;">{{interactive_store.query}}</b></h1>
- 
-  <div class = "result" v-if = "filteredproducts.length < 1">
+  <div v-if="interactive_store.query">
+    <!-- Backdrop -->
+    <div class="modal-backdrop"></div>
 
-  <h2 style="text-align: center; font-size: 17px;">product Not Found</h2>
-  
+    <!-- Search Container -->
+    <div class="search_container">
+      <div class="search">
+        <SEARCHBOX />
+      </div>
+
+      <h1>
+        Search –
+        <span>{{ interactive_store.query }}</span>
+      </h1>
+
+      <!-- No result -->
+      <div class="result" v-if="filteredProducts.length === 0">
+        <div class="not-found">
+          <h2>Gadget Not Found</h2>
+          <p>
+            Can’t find what you’re looking for?
+            You can place a request order and our support team will assist you.
+          </p>
+
+          <a
+            :href="`https://wa.me/${settings_store.whatsapp}`"
+            target="_blank"
+            class="whatsapp-link"
+          >
+            <i class="fab fa-whatsapp"></i>
+            Chat with Customer Support
+          </a>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="result" v-else>
+        <router-link
+          v-for="product in filteredProducts"
+          :key="product.product_id"
+          :to="`/view-product/${product.name}_${product.product_id}`"
+          class="link"
+          @click="interactive_store.clearQuery"
+        >
+          <div class="product">
+            <img :src="product.main_image" :alt="product.name" />
+
+            <div class="info">
+              <h2>{{ product.name }}</h2>
+              <p>{{ product.description.slice(0, 60) }}...</p>
+              <p class="price">
+                {{
+                  new Intl.NumberFormat('en-NG', {
+                    style: 'currency',
+                    currency: 'NGN'
+                  }).format(product.price)
+                }}
+              </p>
+            </div>
+          </div>
+          <hr />
+        </router-link>
+      </div>
+    </div>
   </div>
-
-  <div class = "result" v-else>
-   <template v-for = "product in filteredproducts" :key = "product.name">
-    <router-link @click = "interactive_store.clearQuery" :to = "'/view-dish/'+product.name" class = "link">
-    <div class = "product">
-    <div>
-        <img :src= "'https://mosesfoodorderingapp.kelvinspice.com.ng/images/'+product.image" :alt="product.name">
-    </div>
-    <div class = "info">
-        <h2>{{product.name}}</h2>
-        <p>{{product.category}}</p>
-    </div>
-    </div>
-    <hr>
-    </router-link>
-  </template> 
-  </div>
-
-</div>
-
-</div>
-
 </template>
 
+
 <script setup>
-
+import { computed } from 'vue'
 import { useProductStore } from '@/stores/products'
-
 import { useInteractiveStore } from '@/stores/interactive'
-
 import SEARCHBOX from '@/components/SearchBox.vue'
+ import { useSettingStore } from '../stores/settings'
 
-import { computed, reactive, toRefs, ref} from 'vue'
-
-
+const settings_store = useSettingStore()
 const products_store = useProductStore()
-
 const interactive_store = useInteractiveStore()
 
-const products = reactive(products_store.products)
+const filteredProducts = computed(() => {
+  const query = interactive_store.query.toLowerCase()
 
-
-let filteredproducts = computed(() => { //search for product
-
-    return products.filter((product) => {
-
-    return product.name.toLowerCase().slice(0, (interactive_store.query.length)) === interactive_store.query.toLowerCase();
-
-  })
-
+  return products_store.products.filter(product =>
+    product.name.toLowerCase().includes(query)
+  )
 })
-
-
 </script>
 
+
 <style scoped>
-/* MOBILE DEVICES */
-@media only screen and (max-width: 765px) {
+/* BACKDROP */
 .modal-backdrop {
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100vh;
-    margin: 0;
-    width: 100vw;
-    bottom: 0;
-    left: 0;
-    z-index: 5;
-    opacity: 0.5;
-    background-color: #000;
-}
-div.search_container {
-    z-index: 6;
-    position: fixed;
-    background-color: white;
-    height: 100vh;
-    width: 100vw;
-    left: 0;
-    top: 80px;
-    right: 0;
-    bottom: 0;
-}
-div.search {
-    position: fixed;
-    width: 100%;
-    top: 0;
-    background-color: white;
-    padding: 10px 3px;
-    left: 0;
-}
-div.search_container h1 {
-    margin: 100px 0 0 12px;
-    font-size: 16px;
-    font-weight: bolder;
-}
-div.result {
-    height: 100vh;
-    position: fixed;
-    width: 100%;
-    margin: 0px 0 0 0;
-    overflow-y: auto;
-}
-.link {
-    text-decoration: none;
-}
-hr {
-    margin: 0;
-}
-div.product {
-    display: flex;
-    margin: 0 15px;
-    padding: 15px 0;
-    align-items: flex-start;
-}
-div.product img{
-    width: 60px;
-    display: block;
-    object-fit: cover;
-    height: 60px;
-}
-div.product h2{
-    font-size: 15px;
-    font-weight: bold;
-    color: black;
-    margin: 3px 0;
-}
-div.product p{
-    font-size: 14px;
-    margin: 3px 0;
-    color: rgb(66, 66, 66);
-}
-div.product .info{
-    align-self: center;
-    margin-left: 11px;
-}
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0.5;
+  z-index: 5;
 }
 
+/* CONTAINER */
+.search_container {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  background: var(--secondary-black);
+  color: #f1f1f1;
+  overflow: hidden;
+}
 
-/* DESKTOP */
-@media only screen and (min-width: 765px) {
-.modal-backdrop {
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100vh;
-    margin: 0;
-    width: 100vw;
-    bottom: 0;
-    left: 0;
-    z-index: 5;
-    opacity: 0.5;
-    background-color: #000;
+/* SEARCH BAR */
+.search {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: var(--secondary-black);
+  padding: 10px;
+  z-index: 7;
 }
-div.search_container {
-    z-index: 6;
-    position: fixed;
-    background-color: white;
-    height: 100vh;
-    width: 70vw;
-    margin: auto;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
+
+/* TITLE */
+.search_container h1 {
+  margin: 90px 15px 10px;
+  font-size: 16px;
+  font-weight: 600;
 }
-div.search {
-    position: fixed;
-    width: 70vw;
-    top: 0;
-    background-color: white;
-    padding: 10px 3px;
-    left: 40;
+
+.search_container h1 span {
+  font-weight: 400;
+  font-size: 14px;
+  color: #cfcfcf;
 }
-div.result {
-    height: 100vh;
-    position: fixed;
-    padding-bottom: 100px;
-    width: 70%;
-    margin: 80px auto 0 auto;
-    overflow-y: auto;
+
+/* RESULTS */
+.result {
+  margin-top: 120px;
+  height: calc(100vh - 120px);
+  overflow-y: auto;
 }
+
+/* PRODUCT */
 .link {
-    text-decoration: none;
+  text-decoration: none;
 }
+
+.product {
+  display: flex;
+  gap: 12px;
+  padding: 15px;
+}
+
+.product img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+}
+
+.product h2 {
+  font-size: 15px;
+  color: #ffffff;
+  margin: 0 0 4px;
+}
+
+.product .desc {
+  font-size: 14px;
+  color: #cfcfcf;
+  margin-bottom: 4px;
+}
+
+.product .price {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
 hr {
-    width: 70vw;
-    margin: 0;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
-div.product {
-    display: flex;
-    margin: 0 15px;
-    padding: 15px 0;
-    align-products: flex-start;
+
+/* NOT FOUND */
+.not-found {
+  text-align: center;
+  padding: 40px 20px;
 }
-div.product img{
-    width: 60px;
-    display: block;
-    object-fit: cover;
-    height: 60px;
+
+.not-found h2 {
+  font-size: 17px;
+  margin-bottom: 10px;
+  color: #ffffff;
 }
-div.product h2{
-    font-size: 15px;
-    font-weight: bold;
-    color: black;
-    margin: 3px 0;
+
+.not-found p {
+  font-size: 14px;
+  color: #cfcfcf;
+  line-height: 1.6;
+  margin-bottom: 20px;
 }
-div.product p{
-    font-size: 14px;
-    margin: 3px 0;
-    color: rgb(66, 66, 66);
-}
-div.product .info{
-    align-self: center;
-    margin-left: 11px;
-}
+
+/* WHATSAPP */
+.whatsapp-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #25d366;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  text-decoration: none !important;
+  font-weight: 500;
 }
 </style>
-
- 

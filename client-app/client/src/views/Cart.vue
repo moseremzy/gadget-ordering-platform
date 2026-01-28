@@ -20,7 +20,7 @@
     <!-- LEFT SECTION -->
     <div class="cart-items">
       <div class="cart-item" v-for = "item in products_store.cart_products" :key = "item.product_id">
-        <img :src="`${base_url}/images/${item.main_image}`" alt="" />
+        <img :src="item.main_image" alt="" />
 
         <div class="item-details">
           <h3>{{ item.name }}</h3>

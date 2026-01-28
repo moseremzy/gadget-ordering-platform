@@ -29,6 +29,8 @@
           <li><router-link to="/" class="link">Home</router-link></li>
           <li><router-link to="/shop" class="link">Shop</router-link></li>
           <li><router-link to="/contact" class="link">Contact</router-link></li>
+          <li><router-link to="/privacy-policy" class="link">Privacy and Policy</router-link></li>
+          <li><router-link to="/terms-conditions" class="link">Terms and Conditons</router-link></li>
           <!-- <li><router-link to="/about" class="link">About Us</router-link></li> -->
         </ul>
       </div>

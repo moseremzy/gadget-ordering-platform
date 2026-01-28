@@ -5,6 +5,8 @@ import Home from '../views/Home.vue'
 import Shop from '../views/Shop.vue'
 import Cart from '../views/Cart.vue'
 import Contact from '../views/Contact.vue'
+import PrivacyPolicy from '../views/Privacy-Policy.vue'
+import TermsConditions from '../views/Terms-Conditions.vue'
 import SignIn from '../views/Sign-in.vue'
 import ViewProduct from '../views/View-Product.vue'
 import Checkout from '../views/Checkout.vue'
@@ -60,6 +62,22 @@ routes: [
     component: Contact,
     meta: {
       title: "Contact us - Tech By Cas"
+    }
+  },
+  {
+    path: "/privacy-policy",
+    name: "privacy-policy",
+    component: PrivacyPolicy,
+    meta: {
+      title: "Privacy and Policy - Tech By Cas"
+    }
+  },
+  {
+    path: "/terms-conditions",
+    name: "terms-conditions",
+    component: TermsConditions,
+    meta: {
+      title: "Terms and Conditions - Tech By Cas"
     }
   },
   {

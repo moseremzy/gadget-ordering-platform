@@ -42,12 +42,12 @@
         <form>
 
         <div>
-        <div class = "payment_method" v-if = "settings_store.store_state === user_store.user.state">
+        <!-- <div class = "payment_method">
         <input type = "radio" id = "cash" v-model = "payment_method" value = "cash on delivery"  name = "payment_method">
         <label for = "cash">Cash On Delivery</label>
-        </div>
+        </div> -->
 
-        <div class = "payment_method" v-else>
+        <div class = "payment_method">
         <input type = "radio" id = "card" v-model = "payment_method" value = "online payment" name = "payment_method">
         <label for = "card">Online Payment (Paystack)</label>
         </div> 
