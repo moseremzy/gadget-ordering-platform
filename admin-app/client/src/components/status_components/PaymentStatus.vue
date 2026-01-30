@@ -6,9 +6,6 @@
         <option value="pending" style="color:#f59e0b;">Pending</option>      <!-- Amber / Orange -->
         <option value="success" style="color:#16a34a;">Success</option>      <!-- Green -->
         <option value="failed" style="color:#dc2626;">Failed</option>        <!-- Red -->
-        <option value="abandoned" style="color:#6b7280;">Abandoned</option>  <!-- Gray -->
-        <option value="reversed" style="color:#2563eb;">Reversed</option>    <!-- Blue -->
-        <option value="refunded" style="color:#7c3aed;">Refunded</option>    <!-- Purple -->
       </select>
     </div>
 </template>

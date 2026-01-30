@@ -133,7 +133,7 @@ const filteredProducts = computed(() => {
 
 /* RESULTS */
 .result {
-  margin-top: 120px;
+  margin-top: 20px;
   height: calc(100vh - 120px);
   overflow-y: auto;
 }
@@ -175,6 +175,7 @@ const filteredProducts = computed(() => {
 
 hr {
   border: none;
+  margin: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 

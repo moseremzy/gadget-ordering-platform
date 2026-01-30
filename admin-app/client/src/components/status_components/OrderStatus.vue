@@ -5,7 +5,7 @@
       <select id="status-filter" :style = "status_color"  @change = "UpdateOrderStatus" class="status-filter-select" v-model = "order.order_status">
         <option style = "color:  gray;" value="pending">Pending</option>
         <option style = "color: #007BFF;" value="confirmed">Confirmed</option>
-        <option style = "color: #6F42C1;" value="out for delivery">Out for Delivery</option>
+        <option style = "color: #6F42C1;" value="out-for-delivery">Out for Delivery</option>
         <option style = "color: #28A745;" value="delivered">Delivered</option>
         <option style = "color: red;" value="cancelled">Cancelled</option>    
         <option style = "color: #FD7E14;" value="returned">Returned</option>
@@ -77,7 +77,7 @@ const status_color = computed(() =>  {
 
             break;
 
-        case "out for delivery":
+        case "out-for-delivery":
 
             return {'color': '#6F42C1', 'border': '1px solid #6F42C1'}
 

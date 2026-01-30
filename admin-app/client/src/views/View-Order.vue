@@ -63,7 +63,7 @@
       <template v-for = "item in order_items" :key = "item.name">
       <div class="menu-item">
         <div class="item-image">
-          <img :src="`${base_url}/images/${item.main_image}`" :alt="item.name">
+          <img :src="`${item.main_image}`" :alt="item.name">
         </div>
         <div class="item-details">
           <h3 class="item-name">{{item.product_name}} x {{item.quantity}}</h3>

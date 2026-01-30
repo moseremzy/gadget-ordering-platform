@@ -6,6 +6,7 @@ import Shop from '../views/Shop.vue'
 import Cart from '../views/Cart.vue'
 import Contact from '../views/Contact.vue'
 import PrivacyPolicy from '../views/Privacy-Policy.vue'
+import RefundPolicy from '../views/Refund-Policy.vue'
 import TermsConditions from '../views/Terms-Conditions.vue'
 import SignIn from '../views/Sign-in.vue'
 import ViewProduct from '../views/View-Product.vue'
@@ -70,6 +71,15 @@ routes: [
     component: PrivacyPolicy,
     meta: {
       title: "Privacy and Policy - Tech By Cas"
+    }
+  },
+  
+  {
+    path: "/refund-policy",
+    name: "refund-policy",
+    component: RefundPolicy,
+    meta: {
+      title: "Refund Policy - Tech By Cas"
     }
   },
   {

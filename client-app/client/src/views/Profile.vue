@@ -684,12 +684,17 @@ textarea {
   color: #d4af37;
 }
 
-.status.processing {
+.status.out-for-delivery {
   background: rgba(255, 165, 0, 0.15);
   color: #ffa500;
 }
 
 .status.cancelled {
+  background: rgba(255, 0, 55, 0.15);
+  color: #ff3244;
+}
+
+.status.returned {
   background: rgba(255, 0, 55, 0.15);
   color: #ff3244;
 }

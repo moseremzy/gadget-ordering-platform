@@ -225,17 +225,27 @@ div.home_container h1{
   color: #2bff8a;
 }
 
+.status.confirmed {
+  color: rgb(0, 174, 255);
+}
+
+
 .status.pending {
   color: #d4af37;
 }
 
-.status.processing {
+.status.out-for-delivery {
   color: #ffa500;
 }
 
 .status.cancelled {
   color: #ff3244;
 }
+
+.status.returned {
+  color: #ff3244;
+}
+
 
 /* MOBILE */
 @media(max-width: 600px) {
