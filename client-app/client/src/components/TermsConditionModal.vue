@@ -2,7 +2,7 @@
   <div class="modal-overlay">
     <div class="modal">
       
-      <h2>Terms and Conditions</h2>
+      <h2>Terms and Conditions for TechByCas</h2>
 
       <div class="terms-content">
         <p><strong>1. Introduction</strong><br>
@@ -126,6 +126,11 @@ async function remove_modal () {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.modal h2 {
+  font-size: 18px;
+  text-align: center;
 }
 
 .terms-content{
