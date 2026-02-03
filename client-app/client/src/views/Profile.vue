@@ -268,10 +268,10 @@ let password = reactive({
 })
 
 
-const activeTab = ref('history')
 const route = useRoute()
 const router = useRouter()
  
+const activeTab = ref(route.query.s || 'history')
 
 
 // Initialize from store

@@ -30,7 +30,7 @@
         
         <p v-if = "address_exists" id = "address">{{user_store.user.address}}. {{user_store.user.city}}. {{user_store.user.state}}.</p>
          
-        <router-link id = "link" to = "/account/profile">{{ address_exists ? '[ Change Address ]' : '[ Add Address ]'}}</router-link>
+        <router-link id = "link" to = "/account/profile?s=profile">{{ address_exists ? '[ Change Address ]' : '[ Add Address ]'}}</router-link>
 
       </div> 
 
