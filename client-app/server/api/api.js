@@ -159,6 +159,8 @@ static async register(req, res) {
       
     } else { //if account verified, log am in
 
+    const showTermsConditions = !user[0].welcome_terms_conditions;
+
     date.setHours(date.getHours() + 2); // session expires in 2 hours
 
     req.session.cookie.expires = date;
@@ -179,6 +181,7 @@ static async register(req, res) {
       success: true,
       message: "success",
       user: this_user,
+      showTermsConditions,
       isAuthenticated: true
     });
 
@@ -1617,6 +1620,87 @@ static async update_password (req, res) {
     message: "An error occurred. Please try again.",
   }); 
     
+}
+
+}
+
+
+///mark_terms_conditions
+static async mark_terms_conditions (req, res) {
+  
+  try {
+    
+    const user_query = `SELECT * FROM users WHERE user_id= ?` //first find the user
+
+    const user = await new Promise( (resolve, reject) => {
+
+      db.query(user_query, [req.session.user_id], (err, result) => {
+
+        if (err) {
+
+          reject(err)
+        
+        } else {
+
+          resolve(result)
+
+        }
+
+      })
+
+    })
+
+
+  if (!user[0]) { //if the user nor dey
+
+    req.session.user_id = null
+
+    req.session.isAuthenticated = false
+
+    req.session.destroy()
+
+    return res.status(401).json({
+      success: false,
+      message: "Unauthenticated",
+    }); 
+
+  }  
+
+  const terms_query = `UPDATE users 
+    SET welcome_terms_conditions= ?
+    WHERE user_id= ?`
+
+    await new Promise( (resolve, reject) => {
+
+      db.query(terms_query, [1, req.session.user_id], (err, result) => {
+
+        if (err) {
+
+          reject(err)
+        
+        } else {
+
+          resolve(result)
+
+        }
+
+      })
+
+    })
+
+  return res.status(200).json({
+    success: true,
+    message: "success",
+  }); 
+
+
+ } catch (err) {
+    
+  return res.status(400).json({
+    success: false,
+    message: "error occured. please try again",
+  }); 
+  
 }
 
 }

@@ -41,7 +41,7 @@
           </div>
 
           <div class="dropdown" v-if="showDropdown">
-            <router-link to="/account/profile" class="dropdown-item">My Profile</router-link>
+            <router-link to="/account/profile?s=profile" class="dropdown-item">My Profile</router-link>
             <div class = "dropdown-divider"></div>
             <router-link to ="#" class="dropdown-item logout" @click="logout">Logout <font-awesome-icon class="fa-solid fa-sign-out" icon="fa-solid fa-sign-out" /></router-link>
           </div>

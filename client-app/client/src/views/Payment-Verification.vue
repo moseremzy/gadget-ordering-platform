@@ -28,7 +28,7 @@
     <font-awesome-icon class="fa-solid fa-circle-check" id = "icon" icon="fa-solid fa-circle-check"/>
     <h1>Congratulations! Your order with reference <strong>{{route.query.reference}}</strong> has been placed.</h1>
     <h3>{{confirmation_pin}}</h3>
-    <router-link to = "/" id = "link">return home</router-link>
+    <router-link to = "/account/profile?s=history" id = "link">View</router-link>
     </div>
 
     </div>

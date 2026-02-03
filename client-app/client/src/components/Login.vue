@@ -142,6 +142,8 @@ async function validation() {
 
     interactive_store.display_success_alert_box()
 
+    interactive_store.display_terms_conditons_box(response.showTermsConditions)
+
     switch (interactive_store.page_to_go) {
 
        case 'profile':
@@ -170,7 +172,9 @@ async function validation() {
     
         default:
 
-            window.location.replace('/')
+            interactive_store.toggle_loading_overlay(false)
+
+            router.push({ name: "home"}) 
              
         break;
     

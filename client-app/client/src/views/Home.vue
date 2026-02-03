@@ -3,6 +3,11 @@
     <HEADER/> 
     <SUCCESSALERTBOX>{{interactive_store.backend_message}}</SUCCESSALERTBOX>
     <ERRORALERTBOX>{{interactive_store.backend_message}}</ERRORALERTBOX>
+    <TERMSCONDITION
+      v-if = "interactive_store.display_terms_conditions_modal" 
+      :showTermsCondition = "interactive_store.display_terms_conditions_modal" 
+      @close = "interactive_store.display_terms_conditions_modal = false"
+    />
     <LoadingOverlay/>
     <SEARCHRESULT/>
     <SIDEBAR/>
@@ -93,6 +98,7 @@
 <script setup>
 import HEADER from "@/components/Header.vue";
 import SEARCHRESULT from "@/components/SearchResult.vue";
+import TERMSCONDITION from "../components/TermsConditionModal.vue";
 import SIDEBAR from "@/components/Sidebar.vue";
 import FOOTER from "@/components/Footer.vue";
 import Product from "@/components/Product.vue";

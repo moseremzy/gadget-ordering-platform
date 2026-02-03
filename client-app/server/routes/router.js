@@ -60,5 +60,6 @@ router.patch("/api/update_address", check_user_session, API.update_address)
 
 router.patch("/api/update_password", check_user_session, API.update_password)
 
+router.patch("/api/mark_terms_conditions", check_user_session, API.mark_terms_conditions)
 
 module.exports = router

@@ -88,4 +88,8 @@ export default class API {
     return api.patch("/api/update_password", info).then(res => res.data);
   }
 
+  static async mark_terms_conditions() {
+    return api.patch("/api/mark_terms_conditions").then(res => res.data)
+  }
+
 }
