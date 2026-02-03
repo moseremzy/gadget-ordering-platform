@@ -257,7 +257,7 @@ async function validation() {
 
     interactive_store.toggle_loading_overlay(false)
 
-    return router.push({ name: "email-activation", query: {confirmationEmail: formvalues.email,}, params: {confirmationCode: response.data.message} })
+    return router.push({ name: "email-activation", query: {confirmationEmail: formvalues.email} })
     
     } catch (error) {
 
