@@ -146,7 +146,7 @@
 
 
     <!-- password -->
-    <div class="contact-form">
+    <!-- <div class="contact-form">
         <h2>Settings</h2>
         <p>Update Password</p>
         <form @submit.prevent="update_password">
@@ -173,8 +173,8 @@
             Update Password
         </button>
         </form>
-    </div>
-    </div> 
+    </div> -->
+    </div>  
 
     <div class="contact-form" v-else>
         <h2>Order History</h2>
@@ -848,6 +848,11 @@ form .row {
 
 label {
   margin-bottom: 6px;
+}
+
+p.err {
+  font-size: 12px !important;
+  margin: 7px 0 0 0 !important;
 }
 
 }

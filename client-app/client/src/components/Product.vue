@@ -14,7 +14,7 @@
     <div class="details">
       <Category :product = product />
       <h3 class="title">{{product.name}}</h3>
-      <p class="specs">{{product.description}}</p>
+      <p class="specs">{{product.description.slice(0, 100)}}...</p>
       <p class="price">{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(product.price)}}</p>
     </div>
     </router-link>
@@ -141,6 +141,7 @@ function AddToCart(product, quantity) {
 .specs {
   font-size: 14px;
   margin: 17px 0;
+  word-break: break-all;
   color: #aaa;
   line-height: 1.4;
 }
