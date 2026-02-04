@@ -8,6 +8,12 @@
 
  <ERRORALERTBOX>{{interactive_store.backend_message}}</ERRORALERTBOX>
 
+ <TERMSCONDITION
+    v-if = "user_store.showTermsConditions" 
+    :showTermsCondition = "user_store.showTermsConditions" 
+    @close = "user_store.showTermsConditions = false"
+  />
+
  <SEARCHRESULT/>
 
  <SIDEBAR/>
@@ -84,6 +90,7 @@
 
 <script setup>
 import SEARCHRESULT from "@/components/SearchResult.vue";
+import TERMSCONDITION from "../components/TermsConditionModal.vue";
 import EMPTYCART from "@/components/EmptyCart.vue";
 import HEADER from "@/components/Header.vue";
 import SIDEBAR from "@/components/Sidebar.vue";
@@ -93,11 +100,13 @@ import { onMounted, onUnmounted, onUpdated, reactive, toRaw, ref, watch} from 'v
 import MIDDLEWARES from "../middlewares/middlewares"
 import { useInteractiveStore } from '@/stores/interactive'
 import { useSettingStore } from '@/stores/settings'
+import { useUserStore } from '@/stores/user'
 const base_url = process.env.VUE_APP_API_BASE_URL
 
 const products_store = useProductStore()
 const interactive_store = useInteractiveStore()
 const setting_store = useSettingStore()
+const user_store = useUserStore()
 
 /* Hooks */
 

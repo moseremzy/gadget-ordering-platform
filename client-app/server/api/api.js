@@ -1056,6 +1056,9 @@ static async fetch_user (req, res) {
       });
     }
 
+
+    const showTermsConditions = !user[0].welcome_terms_conditions;
+
     // Success
     return res.status(200).json({
       success: true,
@@ -1068,7 +1071,8 @@ static async fetch_user (req, res) {
         city: user[0].city,
         address: user[0].address,
       },
-      isAuthenticated: true
+      isAuthenticated: true,
+      showTermsConditions
     });
 
   } catch (error) {

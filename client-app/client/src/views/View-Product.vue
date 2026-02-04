@@ -8,6 +8,12 @@
 
  <ERRORALERTBOX>{{interactive_store.backend_message}}</ERRORALERTBOX>
 
+ <TERMSCONDITION
+    v-if = "user_store.showTermsConditions" 
+    :showTermsCondition = "user_store.showTermsConditions" 
+    @close = "user_store.showTermsConditions = false"
+  />
+
  <SEARCHRESULT/>
 
  <SIDEBAR/>
@@ -196,6 +202,7 @@
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import SEARCHRESULT from "@/components/SearchResult.vue";
 import WHATSAPP from "../components/Whatsapp.vue"
+import TERMSCONDITION from "../components/TermsConditionModal.vue";
 import PAGINATION from '../components/Pagination.vue'
 import Availability from '../components/Availability.vue'
 import Condition from '../components/Condition.vue'
@@ -209,6 +216,7 @@ const base_url = process.env.VUE_APP_API_BASE_URL
 
 import { useProductStore } from '@/stores/products'
 import { useSettingStore } from '@/stores/settings'
+import { useUserStore } from '@/stores/user'
 import { useInteractiveStore } from '@/stores/interactive'
 const interactive_store = useInteractiveStore()
       
@@ -219,6 +227,8 @@ const router = useRouter()
 const products_store = useProductStore()
 
 const settingStore = useSettingStore()
+
+const user_store = useUserStore()
 
 const products = computed(() => {
 

@@ -136,13 +136,13 @@ async function validation() {
       
     const response = await API.login(formvalues);
   
-    user_store.logged_In(response.user, response.isAuthenticated)
+    user_store.logged_In(response.user, response.isAuthenticated, response.showTermsConditions)
 
     interactive_store.backend_message = `Welcome ${response.user.fullname}`
 
     interactive_store.display_success_alert_box()
 
-    interactive_store.display_terms_conditons_box(response.showTermsConditions)
+    // interactive_store.display_terms_conditons_box(response.showTermsConditions)
 
     switch (interactive_store.page_to_go) {
 

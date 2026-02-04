@@ -22,7 +22,7 @@ export const useInteractiveStore = defineStore("interactive", {
 
        display_cancel_order_modal: false,
 
-       display_terms_conditions_modal: false,
+    //    display_terms_conditions_modal: false,
 
        display_loading_overlay: false,
 
@@ -98,11 +98,11 @@ export const useInteractiveStore = defineStore("interactive", {
 
         },
 
-        display_terms_conditons_box(action) { //display error box if i add item succesfully
+        // display_terms_conditons_box(action) { //display error box if i add item succesfully
   
-            this.display_terms_conditions_modal = action
+        //     this.display_terms_conditions_modal = action
 
-        },
+        // },
 
         toggle_changeaddress_modal(state) { //toggle main nav
 

@@ -3,6 +3,11 @@
     <HEADER/> 
     <SUCCESSALERTBOX>{{interactive_store.backend_message}}</SUCCESSALERTBOX>
     <ERRORALERTBOX>{{interactive_store.backend_message}}</ERRORALERTBOX>
+    <TERMSCONDITION
+      v-if = "user_store.showTermsConditions" 
+      :showTermsCondition = "user_store.showTermsConditions" 
+      @close = "user_store.showTermsConditions = false"
+    />
     <SEARCHRESULT/>
     <SIDEBAR/>
 
@@ -42,6 +47,7 @@ import HEADER from "@/components/Header.vue";
 import SEARCHRESULT from "@/components/SearchResult.vue";
 import SIDEBAR from "@/components/Sidebar.vue";
 import FOOTER from "@/components/Footer.vue";
+import TERMSCONDITION from "../components/TermsConditionModal.vue";
 import Product from "@/components/Product.vue";
 import PAGINATION from "@/components/Pagination.vue";
 import ITEMSNOTFOUND from "@/components/ItemsNotFound.vue";
@@ -50,6 +56,7 @@ import MIDDLEWARES from "../middlewares/middlewares"
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import { useInteractiveStore } from '@/stores/interactive'
 import { useProductStore } from '@/stores/products'
+import { useUserStore } from '@/stores/user'
 import hero_gadgets from "../assets/static_images/hero-gadgets.png"
 
 const route = useRoute()
@@ -58,6 +65,8 @@ const router = useRouter()
 const interactive_store = useInteractiveStore()
 
 const products_store = useProductStore()
+
+const user_store = useUserStore()
 
 const products = computed(() => {
 

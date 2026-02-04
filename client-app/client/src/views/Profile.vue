@@ -8,6 +8,12 @@
 
  <ERRORALERTBOX>{{interactive_store.backend_message}}</ERRORALERTBOX>
 
+ <TERMSCONDITION
+    v-if = "user_store.showTermsConditions" 
+    :showTermsCondition = "user_store.showTermsConditions" 
+    @close = "user_store.showTermsConditions = false"
+  />
+
  <LoadingOverlay/>
 
  <SEARCHRESULT/>
@@ -221,6 +227,7 @@
 import SEARCHRESULT from "@/components/SearchResult.vue";
 import HEADER from "@/components/Header.vue";
 import SIDEBAR from "@/components/Sidebar.vue";
+import TERMSCONDITION from "../components/TermsConditionModal.vue";
 import ITEMSNOTFOUND from "@/components/ItemsNotFound.vue"
 import FOOTER from "@/components/Footer.vue";
 import LoadingOverlay from "../components/modals/loading_overlay.vue";

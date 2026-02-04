@@ -4,9 +4,9 @@
     <SUCCESSALERTBOX>{{interactive_store.backend_message}}</SUCCESSALERTBOX>
     <ERRORALERTBOX>{{interactive_store.backend_message}}</ERRORALERTBOX>
     <TERMSCONDITION
-      v-if = "interactive_store.display_terms_conditions_modal" 
-      :showTermsCondition = "interactive_store.display_terms_conditions_modal" 
-      @close = "interactive_store.display_terms_conditions_modal = false"
+      v-if = "user_store.showTermsConditions" 
+      :showTermsCondition = "user_store.showTermsConditions" 
+      @close = "user_store.showTermsConditions = false"
     />
     <LoadingOverlay/>
     <SEARCHRESULT/>
@@ -109,6 +109,7 @@ import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import MIDDLEWARES from "../middlewares/middlewares"
 import { useInteractiveStore } from '@/stores/interactive'
 import { useProductStore } from '@/stores/products'
+import { useUserStore } from '@/stores/user'
 import { useCategoriesStore } from '@/stores/categories'
 import hero_gadgets from "../assets/static_images/hero-gadgets.png"
 
@@ -118,6 +119,8 @@ const router = useRouter()
 const interactive_store = useInteractiveStore()
 
 const products_store = useProductStore()
+
+const user_store = useUserStore()
 
 const categories_store = useCategoriesStore()
 

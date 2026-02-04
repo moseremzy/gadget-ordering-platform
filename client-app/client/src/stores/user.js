@@ -5,6 +5,8 @@ export const useUserStore = defineStore("user", {
   state: () => ({
     
     isAuthenticated: false,
+
+    showTermsConditions: false,
     
     user: null,
     
@@ -14,11 +16,13 @@ export const useUserStore = defineStore("user", {
   
   actions: {
     
-    logged_In(user, isAuthenticated) {
+    logged_In(user, isAuthenticated, showTermsConditions) {
       
       this.user = user;
       
       this.isAuthenticated = isAuthenticated;
+
+      this.showTermsConditions =showTermsConditions
     
     },
 
@@ -35,8 +39,10 @@ export const useUserStore = defineStore("user", {
       try {
 
         const response = await API.fetch_user(); // Axios interceptor handles errors
+
+        console.log(response)
         
-        this.logged_In(response.user, response.isAuthenticated);
+        this.logged_In(response.user, response.isAuthenticated, response.showTermsConditions);
       
       } catch (err) {
         

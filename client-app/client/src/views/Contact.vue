@@ -8,6 +8,12 @@
 
  <ERRORALERTBOX>{{interactive_store.backend_message}}</ERRORALERTBOX>
 
+ <TERMSCONDITION
+    v-if = "user_store.showTermsConditions" 
+    :showTermsCondition = "user_store.showTermsConditions" 
+    @close = "user_store.showTermsConditions = false"
+  />
+
  <SUCCESSMODAL>{{interactive_store.backend_message}}</SUCCESSMODAL>
 
  <LoadingOverlay/>
@@ -109,6 +115,7 @@
 import SEARCHRESULT from "@/components/SearchResult.vue";
 import HEADER from "@/components/Header.vue";
 import SIDEBAR from "@/components/Sidebar.vue";
+import TERMSCONDITION from "../components/TermsConditionModal.vue";
 import LoadingOverlay from "../components/modals/loading_overlay.vue";
 import INFOMODAL from "@/components/modals/InfoModal.vue";
 import SUCCESSMODAL from "@/components/modals/SuccessModal.vue";
@@ -118,8 +125,10 @@ import MIDDLEWARES from "../middlewares/middlewares"
 import API from "../api/index";
 import { useInteractiveStore } from '@/stores/interactive'
 import { useSettingStore } from '@/stores/settings'
+import { useUserStore } from '@/stores/user'
 const interactive_store = useInteractiveStore()
 const settings_store = useSettingStore()
+const user_store = useUserStore()
 
 
 let formvalues = reactive({
