@@ -10,12 +10,12 @@ module.exports = class MIDDLEWARES {
   static async SendConfirmationMail(req, res, useremail, confirmationCode) {
 
     var smtpConfig = {
-        host: 'smtppro.zoho.com',
+        host: 'mail.techbycas.com',
         port:  465,
         secure: true,
         auth:{
-            user: 'support@lavexacore.com',
-            pass: 'Lavexacore1.'
+            user: 'support@techbycas.com',
+            pass: 'Techbycas1.'
         }
     };
 
@@ -34,7 +34,7 @@ module.exports = class MIDDLEWARES {
     transporter.use('compile', hbs(handlebarOptions));
 
     const mailOptions = {
-        from: '"Tech By Cas" <support@lavexacore.com>', // sender address
+        from: '"Tech By Cas" <support@techbycas.com>', // sender address
         to: useremail,
         subject: 'Admin Confirmation Email',
         attachments: [{
@@ -90,16 +90,15 @@ module.exports = class MIDDLEWARES {
 //Password Reset  Email
 static async send_reset_pass_email(req, res, useremail, token) {
 
-    const smtpConfig = {
-        host: 'lavexacore.com',
-        port: 465,
-        secure: true, // use SSL
-        auth: {
-            user: 'support@lavexacore.com',
-            pass: 'Lavexacore1.'
+    var smtpConfig = {
+        host: 'mail.techbycas.com',
+        port:  465,
+        secure: true,
+        auth:{
+            user: 'support@techbycas.com',
+            pass: 'Techbycas1.'
         }
     };
-
 
 var transporter = nodemailer.createTransport(smtpConfig);
       
@@ -116,7 +115,7 @@ var transporter = nodemailer.createTransport(smtpConfig);
       transporter.use('compile', hbs(handlebarOptions));
       
       var mailOptions = {
-        from: '"Tech By Cas" <support@lavexacore.com>', // sender address
+        from: '"Tech By Cas" <support@techbycas.com>', // sender address
         to: useremail,
         subject: 'Reset Password',
         attachments: [{
@@ -171,12 +170,12 @@ var transporter = nodemailer.createTransport(smtpConfig);
 static async send_user_cancellation_email(req, res, useremail, fullname, order_id, reason) {
     
     var smtpConfig = {
-        host: 'mail.xnfthub.com', // Zoho SMTP host
-        port: 465, // SSL port
-        secure: true, // Use SSL
-        auth: {
-            user: 'support@xnfthub.com', // Replace with your Zoho email address
-            pass: 'Xnfthub1..' // Use your Zoho app-specific password (if you have 2FA enabled)
+        host: 'mail.techbycas.com',
+        port:  465,
+        secure: true,
+        auth:{
+            user: 'support@techbycas.com',
+            pass: 'Techbycas1.'
         }
     };
 
@@ -195,7 +194,7 @@ static async send_user_cancellation_email(req, res, useremail, fullname, order_i
   transporter.use('compile', hbs(handlebarOptions));
 
   const mailOptions = {
-      from: '"Tech By Cas" <support@xnfthub.com>', // sender address
+      from: '"Tech By Cas" <support@techbycas.com>', // sender address
       to: useremail,
       subject: 'Order Cancellation',
       attachments: [{

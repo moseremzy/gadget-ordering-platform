@@ -313,7 +313,7 @@ ul li {
 }
 
 
-/* ================= DESKTOP NAV ================= */
+/* ================= MOBILE NAV ================= */
 @media only screen and (max-width: 765px) {
 .desktop_nav {
   display: none;
