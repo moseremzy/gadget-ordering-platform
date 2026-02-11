@@ -191,6 +191,8 @@ async function validation() {
         
     const response = await API.register(formvalues);
 
+    interactive_store.toggle_loading_overlay(false)
+
     return router.push({ name: "email-activation", query: {confirmationEmail: formvalues.email,}, params: {confirmationCode: response.message} })
     
     } catch (error) {

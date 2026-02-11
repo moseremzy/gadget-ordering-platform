@@ -23,8 +23,6 @@ static async resizeImage(file) {
    
   } catch (error) {
 
-    console.log(error)
-   
     throw new Error("Image compression failed");
     
   }
