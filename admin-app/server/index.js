@@ -35,7 +35,6 @@ app.use(express.urlencoded({extended: true}));
 app.use(router);
 
  
- 
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static(__dirname+"/dist/"))
     app.get("*", (req, res) => {
