@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import API from "../api/index.js";
 
 export const useUserStore = defineStore("user", {
+  
   state: () => ({
     
     isAuthenticated: false,
