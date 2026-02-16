@@ -6,6 +6,8 @@ module.exports = (req, res, next) => {
         
     } else {
 
+        console.log('dkdk')
+
         return res.status(401).json({
             success: false,
             message: "Not logged in.",
