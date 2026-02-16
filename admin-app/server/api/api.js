@@ -106,6 +106,8 @@ static async register(req, res) {
 
   try {
 
+  console.log('oya na')
+
   const admin_query = `SELECT * FROM admin WHERE email= ?`
 
   const admin = await new Promise( (resolve, reject) => {
