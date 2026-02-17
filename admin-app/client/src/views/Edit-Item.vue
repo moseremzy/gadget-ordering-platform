@@ -14,7 +14,7 @@
 
     <HEADER page_name = "edit-item"/> <!--header--> 
 
-    <h1>Edit {{item_info.name}}</h1>
+    <h1>Edit {{item_info.name.slice(0, 30)}}...</h1>
     <div class="add-item-form-container">
     <Status class = "left-badge" :product = item_info />
     <Availability class = "right-badge" :product = item_info />
