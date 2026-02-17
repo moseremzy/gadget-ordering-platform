@@ -269,7 +269,7 @@ function whatsappvalidated() {
     
         admin_info_error.whatsapp_err = "Please fill field";
     
-    } else if (whatsapp_length != 14) {
+    } else if (whatsapp_length != 13) {
     
         admin_info_error.whatsapp_err = "Invalid whatsapp number"
     
