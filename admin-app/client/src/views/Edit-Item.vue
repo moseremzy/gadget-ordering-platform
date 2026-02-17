@@ -258,8 +258,6 @@ function namevalidated() {
   let pattern = /^[A-Za-z0-9\s]+$/;
     if (item_info.name === "") {
         item_info_error.name_err = "Please fill the field";
-    } else if (!pattern.test(item_info.name)) {
-        item_info_error.name_err = "Item name can only contain letters and spaces";
     } else {
         item_info_error.name_err = "";
         return true;        
