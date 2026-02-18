@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ Routes
-app.use(router);
+app.use('/api', router);
 
 
 // Production static serving (if needed)

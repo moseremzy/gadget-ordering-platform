@@ -34,6 +34,14 @@ routes: [
     }
   },
   {
+    path: "/page-not-found",
+    name: "page-not-found",
+    component: PageNotFound,
+    meta: {
+      title: "Page Not Found"
+    }
+  },
+  {
     path: "/",
     name: "home",
     component: Home,
@@ -131,7 +139,7 @@ routes: [
     }
   },
   {
-    path: "/view-product/:item",
+    path: "/view-product/:id/:slug",
     name: "view-product",
     component: ViewProduct,
     meta: {

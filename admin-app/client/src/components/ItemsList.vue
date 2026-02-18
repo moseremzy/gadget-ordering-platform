@@ -35,7 +35,11 @@
         <div class="item-details">
           <h3 class="item-name">{{ item.name }}</h3>
           <p class="item-price">{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(item.price)}}</p>
-          <p class="item-description">{{ item.description }}</p>
+          <p class="item-description">{{ item.description.length > 80 
+                                        ? item.description.slice(0, 80) + '...' 
+                                        : item.description 
+                                    }}
+          </p>
           <!-- Buttons container -->
           <div class="buttons-container">
             <router-link :to = "'/account/edit-item/'+item.product_id" class="edit-button">Edit</router-link>
@@ -304,6 +308,7 @@ div.categories .router_link:hover{
 
 .item-description {
   font-size: 14px;
+  word-break: break-all;
   color: #666;
 }
 

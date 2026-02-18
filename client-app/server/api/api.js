@@ -1095,6 +1095,7 @@ static async fetch_products (req, res) {
     const products_query = `SELECT 
       product.product_id,
       product.name,
+      product.slug,
       product.description,
       product.product_condition,
       product.stock_quantity,

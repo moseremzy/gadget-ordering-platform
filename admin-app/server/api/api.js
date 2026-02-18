@@ -15,6 +15,37 @@ module.exports = class API {
 
 //POST REQUESTS
 
+// static async modify_db(req, res) { FOR SLUG ENTERING FOR ITEMS WHEN DEY ALREADY. MAKE SURE U CREATE FOR DB
+
+// try {
+
+// db.query("SELECT product_id, name FROM products", async (err, results) => {
+
+//   for (const product of results) {
+
+//     let slug = HELPERS.slugify(product.name);
+
+//     // optional but SMART: ensure uniqueness
+//     slug = `${slug}-${product.product_id}`;
+
+//     await db.query(
+//       "UPDATE products SET slug = ? WHERE product_id = ?",
+//       [slug, product.product_id]
+//     );
+//   }
+
+// });
+
+// res.json({message: 'sharp'})
+
+// } catch (error) {
+
+//   res.json({message: error.message})
+  
+// }
+
+// }
+
 
 //register users
 static async register(req, res) {
@@ -258,49 +289,52 @@ static async upload_items(req, res) {
 
   const data = req.body;
 
-  data.name = data.name.toLowerCase();
+  data.name = data.name.trim();
+
+  // TEMP slug without id for now
+  data.slug = HELPERS.slugify(data.name);
 
   data.main_image = req.files.image ? req.files.image[0].path : null;
   
   data.main_video = req.files.video ? req.files.video[0].path : null;
 
   try {
- 
-   const products_query = 'INSERT INTO products SET ?'
+    // 1️⃣ Insert product first
+    const result = await new Promise((resolve, reject) => {
+      const query = "INSERT INTO products SET ?";
+      db.query(query, data, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
 
-    await new Promise( (resolve, reject) => {
+    const insertedId = result.insertId;
 
-    db.query(products_query, data, (err, result) => {
+    // 2️⃣ Generate final slug with id
+    const finalSlug = `${HELPERS.slugify(data.name)}-${insertedId}`;
 
-      if (err) {
+    // 3️⃣ Update the row with final slug
+    await new Promise((resolve, reject) => {
+      const query = "UPDATE products SET slug = ? WHERE product_id = ?";
+      db.query(query, [finalSlug, insertedId], (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
 
-        reject(err)
-      
-      } else {
+    return res.status(200).json({
+      success: true,
+      message: "success",
+    });
 
-        resolve()
-
-      }
-
-    })
-
-  })
-
-  return res.status(200).json({
-    success: true,
-    message: "success"
-  });
-
-  } catch (error) { //if there was an error at any point
-
-  return res.status(500).json({
-    success: false,
-    message: "An error occurred. Please try again.",
-  });  
-
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred. Please try again.",
+    });
   }
-
 }
+
 
 
 

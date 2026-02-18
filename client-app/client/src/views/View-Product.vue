@@ -18,9 +18,9 @@
 
  <SIDEBAR/>
 
-   <div class = "home_container" v-if = "product[0]" :key = "product[0].product_id">
+   <div class = "home_container" v-if = "product" :key = "product.product_id">
 
-      <h1>View {{product[0].name}}</h1>
+      <h1>View {{product.name}}</h1>
 
        <div class = "grid">
 
@@ -29,15 +29,15 @@
         <!-- Main Image -->
         <div class="image">
           <img
-            :src="product[0].main_image"
-            :alt="product[0].name"
+            :src="product.main_image"
+            :alt="product.name"
           />
         </div>
 
         <!-- Product Video (only if exists) -->
-        <div class="video" v-if="product[0].main_video">
+        <div class="video" v-if="product.main_video">
           <video
-            :src="product[0].main_video"
+            :src="product.main_video"
             controls
             preload="metadata"
             playsinline
@@ -50,16 +50,16 @@
        <div class = "info">
 
         <div class = "spans">
-            <Category :product = product[0] />
-            <Availability :product = product[0] />
-            <Condition :product = product[0] />
+            <Category :product = product />
+            <Availability :product = product />
+            <Condition :product = product />
         </div>
 
-        <h1 id = "title">{{product[0].name}}</h1>
+        <h1 id = "title">{{product.name}}</h1>
 
-        <p id = "description">{{product[0].description}}</p>
+        <p id = "description">{{product.description}}</p>
 
-        <h3>{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(product[0].price)}}</h3>
+        <h3>{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(product.price)}}</h3>
         
        <div class="cart-actions">
         <div class="quantity-box">
@@ -68,7 +68,7 @@
             <button class="qty-btn" @click = "quantity++">+</button>
         </div>
 
-        <button class="add-cart-btn" @click = "AddToCart(product[0], quantity)">
+        <button class="add-cart-btn" @click = "AddToCart(product, quantity)">
             <font-awesome-icon class="fa-solid fa-cart-shopping icons" icon="fa-solid fa-cart-shopping" />
             Add to Cart
         </button>
@@ -154,16 +154,16 @@
      <!-- description -->
       <div class = "tab_info" v-if="activeTab === 'description'">
          <h1>Product Description</h1>
-         <p>{{product[0].description}}</p>
+         <p>{{product.description}}</p>
          
          <div class = "list">
              <div id = "field">Category</div>
-             <div>{{product[0].category_name}}</div>
+             <div>{{product.category_name}}</div>
          </div>
 
         <div class = "list">
              <div id = "field">Availability</div>
-             <div>{{product[0].stock_quantity > 0 ? 'In Stock' : 'Out of Stock' }}</div>
+             <div>{{product.stock_quantity > 0 ? 'In Stock' : 'Out of Stock' }}</div>
          </div>
       </div>
         
@@ -173,17 +173,17 @@
          
          <div class = "list">
              <div id = "field">Product Name</div>
-             <div>{{product[0].name}}</div>
+             <div>{{product.name}}</div>
          </div>
 
         <div class = "list">
              <div id = "field">Category</div>
-             <div>{{product[0].category_name}}</div>
+             <div>{{product.category_name}}</div>
          </div>
 
          <div class = "list">
              <div id = "field">Price</div>
-             <div>{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(product[0].price)}}</div>
+             <div>{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(product.price)}}</div>
          </div>
       </div>
  
@@ -236,7 +236,7 @@ const products = computed(() => {
 
 })
 
-const product_id = parseInt(route.params.item.split('_')[1]) //get just the id and make am int
+const product_id = parseInt(route.params.id) //get just the id and make am int
 
 const product = ref([])
 
@@ -255,22 +255,26 @@ function AddToCart(product, quantity) {
 }
 
 
-
 function getProducts(product_id) { 
 
- product.value = products.value.filter((product) => { //get individual product
+  const foundProduct = products.value.find(p => p.product_id === product_id);
 
-    return product.product_id === product_id;
+  // If product does not exist
+  if (!foundProduct) {
+    router.push({ name: "page-not-found" });
+    return;
+  }
 
-  })
+  product.value = foundProduct;
 
-  
-if (product.value.length < 1 ) { //if product nor dey. redirect to page not found
+  // ✅ Slug validation
+  const currentSlug = route.params.slug;
 
-   router.push({name: "home"})
-    
-}
-   
+  if (currentSlug !== foundProduct.slug) {
+
+    window.location.replace(`/view-product/${foundProduct.product_id}/${foundProduct.slug}`)
+
+   }
 }
 
 getProducts(product_id)
@@ -281,7 +285,7 @@ getProducts(product_id)
 
 onBeforeRouteUpdate(to => {
 
-    getProducts(parseInt(to.params.item.split('_')[1]))
+    getProducts(parseInt(to.params.id))
 
 });
 

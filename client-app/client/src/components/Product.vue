@@ -1,7 +1,7 @@
 <template>
   <div class="product-card">
     <!-- Badge -->
-    <router-link :to = "`/view-product/${product.name}_${product.product_id}`" style = "text-decoration: none;"> 
+    <router-link :to = "`/view-product/${product.product_id}/${product.slug}`" style = "text-decoration: none;"> 
     <Condition class = "left-badge" :product = product />
     <Availability class = "right-badge" :product = product />
 

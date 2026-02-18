@@ -139,6 +139,16 @@ module.exports = class MIDDLEWARES {
       return publicId;
       
     }
+
+
+    static slugify(name) {
+      return name
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '') // removes / + & etc
+        .replace(/\s+/g, '-')     // spaces → hyphen
+        .replace(/--+/g, '-');    // avoid double hyphens
+    }
               
 }
     
