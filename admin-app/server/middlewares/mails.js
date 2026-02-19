@@ -1,6 +1,8 @@
 const hbs = require('nodemailer-express-handlebars');
 const path = require('path');
 const fs = require("fs")
+const SMTP_USER = process.env.SMTP_USER
+const SMTP_PASS = process.env.SMTP_PASS
 const nodemailer = require("nodemailer");
 
 
@@ -14,8 +16,8 @@ module.exports = class MIDDLEWARES {
         port:  465,
         secure: true,
         auth:{
-            user: 'support@techbycas.com',
-            pass: 'Techbycas1.'
+            user: SMTP_USER,
+            pass: SMTP_PASS
         }
     };
 
@@ -34,7 +36,7 @@ module.exports = class MIDDLEWARES {
     transporter.use('compile', hbs(handlebarOptions));
 
     const mailOptions = {
-        from: '"Tech By Cas" <support@techbycas.com>', // sender address
+        from: `Tech By Cas <${SMTP_USER}>`, // sender address
         to: useremail,
         subject: 'Admin Confirmation Email',
         attachments: [{
@@ -95,8 +97,8 @@ static async send_reset_pass_email(req, res, useremail, token) {
         port:  465,
         secure: true,
         auth:{
-            user: 'support@techbycas.com',
-            pass: 'Techbycas1.'
+            user: SMTP_USER,
+            pass: SMTP_PASS
         }
     };
 
@@ -115,7 +117,7 @@ var transporter = nodemailer.createTransport(smtpConfig);
       transporter.use('compile', hbs(handlebarOptions));
       
       var mailOptions = {
-        from: '"Tech By Cas" <support@techbycas.com>', // sender address
+        from: `Tech By Cas <${SMTP_USER}>`, // sender address
         to: useremail,
         subject: 'Reset Password',
         attachments: [{
@@ -174,8 +176,8 @@ static async send_user_cancellation_email(req, res, useremail, fullname, order_i
         port:  465,
         secure: true,
         auth:{
-            user: 'support@techbycas.com',
-            pass: 'Techbycas1.'
+            user: SMTP_USER,
+            pass: SMTP_PASS
         }
     };
 
@@ -194,7 +196,7 @@ static async send_user_cancellation_email(req, res, useremail, fullname, order_i
   transporter.use('compile', hbs(handlebarOptions));
 
   const mailOptions = {
-      from: '"Tech By Cas" <support@techbycas.com>', // sender address
+      from: `Tech By Cas <${SMTP_USER}>`, // sender address
       to: useremail,
       subject: 'Order Cancellation',
       attachments: [{

@@ -1,6 +1,8 @@
 const hbs = require('nodemailer-express-handlebars');
 const path = require('path');
 const fs = require("fs")
+const SMTP_USER = process.env.SMTP_USER
+const SMTP_PASS = process.env.SMTP_PASS
 const nodemailer = require("nodemailer");
 
 
@@ -13,8 +15,8 @@ module.exports = class MIDDLEWARES {
         port:  465,
         secure: true,
         auth:{
-            user: 'support@techbycas.com',
-            pass: 'Techbycas1.'
+            user: SMTP_USER,
+            pass: SMTP_PASS
         }
     };
 
@@ -33,7 +35,7 @@ module.exports = class MIDDLEWARES {
     transporter.use('compile', hbs(handlebarOptions));
 
     const mailOptions = {
-        from: '"Tech By Cas" <support@techbycas.com>', // sender address
+        from: `Tech By Cas <${SMTP_USER}>`, // sender address
         to: useremail,
         subject: 'Confirmation Email',
         attachments: [{
@@ -93,9 +95,9 @@ static async contact_us_email(req, res, email, fullname, phone, message) {
         host: 'mail.techbycas.com',
         port:  465,
         secure: true,
-        auth:{
-            user: 'support@techbycas.com',
-            pass: 'Techbycas1.'
+        auth: {
+            user: SMTP_USER,
+            pass: SMTP_PASS
         }
     };
 
@@ -114,7 +116,7 @@ var transporter = nodemailer.createTransport(smtpConfig);
       transporter.use('compile', hbs(handlebarOptions));
       
       const mailOptions = {
-        from: '"Tech By Cas" <support@techbycas.com>', // sender address
+        from: `Tech By Cas <${SMTP_USER}>`, // sender address
         to: "techbycas@gmail.com", //Tech By Cas email
         subject: 'User Complaint',
         attachments: [{
@@ -176,9 +178,9 @@ static async send_reset_pass_email(req, res, useremail, token, fullname) {
         host: 'mail.techbycas.com',
         port:  465,
         secure: true,
-        auth:{
-            user: 'support@techbycas.com',
-            pass: 'Techbycas1.'
+        auth: {
+            user: SMTP_USER,
+            pass: SMTP_PASS
         }
     };
 
@@ -198,7 +200,7 @@ var transporter = nodemailer.createTransport(smtpConfig);
       transporter.use('compile', hbs(handlebarOptions));
       
       var mailOptions = {
-        from: '"Tech By Cas" <support@techbycas.com>', // sender address
+        from: `Tech By Cas <${SMTP_USER}>`, // sender address
         to: useremail,
         subject: 'Reset Password',
         attachments: [{
@@ -257,8 +259,8 @@ static send_admin_order_notification(order_id, orderDate, data) {
         port: 465,
         secure: true,
         auth: {
-            user: 'support@techbycas.com',
-            pass: 'Techbycas1.'
+            user: SMTP_USER,
+            pass: SMTP_PASS
         }
     };
 
@@ -275,7 +277,7 @@ static send_admin_order_notification(order_id, orderDate, data) {
     transporter.use('compile', hbs(handlebarOptions));
 
     const mailOptions = {
-        from: '"Tech By Cas" <support@techbycas.com>',
+        from: `Tech By Cas <${SMTP_USER}>`,
         to: 'techbycas@gmail.com',
         subject: 'Order Notification',
         attachments: [{
