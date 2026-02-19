@@ -478,6 +478,8 @@ static async submit_order(req, res) {
   
      })
 
+     return order_id
+
   }
 
   const orderData = {
@@ -565,7 +567,9 @@ static async submit_order(req, res) {
           }
       );
       
-      await keep_for_db(data, orderData) 
+      let order_id = await keep_for_db(data, orderData)
+
+      MAILS.send_admin_order_notification(order_id, HELPERS.formatted_date(new Date()), data)
 
       return res.status(200).json({
         success: true,

@@ -90,12 +90,12 @@ module.exports = class MIDDLEWARES {
 static async contact_us_email(req, res, email, fullname, phone, message) {
 
     var smtpConfig = {
-        host: 'mail.xnfthub.com', // Zoho SMTP host
-        port: 465, // SSL port
-        secure: true, // Use SSL
-        auth: {
-            user: 'support@xnfthub.com', // Replace with your Zoho email address
-            pass: 'Xnfthub1..' // Use your Zoho app-specific password (if you have 2FA enabled)
+        host: 'mail.techbycas.com',
+        port:  465,
+        secure: true,
+        auth:{
+            user: 'support@techbycas.com',
+            pass: 'Techbycas1.'
         }
     };
 
@@ -114,7 +114,7 @@ var transporter = nodemailer.createTransport(smtpConfig);
       transporter.use('compile', hbs(handlebarOptions));
       
       const mailOptions = {
-        from: '"Tech By Cas" <support@xnfthub.com>', // sender address
+        from: '"Tech By Cas" <support@techbycas.com>', // sender address
         to: "techbycas@gmail.com", //Tech By Cas email
         subject: 'User Complaint',
         attachments: [{
@@ -173,12 +173,12 @@ var transporter = nodemailer.createTransport(smtpConfig);
 static async send_reset_pass_email(req, res, useremail, token, fullname) {
 
     var smtpConfig = {
-        host: 'mail.xnfthub.com', // Zoho SMTP host
-        port: 465, // SSL port
-        secure: true, // Use SSL
-        auth: {
-            user: 'support@xnfthub.com', // Replace with your Zoho email address
-            pass: 'Xnfthub1..' // Use your Zoho app-specific password (if you have 2FA enabled)
+        host: 'mail.techbycas.com',
+        port:  465,
+        secure: true,
+        auth:{
+            user: 'support@techbycas.com',
+            pass: 'Techbycas1.'
         }
     };
 
@@ -198,7 +198,7 @@ var transporter = nodemailer.createTransport(smtpConfig);
       transporter.use('compile', hbs(handlebarOptions));
       
       var mailOptions = {
-        from: '"Tech By Cas" <support@xnfthub.com>', // sender address
+        from: '"Tech By Cas" <support@techbycas.com>', // sender address
         to: useremail,
         subject: 'Reset Password',
         attachments: [{
@@ -247,5 +247,63 @@ var transporter = nodemailer.createTransport(smtpConfig);
 
     }
 }
+
+
+//send order notification email to admin
+static send_admin_order_notification(order_id, orderDate, data) {
+
+    const smtpConfig = {
+        host: 'mail.techbycas.com',
+        port: 465,
+        secure: true,
+        auth: {
+            user: 'support@techbycas.com',
+            pass: 'Techbycas1.'
+        }
+    };
+
+    const transporter = nodemailer.createTransport(smtpConfig);
+
+    const handlebarOptions = {
+        viewEngine: {
+            partialsDir: path.resolve('./views/'),
+            defaultLayout: false,
+        },
+        viewPath: path.resolve('./views/')
+    };
+
+    transporter.use('compile', hbs(handlebarOptions));
+
+    const mailOptions = {
+        from: '"Tech By Cas" <support@techbycas.com>',
+        to: 'techbycas@gmail.com',
+        subject: 'Order Notification',
+        attachments: [{
+            filename: 'logo.png',
+            path: './images/logo.png',
+            cid: "logo"
+        }],
+        template: 'admin_order_notification',
+        context: {
+            order_id,
+            customerName: data.customer_name,
+            customerEmail: data.email,
+            customerPhone: data.phone,
+            totalAmount: new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(data.total_amount),
+            paymentMethod: data.payment_method,
+            total_items: data.total_items,
+            orderDate
+        }
+    };
+
+    transporter.sendMail(mailOptions)
+        .then(() => {
+            console.log('Admin notification email sent');
+        })
+        .catch(err => {
+            console.error('Admin email failed:', err);
+        });
+}
+
 
 }

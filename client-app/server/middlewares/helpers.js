@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const dayjs = require('dayjs')
 
 module.exports = class MIDDLEWARES {
  
@@ -24,6 +25,13 @@ static generateConfirmationPin() {
 static generatePaymentReference(length = 10) { //for order id
 
   return crypto.randomBytes(length).toString('hex').slice(0, length);
+
+}
+
+
+static formatted_date (date) {
+
+  return dayjs(date).format("MMM DD, YYYY. h:mm A")
 
 }
 

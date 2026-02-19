@@ -253,7 +253,7 @@ async function checkout() {
 
             email: `${user_store.user.email}`,
 
-            customer_name: `${user_store.fullname}`,
+            customer_name: `${user_store.user.fullname}`,
 
             phone: `${user_store.user.phone}`,
 
