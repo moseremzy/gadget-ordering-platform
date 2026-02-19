@@ -53,7 +53,7 @@
 
       <!-- Item Price -->
       <div class="form-group">
-        <label for="item-price" class="form-label">Item Price</label>
+        <label for="item-price" class="form-label">Item Price ({{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(item_info.price)}})</label>
         <input type="number" v-model = "item_info.price" id="item-price" class="form-input" placeholder="Enter item price" required />
         <p class="err">{{item_info_error.price_err}}</p>
       </div>
