@@ -15,36 +15,36 @@ module.exports = class API {
 
 //POST REQUESTS
 
-// static async modify_db(req, res) { FOR SLUG ENTERING FOR ITEMS WHEN DEY ALREADY. MAKE SURE U CREATE FOR DB
+static async modify_db(req, res) { //FOR SLUG ENTERING FOR ITEMS WHEN DEY ALREADY. MAKE SURE U CREATE FOR DB
 
-// try {
+try {
 
-// db.query("SELECT product_id, name FROM products", async (err, results) => {
+db.query("SELECT product_id, name FROM products", async (err, results) => {
 
-//   for (const product of results) {
+  for (const product of results) {
 
-//     let slug = HELPERS.slugify(product.name);
+    let slug = HELPERS.slugify(product.name);
 
-//     // optional but SMART: ensure uniqueness
-//     slug = `${slug}-${product.product_id}`;
+    // optional but SMART: ensure uniqueness
+    slug = `${slug}-${product.product_id}`;
 
-//     await db.query(
-//       "UPDATE products SET slug = ? WHERE product_id = ?",
-//       [slug, product.product_id]
-//     );
-//   }
+    await db.query(
+      "UPDATE products SET slug = ? WHERE product_id = ?",
+      [slug, product.product_id]
+    );
+  }
 
-// });
+});
 
-// res.json({message: 'sharp'})
+res.json({message: 'sharp'})
 
-// } catch (error) {
+} catch (error) {
 
-//   res.json({message: error.message})
+  res.json({message: error.message})
   
-// }
+}
 
-// }
+}
 
 
 //register users

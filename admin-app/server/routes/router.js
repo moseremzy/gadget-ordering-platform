@@ -30,7 +30,7 @@ router.get("/fetch_settings", check_admin_session,  API.fetch_settings);
 
 router.get("/fetch_orders", check_admin_session,  API.fetch_orders);
 
-// router.get("/modify_db", API.modify_db)
+router.get("/modify_db", API.modify_db)
 
 router.get("/logout", API.logout);
 
