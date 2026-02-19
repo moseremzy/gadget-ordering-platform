@@ -39,6 +39,11 @@
         </div>
 
         <div>
+        <h2>DELIVERY DATE</h2>
+        <p>{{new Date(order.created_at).toLocaleDateString()}} - {{order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : ''}}</p>
+        </div>
+
+        <div>
         <h2>PAYMENT METHOD</h2>
         <p>{{order.payment_method}}</p>
         </div>

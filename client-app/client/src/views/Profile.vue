@@ -188,7 +188,7 @@
         <div>
         <p class="order-id">Order #{{order.order_id}}</p>
         <p class="order-date">Placed on {{MIDDLEWARES.formatted_date(order.created_at)}}</p>
-        <p class="order-date">Delivery on {{order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : '...'}}</p>
+        <p class="order-date">Expected between {{new Date(order.created_at).toLocaleDateString()}} - {{order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : ''}}</p>
         </div>
         <span :class="`status ${order.order_status}`">{{order.order_status}}</span>
         </div>
