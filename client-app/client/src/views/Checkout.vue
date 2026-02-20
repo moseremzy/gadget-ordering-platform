@@ -47,17 +47,17 @@
         
         <form>
 
-        <div>
-        <!-- <div class = "payment_method">
+        <!-- <div>
+        <div class = "payment_method">
         <input type = "radio" id = "cash" v-model = "payment_method" value = "cash on delivery"  name = "payment_method">
         <label for = "cash">Cash On Delivery</label>
-        </div> -->
+        </div> 
 
         <div class = "payment_method">
         <input type = "radio" id = "card" v-model = "payment_method" value = "online payment" name = "payment_method">
         <label for = "card">Online Payment (Paystack)</label>
         </div> 
-        </div>
+        </div> -->
 
         </form>
 
@@ -148,7 +148,7 @@ const settings_store = useSettingStore()
 const route = useRoute()
 const router = useRouter()
 
-let payment_method = ref("")
+let payment_method = ref("online payment")
 
  
 watch( () => user_store.isAuthenticated,
