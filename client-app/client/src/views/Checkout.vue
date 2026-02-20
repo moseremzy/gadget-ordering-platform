@@ -41,13 +41,13 @@
       </div> 
 
 
-      <div class = "item">
+     <!-- <div class = "item">
 
-        <h2>Select Payment Method</h2>
+     <h2>Select Payment Method</h2>
         
         <form>
 
-        <!-- <div>
+        <div>
         <div class = "payment_method">
         <input type = "radio" id = "cash" v-model = "payment_method" value = "cash on delivery"  name = "payment_method">
         <label for = "cash">Cash On Delivery</label>
@@ -57,11 +57,13 @@
         <input type = "radio" id = "card" v-model = "payment_method" value = "online payment" name = "payment_method">
         <label for = "card">Online Payment (Paystack)</label>
         </div> 
-        </div> -->
+        </div>
 
-        </form>
+        </form> 
 
-      </div> 
+      </div>  -->
+
+     
 
 
       <div class = "item" style = "border: 0;">
@@ -110,6 +112,10 @@
       </div> <!-- section2 -->
 
    </div> <!-- grid -->
+
+   <div style = "margin-top: 30px; text-align: center;"> 
+     <img src = "../assets/static_images/paystack.png" alt="">
+   </div>
 
    </div> <!-- CONTAINER -->
 
