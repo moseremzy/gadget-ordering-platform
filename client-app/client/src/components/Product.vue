@@ -64,7 +64,7 @@ function AddToCart(product, quantity) {
     font-family: var(--font-family);
 }
 .product-card {
-  background: linear-gradient(145deg, #1a1a1a 60%, #5086eb 100%);
+  background: linear-gradient(145deg, #1a1a1a 60%, #02112c 100%);
   color: #fff;
   border-radius: 16px;
   overflow: hidden;
@@ -142,11 +142,11 @@ function AddToCart(product, quantity) {
   font-size: 14px;
   margin: 17px 0;
   word-break: break-all;
-  color: #aaa;
+  color: var(--primary-white);
   line-height: 1.4;
 }
 .price {
-  color: var(--primary-blue);
+  color: var(--primary-white);
   font-weight: 700;
   font-size: 28px;
   margin: 6px 0;

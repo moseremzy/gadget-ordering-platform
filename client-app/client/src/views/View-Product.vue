@@ -577,7 +577,7 @@ div.home_container h1{
       display: block;
       width: 100%;
       height: 400px;
-      object-fit: cover;
+      object-fit: contain;
       margin: auto;
   }
 

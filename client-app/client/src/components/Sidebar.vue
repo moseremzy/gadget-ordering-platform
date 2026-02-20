@@ -80,7 +80,6 @@ const user_store = useUserStore();
 const interactive_store = useInteractiveStore();
 const categories_store = useCategoriesStore()
 
-
 const categories = computed(() => {
 
  return categories_store.categories

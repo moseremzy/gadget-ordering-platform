@@ -106,6 +106,7 @@ async function logout() {
   interactive_store.toggle_loading_overlay(false)
 
 }
+
 </script>
 
 
