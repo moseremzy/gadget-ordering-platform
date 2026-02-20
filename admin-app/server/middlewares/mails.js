@@ -246,5 +246,63 @@ static async send_user_cancellation_email(req, res, useremail, fullname, order_i
   }
 
  } 
+
+
+ 
+//send order delivery notification email to user
+static send_user_order_notification(data) {
+
+    const smtpConfig = {
+        host: 'mail.techbycas.com',
+        port: 465,
+        secure: true,
+        auth: {
+            user: SMTP_USER,
+            pass: SMTP_PASS
+        }
+    };
+
+    const transporter = nodemailer.createTransport(smtpConfig);
+
+    const handlebarOptions = {
+        viewEngine: {
+            partialsDir: path.resolve('./views/'),
+            defaultLayout: false,
+        },
+        viewPath: path.resolve('./views/')
+    };
+
+    transporter.use('compile', hbs(handlebarOptions));
+
+    const mailOptions = {
+        from: `Tech By Cas <${SMTP_USER}>`,
+        to: data.customerEmail,
+        subject: 'Order Notification',
+        attachments: [{
+            filename: 'logo.png',
+            path: './images/logo.png',
+            cid: "logo"
+        }],
+        template: 'user_order_notification',
+        context: {
+            order_id: data.order_id,
+            customerName: data.customerName,
+            total_amount: new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(data.total_amount),
+            payment_method: data.payment_method,
+            total_items: data.total_items,
+            delivery_date: data.delivery_date
+        }
+    };
+
+    transporter.sendMail(mailOptions)
+        .then(() => {
+            console.log('User order delivery notification email sent');
+        })
+        .catch(err => {
+            console.error('User order delivery email failed:', err);
+        });
+}
+
+
  
 }

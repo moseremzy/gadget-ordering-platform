@@ -1723,50 +1723,69 @@ static async update_admin_pass (req, res) {
 
 
 //update order status
-static async update_order_status (req, res) {
+// update order status
+static async update_order_status(req, res) {
 
-  let order_status = req.body.order_status
-
-  let order_id = req.body.order_id
+  const { order_status, order_id } = req.body;
 
   try {
 
-  const order_query = `UPDATE orders 
-  SET order_status= ?
-  WHERE order_id= ?`
+    // 1️⃣ Update order status
+    const update_query = `
+      UPDATE orders
+      SET order_status = ?
+      WHERE order_id = ?
+    `;
 
-  await new Promise( (resolve, reject) => {
+    await new Promise((resolve, reject) => {
+      db.query(update_query, [order_status, order_id], (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
 
-    db.query(order_query, [order_status, order_id], (err, result) => {
+    // 2️⃣ If delivered, fetch order + user details
+    if (order_status === 'delivered') {
 
-      if (err) {
+      const select_query = `
+        SELECT 
+          o.order_id,
+          o.total_items,
+          o.total_amount,
+          o.payment_method,
+          o.delivery_date,
+          u.fullname AS customerName,
+          u.email AS customerEmail
+        FROM orders o
+        JOIN users u ON o.user_id = u.user_id
+        WHERE o.order_id = ?
+      `;
 
-        reject(err)
-      
-      } else {
+      const orderData = await new Promise((resolve, reject) => {
+        db.query(select_query, [order_id], (err, result) => {
+          if (err) reject(err);
+          else resolve(result[0]);
+        });
+      });
 
-        resolve(result)
-
+      if (orderData) {
+        MAILS.send_user_order_notification(orderData)
       }
+    }
 
-    })
+    return res.status(200).json({
+      success: true,
+      message: "Order Status Updated",
+    });
 
-  })
+  } catch (error) {
 
-  return res.status(200).json({
-    success: true,
-    message: "Order Status Updated",
-  });
-  
-} catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred. Please try again.",
+    });
 
-  return res.status(500).json({
-    success: false,
-    message: "An error occurred. Please try again.",
-  });   
-
- }
-
+  }
 }
 
 
