@@ -84,9 +84,9 @@ async function remove_modal () {
   
   try {
     
-    await API.mark_terms_conditions()
-    
     emit('close')   // tell parent to update state
+
+    await API.mark_terms_conditions()
   
   } catch (error) {
     
