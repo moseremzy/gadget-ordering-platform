@@ -55,7 +55,7 @@ static async register(req, res) {
         message: "email already exists"
       }); 
         
-    } else { //insert user for db
+    }  
 
      data.password = await bcrypt.hash(data.password, 12); //encrypt the password
 
@@ -83,10 +83,13 @@ static async register(req, res) {
 
     })
 
-     return await MAILS.SendConfirmationMail(req, res, data.email, data.confirmation_code, data.fullname)
+     MAILS.SendConfirmationMail(req, res, data.email, data.confirmation_code, data.fullname)
    
-    }
-        
+     return res.status(200).json({ // Failure
+      success: true,
+      message: "success"
+     });
+
     } catch (error) { //if there was an error at any point
 
      return res.status(500).json({ // Failure

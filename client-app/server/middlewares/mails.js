@@ -50,41 +50,14 @@ module.exports = class MIDDLEWARES {
         }
     };
 
-    // Wrap sendMail in a Promise
-    try {
-
-       let result = await new Promise((resolve, reject) => {
-      
-        transporter.sendMail(mailOptions, (err, info) => {
-
-            if (err) {
-
-                reject(err);
-        
-            } else {
-                
-                resolve('Confirmation Email Was Resent');
-            
-            }
-        });
-      
-      });
-
-        return res.status(200).json({ // Success
-            success: true,
-            message: result,
-            confirmationCode: confirmationCode
-        }); 
-    
-      } catch (err) {
-    
-        return res.status(500).json({ // Failure
-            success: false,
-            message: "mail not delivered. please try again.",
-        });  
-    }
+    transporter.sendMail(mailOptions)
+    .then(() => {
+        console.log('confirmation mail sent');
+    })
+    .catch(err => {
+        console.error('confirmation mail failed:', err);
+    });
 }
-
 
 
 
