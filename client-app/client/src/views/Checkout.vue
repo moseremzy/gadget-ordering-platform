@@ -40,6 +40,25 @@
 
       </div> 
 
+      <div class="item">
+
+        <h2>Optional Order Note</h2>
+
+        <div class="note_container">
+
+        <textarea 
+        v-model="order_note"
+        placeholder="Add delivery instructions, landmarks, or special requests..."
+        ></textarea>
+
+        <!-- <p class="note_hint">
+        Example: "Call me before delivery" | "Deliver to gate 2" | "Leave with security"
+        </p> -->
+
+        </div>
+
+      </div>
+
 
      <!-- <div class = "item">
 
@@ -155,6 +174,7 @@ const route = useRoute()
 const router = useRouter()
 
 let payment_method = ref("online payment")
+const order_note = ref("")
 
  
 watch( () => user_store.isAuthenticated,
@@ -210,6 +230,25 @@ function validateAddress() {
     
 }
 
+
+function validateNote() {
+
+    if (order_note.value.length > 200) {
+
+        interactive_store.backend_message = "Note cannot be more than 200 characters"
+
+        interactive_store.display_error_alert_box()
+
+        return false
+
+    } else {
+
+        return true
+
+    }
+    
+}
+
 function validate_payment_method() {
 
     if (payment_method.value == "") {
@@ -251,7 +290,7 @@ function validate_products() {
 
 async function checkout() {
 
-    if (validateAddress() && validate_payment_method() && validate_products()) {
+    if (validateAddress() && validate_payment_method() && validate_products() && validateNote()) {
 
         interactive_store.toggle_loading_overlay(true)
 
@@ -268,6 +307,8 @@ async function checkout() {
             total_amount: products_store.cart_total_amount,
 
             total_items: products_store.total_cart_products,
+
+            note: order_note.value.trim(),
 
             delivery_fee: products_store.delivery_fee,
 
@@ -385,6 +426,34 @@ div.item {
       cursor: pointer;
       margin: 10px 20px 11px 20px;
   }
+
+  .note_container {
+      padding: 20px;
+  }
+
+  .note_container textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid rgb(60,60,60);
+    background-color: rgb(10,10,10);
+    color: white;
+    font-size: 15px;
+    resize: none;
+  }
+
+  .note_container textarea:focus {
+    outline: none;
+    border: 1px solid var(--primary-blue);
+  }
+
+  /* .note_hint {
+    color: gray;
+    font-size: 13px;
+    margin-top: 10px;
+    line-height: 1.5;
+  } */
 
   div.payment_method {
       color: var(--primary-white);

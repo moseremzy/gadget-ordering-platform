@@ -54,7 +54,8 @@
         <div class="icon"><font-awesome-icon class="fa-solid fa-clock blue" icon="fa-solid fa-clock" /></div>
         <div class="details">
         <h4>Store Hours</h4>
-        <p>Monday - Saturday: 9:00 AM - 7:00 PM</p>
+        <p>Monday - Friday: 9:00 AM - 6:00 PM</p>
+        <p>Saturday: 10:00 AM - 6:00 PM</p>
         <p>Sunday: Closed</p>
         </div>
     </div>

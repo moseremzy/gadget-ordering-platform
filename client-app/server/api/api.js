@@ -492,6 +492,7 @@ static async submit_order(req, res) {
     total_items: data.total_items,
     delivery_fee: data.delivery_fee,
     confirmation_pin: data.confirmation_pin,
+    note: data.note,
     payment_reference: data.payment_reference
   };
 
@@ -1276,6 +1277,7 @@ static async fetch_orders (req, res) {
       o.order_status,
       o.created_at,
       o.total_amount,
+      o.note,
       p.name,
       p.main_image,
       oi.quantity,
@@ -1303,6 +1305,8 @@ static async fetch_orders (req, res) {
       })
 
     })
+
+    
 
 
     return res.status(200).json({ // Success

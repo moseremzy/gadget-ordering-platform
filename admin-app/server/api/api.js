@@ -1132,6 +1132,7 @@ static async fetch_orders (req, res) {
         o.order_id,
         o.order_status,
         o.created_at,
+        o.note,
         o.total_amount,
       
         -- User details

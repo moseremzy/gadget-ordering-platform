@@ -58,6 +58,11 @@
         <p>{{order_items[0].address}}</p>
         </div>
 
+        <div v-if = "order_items[0].note">
+        <h2>NOTE</h2>
+        <p>{{order_items[0].note}}</p>
+        </div>
+
         <REFUNDSTATUS :order = order />
 
     </div> <!-- ORDER DETAILS -->

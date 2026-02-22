@@ -39,7 +39,7 @@
       <!-- STORE HOURS -->
       <div class="footer-section">
         <h3>Store Hours</h3>
-        <p>Mon - Fri: 9:00 AM - 8:00 PM</p>
+        <p>Mon - Fri: 9:00  AM - 6:00 PM</p>
         <p>Sat: 10:00 AM - 6:00 PM</p>
         <p>Sun: Closed</p>
       </div>

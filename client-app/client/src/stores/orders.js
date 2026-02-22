@@ -36,6 +36,8 @@ export const useOrdersStore = defineStore("orders", {
 
             this.order_items = response.all_order_items || []
 
+            console.log(this.order_items)
+
             this.orders = response.all_orders || []
     
         }

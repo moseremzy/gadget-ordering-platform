@@ -30,6 +30,7 @@
     <div :class="`status ${orders_store.current_order[0]?.order_status}`"><strong>Status:</strong> {{ orders_store.current_order[0]?.order_status }}</div>
     <div><strong>Created:</strong> {{MIDDLEWARES.formatted_date(orders_store.current_order[0]?.created_at)}}</div>
     <div><strong>Total Amount:</strong> {{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(orders_store.current_order[0]?.total_amount)}}</div>
+    <div v-if = "orders_store.current_order[0].note"><strong>Note:</strong> {{orders_store.current_order[0]?.note}}</div>
   </div>
 
   <!-- Order Items Table -->
@@ -56,6 +57,7 @@
           <td>{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(item.price)}}</td>
 
           <td>{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(item.quantity * item.price )}}</td>
+      
         </tr>
       </tbody>
     </table>
@@ -159,6 +161,7 @@ div.home_container h1{
 
 /* ORDER SUMMARY */
 .order-summary {
+  word-break: break-all;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 10px;
@@ -198,6 +201,7 @@ div.home_container h1{
 }
 
 .order-table td {
+  word-break: break-all;
   padding: 15px 12px;
   border-bottom: 1px solid #2c2c2c;
   font-size: 14px;
