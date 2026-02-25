@@ -76,7 +76,7 @@ const products = computed(() => {
 
 // Pagination State
 const currentPage = ref(1);
-const itemsPerPage = 2;
+const itemsPerPage = 20;
 
 
 /* Hooks */
