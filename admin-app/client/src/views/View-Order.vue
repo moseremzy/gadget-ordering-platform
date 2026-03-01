@@ -136,7 +136,7 @@
 
 <div> <!-- PRINT RECIEPT -->
 
-<RECEIPT v-if="selectedOrder" :order="selectedOrder" />
+<!-- <RECEIPT v-if="selectedOrder" :order="selectedOrder" /> -->
 
 </div> <!-- PRINT RECIEPT -->
 
@@ -237,11 +237,10 @@ const order_items = computed(() =>  {
 
 })
 
-const selectedOrder = ref(null);
 
 const generateReceipt = (order) => {
 
-  selectedOrder.value = order;
+   console.log(order)
   
 };
 
