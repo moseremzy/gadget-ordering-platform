@@ -132,9 +132,23 @@
 
    </div> <!-- grid -->
 
-   <div style = "margin-top: 30px; text-align: center;"> 
-     <img src = "../assets/static_images/paystack.png" alt="">
-   </div>
+   <div class="payment-section">
+
+    <div class="payment-box">
+
+        <div class="secure">
+            <span class="line"></span>
+            <span class="secure-text">Secured by <strong>paystack</strong></span>
+            <span class="line"></span>
+        </div>
+
+        <div class="payment-logos">
+            <img src="../assets/static_images/paystack.png" alt="Payment methods">
+        </div>
+
+    </div>
+
+</div>
 
    </div> <!-- CONTAINER -->
 
@@ -537,6 +551,64 @@ div.item {
       margin: 40px auto 0px auto;
       background-color: var(--primary-blue);
   }
+ 
+
+.payment-section{
+    width:100%;
+    max-width:420px;
+    border: 0;
+    border-radius: 30%;
+    margin:0 auto;
+    font-family: Arial, Helvetica, sans-serif;
+    background:#f3f3f3;
+}
+
+.payment-section h3{
+    font-size:18px;
+    margin-bottom:10px;
+}
+
+.payment-box{
+    background:#fff;
+    border:1px solid #ddd;
+    border-radius:8px;
+    padding:18px;
+}
+
+.secure{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:15px;
+}
+
+.secure .line{
+    flex:1;
+    height:1px;
+    background:#ddd;
+}
+
+.secure-text{
+    margin:0 10px;
+    font-size:14px;
+    color:#444;
+    white-space:nowrap;
+}
+
+.secure-text strong{
+    font-weight:700;
+}
+
+.payment-logos{
+    display:flex;
+    justify-content:center;
+}
+
+.payment-logos img{
+    width:100%;
+    max-width:320px;
+    height:auto;
+}
 
 
 /* DESKTOP */
@@ -554,6 +626,9 @@ div.item {
 @media only screen and (max-width: 800px) {
   div.home_container h1{
     font-size: var(--container-mobile-font-size);
+  }
+  .payment-section{
+     margin: 16px auto 0 auto;
   }
 }
 </style>
