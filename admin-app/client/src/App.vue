@@ -10,6 +10,8 @@ import { useSettingStore } from '@/stores/settings'
 
 import { useOrdersStore } from '@/stores/orders'
 
+import { useRecordsStore } from '@/stores/records'
+
 import { useAdminStore } from '@/stores/admin'
 
 import { useProductStore } from './stores/products';
@@ -25,6 +27,8 @@ import API from "./api/index";
 const admin_store = useAdminStore(); // Access the admin
 
 const ordersStore = useOrdersStore(); //Access the orders store
+
+const recordsStore = useRecordsStore(); //Access the records store
 
 const customers_store = useCustomersStore()
 
@@ -90,6 +94,8 @@ setInterval(async () => {   // In App.vue (your polling function)
         await Promise.all([
 
         ordersStore.fetch_orders(),
+
+        recordsStore.fetch_records(),
 
         products_store.fetch_products(),
 

@@ -4,6 +4,7 @@ import App from "./App.vue";
 import router from "./router";
 import { useAdminStore } from './stores/admin';
 import { useOrdersStore } from './stores/orders';
+import { useRecordsStore } from './stores/records';
 import { useCustomersStore } from '@/stores/customers';
 import { useProductStore } from '@/stores/products';
 import { useCategoriesStore } from './stores/categories';
@@ -20,10 +21,10 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 /* import specific icons */
-import { faNavicon, faSpinner, faHome, faCartShopping, faSearch, faUtensils, faHotel, faBurger, faPeopleRoof, faGraduationCap, faShop, faHouse, faUser, faTrash, faExclamation, faArrowRightLong, faXmark, faArrowLeftLong, faCircleCheck, faChevronLeft, faChevronRight, faBoxOpen, faUserTie, faEnvelope, faSignOut, faGauge, faUsers, faCalculator, faSort, faPhone, faLocation, faCamera, faMessage, faChartLine, faUserCog, faMobilePhone, faPlus} from '@fortawesome/free-solid-svg-icons'
+import { faNavicon, faSpinner, faHome, faCartShopping, faSearch, faUtensils, faHotel, faBurger, faPeopleRoof, faGraduationCap, faShop, faHouse, faUser, faTrash, faExclamation, faArrowRightLong, faXmark, faArrowLeftLong, faCircleCheck, faChevronLeft, faChevronRight, faBoxOpen, faUserTie, faEnvelope, faSignOut, faGauge, faUsers, faCalculator, faSort, faPhone, faLocation, faCamera, faMessage, faChartLine, faUserCog, faMobilePhone, faPlus, faMobileScreenButton} from '@fortawesome/free-solid-svg-icons'
 
 /* add icons to the library */
-library.add( faNavicon, faSpinner, faHome, faCartShopping, faSearch, faUtensils, faHotel, faBurger, faPeopleRoof, faGraduationCap, faShop, faHouse, faUser, faTrash, faExclamation, faArrowRightLong, faXmark, faArrowLeftLong, faCircleCheck, faChevronLeft, faChevronRight, faBoxOpen, faUserTie, faEnvelope, faSignOut, faGauge, faUsers, faCalculator, faSort, faPhone, faLocation, faCamera, faMessage, faChartLine, faUserCog, faMobilePhone, faPlus)
+library.add( faNavicon, faSpinner, faHome, faCartShopping, faSearch, faUtensils, faHotel, faBurger, faPeopleRoof, faGraduationCap, faShop, faHouse, faUser, faTrash, faExclamation, faArrowRightLong, faXmark, faArrowLeftLong, faCircleCheck, faChevronLeft, faChevronRight, faBoxOpen, faUserTie, faEnvelope, faSignOut, faGauge, faUsers, faCalculator, faSort, faPhone, faLocation, faCamera, faMessage, faChartLine, faUserCog, faMobilePhone, faPlus, faMobileScreenButton)
 
 
 // Import the component
@@ -51,6 +52,8 @@ const initializeApp = async () => {
 
     const ordersStore = useOrdersStore(); //Access the orders store
 
+    const recordsStore = useRecordsStore(); //Access the orders store
+
     const customers_store = useCustomersStore()
 
     const products_store = useProductStore()
@@ -72,6 +75,8 @@ const initializeApp = async () => {
             await Promise.all([
     
             ordersStore.fetch_orders(),
+
+            recordsStore.fetch_records(),
 
             products_store.fetch_products(),
 

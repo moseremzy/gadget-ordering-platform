@@ -21,18 +21,40 @@ import API from '../../api/index'
 
 import { useInteractiveStore } from '@/stores/interactive'
 
+import { useDeliveryStore } from '@/stores/delivery_store'
+
 const interactive_store = useInteractiveStore()
+
+const delivery_store = useDeliveryStore()
 
 const props = defineProps({
 
-  order: Object
+  order: Object,
+
+  order_items: Object
 
 })
 
-const { order } = toRefs(props)
- 
+const { order, order_items } = toRefs(props)
+
+const originalStatus = ref(order.value.order_status)
 
 async function UpdateOrderStatus() {
+
+  if (order.value.order_status == 'delivered') {
+
+    delivery_store.previous_status = originalStatus.value
+
+    // reset UI
+    order.value.order_status = originalStatus.value
+
+    delivery_store.prepareDeliveryForm(order.value, order_items.value)
+
+    interactive_store.display_delivered_modal = true
+
+    return
+  
+  }
 
     interactive_store.toggle_loading_overlay(true) //show overlay
 
@@ -45,6 +67,8 @@ async function UpdateOrderStatus() {
       order_id: order.value.order_id,
         
     })
+
+    originalStatus.value = order.value.order_status
 
     interactive_store.backend_message = "Order Status Updated Succesfully"
     

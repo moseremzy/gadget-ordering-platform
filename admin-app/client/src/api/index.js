@@ -70,6 +70,11 @@ export default class API {
     return await api.post("/retry_refund", info)
   }
 
+  //submits records before updating order status to delivered
+  static async submit_gadget_record(info) {
+    return await api.post("/submit_gadget_record", info)
+  }
+
   // GET
 
   //Verify Email
@@ -98,8 +103,16 @@ export default class API {
     return api.get("/fetch_orders").then(res => res.data);
   }
 
+  static async fetch_records() {
+    return api.get("/fetch_records").then(res => res.data);
+  }
+
   static async fetch_settings() {
     return api.get("/fetch_settings").then(res => res.data);
+  }
+
+  static async download_reciept(order_id) {
+    return api.get(`/orders/${order_id}/receipt`, { responseType: 'blob' }).then(res => res.data);
   }
 
   static async logout() {

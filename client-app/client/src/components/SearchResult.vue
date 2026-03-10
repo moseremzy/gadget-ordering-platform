@@ -39,7 +39,7 @@
         <router-link
           v-for="product in filteredProducts"
           :key="product.product_id"
-          :to="`/view-product/${product.name}_${product.product_id}`"
+          :to= "`/view-product/${product.product_id}/${product.slug}`"
           class="link"
           @click="interactive_store.clearQuery"
         >

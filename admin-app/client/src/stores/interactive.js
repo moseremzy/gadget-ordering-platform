@@ -42,6 +42,8 @@ export const useInteractiveStore = defineStore("interactive", {
 
        query: '', //query for search box
 
+       display_delivered_modal: false
+
     }),
 
 

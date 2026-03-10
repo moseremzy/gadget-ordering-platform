@@ -9,43 +9,45 @@ const db = require("../middlewares/database")
 const MAILS = require("../middlewares/mails.js");
 const HELPERS = require("../middlewares/helpers")
 const cloudinary = require("../middlewares/cloudinary")
-
+const PDFDocument = require("pdfkit");
 
 module.exports = class API {
 
 //POST REQUESTS
 
-// static async modify_db(req, res) { //FOR SLUG ENTERING FOR ITEMS WHEN DEY ALREADY. MAKE SURE U CREATE FOR DB
 
-// try {
+static async modify_db(req, res) {
+  try {
 
-// db.query("SELECT product_id, name FROM products", async (err, results) => {
+    const query = `
+      CREATE TABLE IF NOT EXISTS device_records (
+        record_id INT AUTO_INCREMENT PRIMARY KEY,
+        
+        order_item_id INT NOT NULL,
+        
+        imei VARCHAR(50) NOT NULL UNIQUE,
+        
+        source VARCHAR(255) NOT NULL,
+        
+        delivered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        
+        FOREIGN KEY (order_item_id) 
+        REFERENCES order_items(order_item_id)
+      )
+    `;
 
-//   for (const product of results) {
+    db.query(query, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
 
-//     let slug = HELPERS.slugify(product.name);
+      return res.json({ message: "delivered_devices table created successfully" });
+    });
 
-//     // optional but SMART: ensure uniqueness
-//     slug = `${slug}-${product.product_id}`;
-
-//     await db.query(
-//       "UPDATE products SET slug = ? WHERE product_id = ?",
-//       [slug, product.product_id]
-//     );
-//   }
-
-// });
-
-// res.json({message: 'sharp'})
-
-// } catch (error) {
-
-//   res.json({message: error.message})
-  
-// }
-
-// }
-
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
 
 //register users
 static async register(req, res) {
@@ -899,6 +901,130 @@ static async retry_refund (req, res) {
 }
 
 
+// submits records before updating order status to delivered
+static async submit_gadget_record(req, res) {
+
+  try {
+
+    const data = req.body
+    const order_id = data.order_id
+
+    const gadgets = data.gadgets.map((gadget) => {
+      return {
+        order_item_id: gadget.order_item_id,
+        imei: gadget.imei,
+        source: gadget.source
+      }
+    })
+
+    // check if records already exist
+    const existing = await new Promise((resolve, reject) => {
+
+      const query = `
+        SELECT dr.record_id 
+        FROM device_records dr
+        JOIN order_items oi ON dr.order_item_id = oi.order_item_id
+        WHERE oi.order_id = ?
+        LIMIT 1
+      `
+
+      db.query(query, [order_id], (err, result) => {
+        if (err) reject(err)
+        else resolve(result)
+      })
+
+    })
+
+    const recordsAlreadyExist = existing.length > 0
+
+
+    // 1️⃣ START TRANSACTION
+    await new Promise((resolve, reject) => {
+      db.query("START TRANSACTION", (err) => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+
+
+    // 2️⃣ INSERT GADGETS ONLY IF THEY DON'T EXIST
+    if (!recordsAlreadyExist) {
+
+      for (const gadget of gadgets) {
+
+        await new Promise((resolve, reject) => {
+
+          const query = `
+            INSERT INTO device_records 
+            (order_item_id, imei, source) 
+            VALUES (?, ?, ?)
+          `
+
+          db.query(
+            query,
+            [gadget.order_item_id, gadget.imei, gadget.source],
+            (err, result) => {
+              if (err) reject(err)
+              else resolve(result)
+            }
+          )
+
+        })
+
+      }
+
+    }
+
+
+    // 3️⃣ UPDATE ORDER STATUS
+    await new Promise((resolve, reject) => {
+
+      const query = `
+        UPDATE orders 
+        SET order_status = 'delivered' 
+        WHERE order_id = ?
+      `
+
+      db.query(query, [order_id], (err, result) => {
+        if (err) reject(err)
+        else resolve(result)
+      })
+
+    })
+
+
+    // 4️⃣ COMMIT
+    await new Promise((resolve, reject) => {
+      db.query("COMMIT", (err) => {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+
+
+    return res.status(200).json({
+      success: true,
+      message: recordsAlreadyExist
+        ? "Order status updated to delivered (records already existed)"
+        : "Order delivered and gadget records stored"
+    })
+
+
+  } catch (error) {
+
+    await new Promise((resolve) => {
+      db.query("ROLLBACK", () => resolve())
+    })
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    })
+
+  }
+
+}
+
 
   //CHANGE ITEM PHOTO
   static async update_photo (req, res) {
@@ -1148,6 +1274,7 @@ static async fetch_orders (req, res) {
         p.main_image,
       
         -- Order item details
+        oi.order_item_id,
         oi.quantity,
         oi.price
       
@@ -1186,6 +1313,95 @@ static async fetch_orders (req, res) {
     });
     
   } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: "Error loading data. please try again.",
+    });
+
+  }
+
+}
+
+
+
+//fetch records
+static async fetch_records (req, res) {
+
+  try {
+
+  const device_records_query = `
+  SELECT 
+    dr.record_id,
+    dr.order_item_id,
+    dr.imei,
+    dr.source,
+    dr.delivered_at,
+  
+    -- Order
+    o.order_id,
+  
+    -- User details
+    u.user_id AS customer_id,
+    u.fullname AS customer_name,
+    u.phone,
+    u.email,
+    u.address,
+  
+    -- Product details
+    p.product_id,
+    p.name AS product_name,
+    p.main_image,
+  
+    -- Order item details
+    oi.quantity,
+    oi.price
+  
+  FROM device_records dr
+  
+  JOIN order_items oi 
+    ON dr.order_item_id = oi.order_item_id
+  
+  JOIN orders o 
+    ON oi.order_id = o.order_id
+  
+  JOIN users u 
+    ON o.user_id = u.user_id
+  
+  JOIN products p 
+    ON oi.product_id = p.product_id
+  
+  ORDER BY dr.delivered_at DESC
+  `;
+
+  let all_records = await new Promise( (resolve, reject) => {
+
+    db.query(device_records_query, (err, result) => {
+
+      if (err) {
+
+        reject(err)
+      
+      } else {
+
+        resolve(result)
+
+      }
+
+    })
+
+  })
+
+
+    return res.status(200).json({ // Success
+      success: true,
+      message: "success",
+      all_records
+    });
+    
+  } catch (error) {
+
+    console.log(error.message)
 
     return res.status(500).json({
       success: false,
@@ -1391,6 +1607,295 @@ static async fetch_settings (req, res) {
 
   }
 
+}
+
+
+
+//download reciept
+static async download_reciept(req, res) {
+  
+  try {
+    
+    const naira = new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+    });
+
+    const order_id = req.params.order_id;
+
+    // 1️⃣ Fetch Order
+    const order = await new Promise((resolve, reject) => {
+      db.query(
+        "SELECT * FROM orders WHERE order_id = ?",
+        [order_id],
+        (err, result) => {
+          if (err) return reject(err);
+          resolve(result[0]);
+        }
+      );
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // 2️⃣ Verify payment
+    if (order.payment_status !== "success") {
+      return res.status(400).json({
+        success: false,
+        message: "Payment not verified",
+      });
+    }
+
+
+    const order_items_query = `
+    SELECT 
+      o.order_id,
+      o.order_status,
+      o.created_at,
+      o.note,
+      o.total_amount,
+      o.delivery_fee,
+
+      -- User details
+      u.user_id AS customer_id,
+      u.fullname AS customer_name,
+      u.phone,
+      u.email,
+      u.address,
+
+      -- Product details
+      p.product_id,
+      p.name AS product_name,
+      p.main_image,
+
+      -- Order item details
+      oi.order_item_id,
+      oi.quantity,
+      oi.price,
+
+      -- Device record
+      dr.imei,
+      dr.source
+
+    FROM orders o
+    JOIN users u ON o.user_id = u.user_id
+    JOIN order_items oi ON o.order_id = oi.order_id
+    JOIN products p ON oi.product_id = p.product_id
+    LEFT JOIN device_records dr ON oi.order_item_id = dr.order_item_id
+
+    WHERE o.order_id = ?
+    `;
+  
+  let order_items = await new Promise((resolve, reject) => {
+    db.query(order_items_query, [order_id], (err, result) => {
+      if (err) reject(err);
+      else resolve(result);
+    });
+  });
+
+
+  const doc = new PDFDocument({ margin: 50 });
+
+  // Register fonts
+  doc.registerFont("Roboto", path.join(__dirname, "../fonts/Roboto-Regular.ttf"));
+  doc.registerFont("Roboto-Bold", path.join(__dirname, "../fonts/Roboto-Bold.ttf"));
+  
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=receipt-${order.order_id}.pdf`
+  );
+  
+  doc.pipe(res);
+  
+  const current_order = order_items[0];
+  const items = order_items;
+  
+  // ===============================
+  // STORE HEADER
+  // ===============================
+  doc.fontSize(18).font("Roboto-Bold").text("TECH BY CAS", {
+    align: "center",
+  });
+  
+  doc.moveDown(0.3);
+  doc.fontSize(10).font("Roboto")
+     .text("18 Asemota street airport Benin city", { align: "center" })
+     .text("Phone: 08077416692 | Email: support@techbycas.com", { align: "center" });
+  
+  doc.moveDown();
+  doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+  doc.moveDown();
+  
+  // ===============================
+  // ORDER DETAILS SECTION
+  // ===============================
+  doc.fontSize(12).font("Roboto-Bold").text("Receipt Details");
+  doc.moveDown(0.5);
+  
+  doc.font("Roboto");
+  doc.text(`Order ID: ${current_order.order_id}`);
+  doc.text(`Date: ${new Date(current_order.created_at).toDateString()}`);
+  doc.text(`Customer: ${current_order.customer_name}`);
+  doc.text(`Phone: ${current_order.phone}`);
+  doc.text(`Address: ${current_order.address}`);
+  
+  doc.moveDown();
+  doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+  doc.moveDown();
+  
+  // ===============================
+  // ITEMS TABLE
+  // ===============================
+  
+  const tableTop = doc.y + 10;
+  const itemX = 50;
+  const priceX = 280;
+  const imeiX = 350;
+  const sourceX = 470;
+  
+  doc.font("Roboto-Bold");
+  doc.text("Product", itemX, tableTop);
+  doc.text("Price", priceX, tableTop);
+  doc.text("IMEI / Serial", imeiX, tableTop);
+  doc.text("Source", sourceX, tableTop);
+  
+  doc.moveTo(50, tableTop + 15)
+     .lineTo(550, tableTop + 15)
+     .stroke();
+  
+  doc.font("Roboto");
+  
+  let position = tableTop + 25;
+  const rowSpacing = 8;
+
+  items.forEach(item => {
+
+    const productHeight = doc.heightOfString(item.product_name, {
+      width: 180,
+    });
+
+    const priceHeight = doc.heightOfString(naira.format(item.price), {
+      width: 60,
+    });
+
+    const imeiHeight = doc.heightOfString(item.imei || "-", {
+      width: 110,
+    });
+
+    const sourceHeight = doc.heightOfString(item.source || "-", {
+      width: 80,
+    });
+
+    const rowHeight = Math.max(
+      productHeight,
+      priceHeight,
+      imeiHeight,
+      sourceHeight,
+      20
+    );
+
+    doc.text(item.product_name, itemX, position, {
+      width: 180,
+    });
+
+    doc.text(naira.format(item.price), priceX, position, {
+      width: 60,
+    });
+
+    doc.text(item.imei || "-", imeiX, position, {
+      width: 110,
+    });
+
+    doc.text(item.source || "-", sourceX, position, {
+      width: 80,
+    });
+
+    position += rowHeight + rowSpacing;
+
+  });
+  // Bottom line
+  doc.moveTo(50, position)
+     .lineTo(550, position)
+     .stroke();
+  
+  doc.moveDown(2);
+  
+  // ===============================
+  // TOTAL SECTION
+  // ===============================
+  
+  const subTotal = Number(order.total_amount) - (order.delivery_fee || 0);
+  const deliveryFee = Number(order.delivery_fee || 0);
+  const finalTotal = Number(order.total_amount);
+  
+  // Move slightly down from table
+  position += 20;
+  
+  doc.moveTo(350, position)
+    .lineTo(550, position)
+    .stroke();
+  
+  position += 10;
+  
+  doc.font("Roboto");
+  
+  // Subtotal
+  doc.text("Subtotal:", 350, position);
+  doc.text(naira.format(subTotal), 450, position, {
+    width: 100,
+    align: "right",
+  });
+  
+  position += 20;
+  
+  // Delivery Fee
+  if (deliveryFee > 0) {
+    doc.text("Delivery Fee:", 350, position);
+    doc.text(naira.format(deliveryFee), 450, position, {
+      width: 100,
+      align: "right",
+    });
+    position += 20;
+  }
+  
+  // Divider
+  doc.moveTo(350, position)
+    .lineTo(550, position)
+    .stroke();
+  
+  position += 10;
+  
+  // Grand Total
+  doc.font("Roboto-Bold");
+  doc.text("Total:", 350, position);
+  doc.text(naira.format(finalTotal), 450, position, {
+    width: 100,
+    align: "right",
+  });
+  
+  // ===============================
+  // FOOTER
+  // ===============================
+  doc.moveDown(2);
+  
+  doc.fontSize(10)
+     .font("Roboto")
+     .text("Thank you for your patronage.", { align: "center" });
+  
+  doc.end();
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: "Error generating receipt",
+    });
+  }
 }
 
 
@@ -1722,8 +2227,6 @@ static async update_admin_pass (req, res) {
 
 
 
-
-//update order status
 // update order status
 static async update_order_status(req, res) {
 
@@ -1744,35 +2247,6 @@ static async update_order_status(req, res) {
         else resolve(result);
       });
     });
-
-    // 2️⃣ If delivered, fetch order + user details
-    if (order_status === 'delivered') {
-
-      const select_query = `
-        SELECT 
-          o.order_id,
-          o.total_items,
-          o.total_amount,
-          o.payment_method,
-          o.delivery_date,
-          u.fullname AS customerName,
-          u.email AS customerEmail
-        FROM orders o
-        JOIN users u ON o.user_id = u.user_id
-        WHERE o.order_id = ?
-      `;
-
-      const orderData = await new Promise((resolve, reject) => {
-        db.query(select_query, [order_id], (err, result) => {
-          if (err) reject(err);
-          else resolve(result[0]);
-        });
-      });
-
-      if (orderData) {
-        MAILS.send_user_order_notification(orderData)
-      }
-    }
 
     return res.status(200).json({
       success: true,

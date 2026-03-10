@@ -109,6 +109,15 @@ routes: [
     }
   },
   {
+    path: '/account/device-records',
+    name: 'deviceRecords',
+    component: () => import('../views/Device-Records.vue'),
+    meta: {
+      title: 'Device-Records - Tech By Cas Admin',
+      requiresAuth: true
+    }
+  },
+  {
     path: '/account/analytics',
     name: 'Analytics',
     component: () => import('../views/Analytics.vue'),

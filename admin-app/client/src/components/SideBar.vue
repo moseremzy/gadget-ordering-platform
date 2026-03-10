@@ -6,7 +6,13 @@
        <li><router-link exact-active-class = "active-link" to = "/account/dashboard"><font-awesome-icon class="fa-solid fa-user-tie icons" icon="fa-solid fa-gauge"/> Dashboard</router-link></li> 
        <li><router-link exact-active-class = "active-link" to = "/account/orders"><font-awesome-icon class="fa-solid fa-cart-shopping icons" icon="fa-solid fa-cart-shopping"/> Orders <strong v-if = "filteredItems > 0" style = "background-color: red; margin-left: 5px; padding: 3px 7px; font-size: 13px; border-radius: 100%;">{{filteredItems}}</strong></router-link></li> 
        <li><router-link exact-active-class = "active-link" to = "/account/items"><font-awesome-icon class="fa-solid fa-mobile-phone icons" icon="fa-solid fa-mobile-phone"/> Items</router-link></li> 
-       <li><router-link exact-active-class = "active-link" to = "/account/customers"><font-awesome-icon class="fa-solid fa-user icons" icon="fa-solid fa-user"/> Customers</router-link></li> 
+       <li><router-link exact-active-class = "active-link" to = "/account/customers"><font-awesome-icon class="fa-solid fa-user icons" icon="fa-solid fa-user"/> Customers</router-link></li>
+       <li>
+        <router-link exact-active-class="active-link" to="/account/device-records">
+            <font-awesome-icon class="icons" icon="fa-solid fa-mobile-screen-button"/>
+            Device Records
+        </router-link>
+        </li> 
        <li><router-link exact-active-class = "active-link" to = "/account/analytics"><font-awesome-icon class="fa-solid fa-chart-line icons" icon="fa-solid fa-chart-line"/> Analytics</router-link></li> 
        <li><router-link exact-active-class = "active-link" to = "/account/settings"><font-awesome-icon class="fa-solid fa-user-cog icons" icon="fa-solid fa-user-cog"/>Account Settings</router-link></li> 
        <li @click.prevent = "logout" v-if = "admin_store.isAuthenticated"><router-link to="#" class = "link" style="color: red;"><font-awesome-icon  class="fa-solid fa-sign-out icons" style="color: red;" icon="fa-solid fa-sign-out"/>Log Out</router-link></li>
@@ -39,7 +45,7 @@ let filteredItems = computed(() => { //search for item
 
     return orders_store.orders.filter((order) => {
 
-    return order.status !== "Payment Pending" && order.status !== "Payment Failed" && order.status !== "Payment Abandoned" && order.status !== "Payment Reversed" && order.status !== "Cancelled" && order.status !== "Delivered";
+    return order.order_status == "pending";
 
 }).length
 

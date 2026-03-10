@@ -20,7 +20,7 @@
 
     <!-- Status Filter --> 
 
-    <ORDERSTATUS :order = order v-else/>
+    <ORDERSTATUS :order = order :order_items = order_items v-else/>
     
     <PAYMENTSTATUS :order = order />
 
@@ -29,6 +29,8 @@
     <CANCELORDERMODAL/>
 
     <CONFIRMORDERMODAL/>
+
+    <DELIVEREDMODAL/>
 
     <div class = "flex_container">
 
@@ -70,10 +72,10 @@
     <div class = "order_items">
     <h2>GADGETS ORDERED ({{order.total_items}})</h2>
     <div class="menu-items">
-      <template v-for = "item in order_items" :key = "item.name">
+      <template v-for = "item in order_items" :key = "item.product_name">
       <div class="menu-item">
         <div class="item-image">
-          <img :src="`${item.main_image}`" :alt="item.name">
+          <img :src="`${item.main_image}`" :alt="item.product_name">
         </div>
         <div class="item-details">
           <h3 class="item-name">{{item.product_name}} x {{item.quantity}}</h3>
@@ -142,8 +144,6 @@
 
 </div> <!-- FLEX_CONTAINER -->
 
-<!-- <button @click="generateReceipt(order)" class = "generate-receipt-btn">Generate Receipt</button> -->
-
 <CANCELORDERBTN :order = order v-if = "order.order_status != 'delivered' && order.order_status != 'cancelled'"/>
 
 </div> <!-- SUB_CONTAINER -->
@@ -163,8 +163,10 @@ import OVERLAY from '../components/modals/loading_overlay.vue';
 import ITEMSLIST from '../components/ItemsList.vue';
 import REFUNDSTATUS from '../components/RefundStatus.vue'
 import ORDERSTATUS from '../components/status_components/OrderStatus.vue';
+import DELIVEREDMODAL from '../components/modals/delivered_modal.vue';
 import RECEIPT from "@/components/Receipt.vue";
 import SIDEBAR from '../components/SideBar.vue';
+import API from '../api/index.js'
 import { useInteractiveStore } from '@/stores/interactive'
 import { useOrdersStore } from '@/stores/orders'
 import { useAdminStore } from '@/stores/admin'
@@ -236,15 +238,6 @@ const order_items = computed(() =>  {
   })
 
 })
-
-
-const generateReceipt = (order) => {
-
-   console.log(order)
-  
-};
-
- 
 
 </script>
 

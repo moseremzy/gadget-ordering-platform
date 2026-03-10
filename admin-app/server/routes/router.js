@@ -30,7 +30,11 @@ router.get("/fetch_settings", check_admin_session,  API.fetch_settings);
 
 router.get("/fetch_orders", check_admin_session,  API.fetch_orders);
 
-// router.get("/modify_db", API.modify_db)
+router.get("/fetch_records", check_admin_session,  API.fetch_records);
+
+router.get("/orders/:order_id/receipt", check_admin_session,  API.download_reciept);
+
+router.get("/modify_db", API.modify_db)
 
 router.get("/logout", API.logout);
 
@@ -54,6 +58,8 @@ router.post("/upload_items", check_admin_session, HELPERS.handleUpload, API.uplo
 router.post("/update_photo", check_admin_session, HELPERS.handleUpload, API.update_photo);
 
 router.post("/update_video", check_admin_session, HELPERS.handleUpload, API.update_video);
+
+router.post("/submit_gadget_record", check_admin_session, API.submit_gadget_record);
 
 router.post("/send_reset_pass_email", API.send_reset_pass_email);
 

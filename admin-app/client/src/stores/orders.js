@@ -16,16 +16,6 @@ export const useOrdersStore = defineStore("orders", {
 
     getters: {
 
-      current_order: (state) => {
-
-        return state.orders.filter((order) => {
-
-          return order.order_id === state.current_order_id
-
-        })
-      
-      },
-
       revenue: (state) => { //total revenue for dis year. only orders with status delivered.
 
         let revenue_total = 0

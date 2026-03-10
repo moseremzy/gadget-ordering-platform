@@ -30,7 +30,7 @@
     <div :class="`status ${orders_store.current_order[0]?.order_status}`"><strong>Status:</strong> {{ orders_store.current_order[0]?.order_status }}</div>
     <div><strong>Created:</strong> {{MIDDLEWARES.formatted_date(orders_store.current_order[0]?.created_at)}}</div>
     <div><strong>Total Amount:</strong> {{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(orders_store.current_order[0]?.total_amount)}}</div>
-    <div v-if = "orders_store.current_order[0].note"><strong>Note:</strong> {{orders_store.current_order[0]?.note}}</div>
+    <div v-if = "orders_store.current_order[0]?.note"><strong>Note:</strong> {{orders_store.current_order[0]?.note}}</div>
   </div>
 
   <!-- Order Items Table -->
