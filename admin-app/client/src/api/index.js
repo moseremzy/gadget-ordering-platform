@@ -75,6 +75,11 @@ export default class API {
     return await api.post("/submit_gadget_record", info)
   }
 
+  //adjust prices
+  static async adjust_prices(info) {
+    return await api.post("/adjust_prices", info)
+  }
+
   // GET
 
   //Verify Email

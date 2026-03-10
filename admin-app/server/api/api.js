@@ -1026,6 +1026,95 @@ static async submit_gadget_record(req, res) {
 }
 
 
+//Adjust Prices
+static async adjust_prices(req, res) {
+
+  try {
+
+    const { percent, category, action } = req.body;
+
+    // validation
+    if (!percent || percent <= 0) {
+      return res.json({
+        success: false,
+        message: "Invalid percentage"
+      });
+    }
+
+    if (!action || !["increase", "decrease"].includes(action)) {
+      return res.json({
+        success: false,
+        message: "Invalid action"
+      });
+    }
+
+    // calculate multiplier
+    let multiplier;
+
+    if (action === "increase") {
+      multiplier = 1 + (percent / 100);
+    } 
+    else {
+      multiplier = 1 - (percent / 100);
+    }
+
+    let query;
+    let values = [];
+
+    // ALL categories
+    if (category === "all") {
+
+      query = `
+        UPDATE products
+        SET price = price * ?
+      `;
+
+      values = [multiplier];
+
+    }
+
+    // SPECIFIC category
+    else {
+
+      query = `
+        UPDATE products
+        SET price = price * ?
+        WHERE category_id = ?
+      `;
+
+      values = [multiplier, category];
+
+    }
+
+    const result = await new Promise((resolve, reject) => {
+
+      db.query(query, values, (err, data) => {
+        if (err) reject(err);
+        else resolve(data);
+      });
+
+    });
+
+    return res.json({
+      success: true,
+      message: "Prices updated successfully",
+      affected_rows: result.affectedRows
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+
+  }
+
+}
+
+
   //CHANGE ITEM PHOTO
   static async update_photo (req, res) {
 

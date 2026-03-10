@@ -65,6 +65,81 @@
             </form>
             </div>
 
+
+            <!-- PRICE ADJUSTMENTS -->
+            <div class="edit-details-form-container">
+            <h2 class="form-title">Price Adjustments</h2>
+
+            <form class="edit-details-form grid-form">
+
+            <!-- Percent -->
+            <div class="form-group grid-full">
+            <label class="form-label" for="percent">Percentage</label>
+            <input 
+            class="form-input" 
+            type="number" 
+            placeholder="10"
+            v-model="price_adjustment.percent"
+            id="percent"
+            />
+            <p class="err">{{price_adjustment_error.percent_err}}</p>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group grid-full">
+            <label class="form-label" for="category">Category</label>
+
+            <select 
+            class="form-input" 
+            v-model="price_adjustment.category" 
+            id="category"
+            >
+            <option value="all">All Categories</option>
+            <option 
+            v-for="cat in categories" 
+            :key="cat.category_id" 
+            :value="cat.category_id"
+            >
+            {{ cat.name }}
+            </option>
+
+            </select>
+
+            <p class="err">{{price_adjustment_error.category_err}}</p>
+            </div>
+
+            <!-- Action -->
+            <div class="form-group grid-full">
+            <label class="form-label" for="action">Action</label>
+
+            <select 
+            class="form-input" 
+            v-model="price_adjustment.action" 
+            id="action"
+            >
+
+            <option disabled value="">Select Action</option>
+            <option value="increase">Increase Price</option>
+            <option value="decrease">Decrease Price</option>
+
+            </select>
+
+            <p class="err">{{price_adjustment_error.action_err}}</p>
+            </div>
+
+            <!-- Submit -->
+            <div class="form-group grid-full">
+            <button 
+            type="submit" 
+            @click.prevent="adjustPrices" 
+            class="submit-button"
+            >
+            Apply Adjustment
+            </button>
+            </div>
+
+            </form>
+            </div>
             
             <!-- EDIT PASSWORD -->
             <div class="edit-details-form-container">
@@ -108,14 +183,19 @@ import OVERLAY from "../components/modals/loading_overlay.vue";
 import { useInteractiveStore } from '@/stores/interactive'
 import { useAdminStore } from '@/stores/admin'
 import { useSettingStore } from '@/stores/settings'
-import { useCustomersStore } from '@/stores/customers'
+import { useProductStore } from '@/stores/products'
+import { useCategoriesStore } from '@/stores/categories'
 import HEADER from "../components/Header.vue";
 import SIDEBAR from "../components/SideBar.vue"; 
 import API from "../api/index"
 import { useRoute, useRouter } from 'vue-router'
-import { onMounted, onUnmounted, onUpdated, reactive, toRaw, ref, watch} from 'vue'
+import { onMounted, onUnmounted, onUpdated, reactive, toRaw, ref, watch, computed} from 'vue'
 
 const interactive_store = useInteractiveStore()
+
+const categories_store = useCategoriesStore()
+
+const products_store = useProductStore()
 
 const admin_store = useAdminStore()
 
@@ -157,13 +237,23 @@ let password_error = reactive({
 })
 
 
+let price_adjustment = reactive({
+    percent: "",
+    category: "",
+    action: ""
+})
 
-if (!admin_store.isAuthenticated) { //if user no get session redirect to login
+let price_adjustment_error = reactive({
+    percent_err: "",
+    category_err: "",
+    action_err: ""
+})
 
-    router.push({ path: "/login" })
+const categories = computed(() => {
 
-}
+  return categories_store.categories
 
+})
 
 watch( () => admin_store.isAuthenticated,
 
@@ -204,6 +294,10 @@ onUpdated(() => {
     old_password_validated()
     new_password_validated()
     confirm_password_validated()
+
+    percent_validated()
+    category_validated()
+    action_validated()
 
 })
 
@@ -393,6 +487,52 @@ function confirm_password_validated() {
 
 
 
+function percent_validated() {
+    
+    if (price_adjustment.percent === "") {
+    
+        price_adjustment_error.percent_err = "Please fill field";
+    
+    } else {
+        
+        price_adjustment_error.percent_err = ""
+        
+        return true
+
+    }         
+}
+
+function category_validated() {
+    
+    if (price_adjustment.category === "") {
+    
+        price_adjustment_error.category_err = "Please fill field";
+    
+    } else {
+        
+        price_adjustment_error.category_err = ""
+        
+        return true
+
+    }         
+}
+
+function action_validated() {
+    
+    if (price_adjustment.category === "") {
+    
+        price_adjustment_error.category_err = "Please fill field";
+    
+    } else {
+        
+        price_adjustment_error.category_err = ""
+        
+        return true
+
+    }         
+}
+
+
 async function updateAdmin() {
 
     if (emailvalidated() && phonevalidated() && samecityvalidated() && samestatevalidated() && otherstatevalidated() && whatsappvalidated()) {
@@ -454,6 +594,34 @@ async function update_admin_pass() {
 
 }
 
+
+async function adjustPrices() {
+
+    if (percent_validated() && category_validated() && action_validated()) {
+
+        interactive_store.toggle_loading_overlay(true)
+
+        try {
+
+        const response = await API.adjust_prices(price_adjustment);
+
+        await products_store.fetch_products() //Update items
+
+        interactive_store.backend_message = "Prices has been adjusted"
+        
+        interactive_store.display_success_alert_box()
+        
+        } catch (error) {
+
+          console.log(error)
+          
+        }  
+
+        interactive_store.toggle_loading_overlay(false)
+        
+    }  
+
+}
 
 
 </script>

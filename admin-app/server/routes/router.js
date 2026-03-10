@@ -61,6 +61,8 @@ router.post("/update_video", check_admin_session, HELPERS.handleUpload, API.upda
 
 router.post("/submit_gadget_record", check_admin_session, API.submit_gadget_record);
 
+router.post("/adjust_prices", check_admin_session, API.adjust_prices);
+
 router.post("/send_reset_pass_email", API.send_reset_pass_email);
 
 router.post("/reset_password", API.reset_password);
