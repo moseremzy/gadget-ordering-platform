@@ -1807,16 +1807,33 @@ static async download_reciept(req, res) {
   // ===============================
   // STORE HEADER
   // ===============================
+
+  const logoPath = path.join(__dirname, "../images/logo.png");
+
+  // Get image dimensions (you can use approximate width if you know it)
+  const logoWidth = 80;
+  const pageWidth = doc.page.width;
+  const x = (pageWidth - logoWidth) / 2;  // centers image
+
+  // Logo
+  doc.image(logoPath, x, 45, { width: logoWidth });
+  doc.moveDown(2.5);
+
+
+  // Store name
   doc.fontSize(18).font("Roboto-Bold").text("TECH BY CAS", {
     align: "center",
   });
-  
+
   doc.moveDown(0.3);
-  doc.fontSize(10).font("Roboto")
-     .text("18 Asemota street airport Benin city", { align: "center" })
-     .text("Phone: 08077416692 | Email: support@techbycas.com", { align: "center" });
-  
+
+  doc.fontSize(10)
+    .font("Roboto")
+    .text("18 Asemota street airport Benin city", { align: "center" })
+    .text("Phone: 08077416692 | Email: support@techbycas.com", { align: "center" });
+
   doc.moveDown();
+
   doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
   doc.moveDown();
   
