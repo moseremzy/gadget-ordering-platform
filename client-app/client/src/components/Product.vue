@@ -202,9 +202,7 @@ function AddToCart(product, quantity) {
   .image-box {
     height: 180px;
   }
-.image-box img {
-  object-fit: cover
-}
+ 
   .title {
     font-size: 20px;
   }
