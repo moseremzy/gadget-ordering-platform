@@ -106,7 +106,7 @@ function AddToCart(product, quantity) {
 .image-box {
   width: 100%;
   height: 200px;
-  background: #000;
+  background: white;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -202,6 +202,9 @@ function AddToCart(product, quantity) {
   .image-box {
     height: 180px;
   }
+.image-box img {
+  object-fit: cover
+}
   .title {
     font-size: 20px;
   }
