@@ -2130,13 +2130,14 @@ static async update_item (req, res) {
   description= ?,
   category_id= ?,
   product_condition= ?,
+  status= ?,
   stock_quantity= ?,
   price= ?
   WHERE product_id= ?`
 
   await new Promise( (resolve, reject) => {
 
-    db.query(items_query, [item.name, item.description, item.category_id, item.product_condition, item.stock_quantity, item.price, item.product_id], (err, result) => {
+    db.query(items_query, [item.name, item.description, item.category_id, item.product_condition, item.status, item.stock_quantity, item.price, item.product_id], (err, result) => {
 
       if (err) {
 

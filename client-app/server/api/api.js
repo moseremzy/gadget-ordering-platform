@@ -1100,20 +1100,23 @@ static async fetch_products (req, res) {
  
   try {
 
-    const products_query = `SELECT 
-      product.product_id,
-      product.name,
-      product.slug,
-      product.description,
-      product.product_condition,
-      product.stock_quantity,
-      product.price,
-      product.main_image,
-      product.main_video,
-      category.name AS category_name
-    FROM products AS product
-    JOIN categories AS category
-    ON product.category_id = category.category_id`;
+    const products_query = `
+  SELECT 
+    product.product_id,
+    product.name,
+    product.slug,
+    product.description,
+    product.product_condition,
+    product.stock_quantity,
+    product.price,
+    product.main_image,
+    product.main_video,
+    category.name AS category_name
+  FROM products AS product
+  JOIN categories AS category
+    ON product.category_id = category.category_id
+  WHERE product.status = 'active'
+`;
   
     let all_products = await new Promise( (resolve, reject) => {
 
