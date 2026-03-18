@@ -160,8 +160,10 @@ const filteredRecords = computed(() => {
     const matchesEndDate =
       !end || recordDate <= end
 
-    const matchesIMEI = !interactive_store.query || record.imei == interactive_store.query
+    const query = interactive_store.query?.trim();
 
+    const matchesIMEI = !query || String(record.imei).includes(query);
+    
     return (
       matchesStartDate &&
       matchesEndDate &&

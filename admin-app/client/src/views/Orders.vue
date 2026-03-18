@@ -206,7 +206,9 @@ const filteredOrders = computed(() => {
     const matchesEndDate =
       !end || orderDate <= end
 
-    const matchesID = !interactive_store.query || order.order_id == interactive_store.query
+    const query = interactive_store.query?.trim();
+
+    const matchesID = !query || String(order.order_id).includes(query);
 
     return (
       matchesOrderStatus &&

@@ -129,7 +129,7 @@ let filteredItems = computed(() => { //search for item
 
     const matchesCategory = tab_clicked.value === "All" ? item : item.category_name === tab_clicked.value;
 
-    const matchesItem = item.name.toLowerCase().slice(0, (interactive_store.query.length)) === interactive_store.query.toLowerCase();
+    const matchesItem = item.name.toLowerCase().includes(interactive_store.query.toLowerCase());
   
     return matchesCategory && matchesItem;
 

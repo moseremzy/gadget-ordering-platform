@@ -178,8 +178,8 @@ const filteredCustomers = computed(() => {
     const matchesEndDate =
       !end || customerDate <= end
     
-    const matchesEmail = customer.email.toLowerCase().slice(0, (interactive_store.query.length)) === interactive_store.query.toLowerCase();
-    
+    const matchesEmail = customer.email.toLowerCase().includes(interactive_store.query.toLowerCase());
+
     return (matchesStatus && 
     matchesStartDate && 
     matchesEndDate && 

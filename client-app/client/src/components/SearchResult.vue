@@ -72,7 +72,7 @@ import { computed } from 'vue'
 import { useProductStore } from '@/stores/products'
 import { useInteractiveStore } from '@/stores/interactive'
 import SEARCHBOX from '@/components/SearchBox.vue'
- import { useSettingStore } from '../stores/settings'
+import { useSettingStore } from '../stores/settings'
 
 const settings_store = useSettingStore()
 const products_store = useProductStore()
