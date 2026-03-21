@@ -522,7 +522,7 @@ static async submit_order(req, res) {
     
     return res.status(200).json({
       success: true,
-      message: "success",
+      message: "success"
     }); 
 
     break;

@@ -6,7 +6,7 @@
       <div class="footer-section">
         <h3>Contact Us</h3>
         <p>We’d love to hear from you! Reach us anytime.</p>
-        <p><font-awesome-icon icon="fa-solids fa-location" style="color: var(--primary-blue);"/> 18 Asemota street airport Benin city</p>
+        <p><font-awesome-icon icon="fa-solids fa-location" style="color: var(--primary-blue);"/> 18 Asemota street airport road Benin city</p>
         <p><font-awesome-icon icon="fa-solids fa-phone" /> {{ settings_store.whatsapp }}</p>
         <div class="contact-icons">
           <a
