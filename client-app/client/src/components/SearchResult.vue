@@ -3,7 +3,7 @@
     <!-- Backdrop -->
     <div class="modal-backdrop"></div>
 
-    <!-- Search Container -->
+   <!-- Search Container -->
     <div class="search_container">
       <div class="search">
         <SEARCHBOX />

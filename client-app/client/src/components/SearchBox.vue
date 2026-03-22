@@ -4,7 +4,13 @@
 
   <font-awesome-icon class="fa-solid fa-search" id = "search_icon" icon="fa-solid fa-search"/>
 
-  <input type="text" v-model = "search_data" placeholder = "Search gadgets..." name = "search_box" id = "search_box">
+  <input
+  type="text"
+  v-model="search_data"
+  placeholder="Search gadgets..."
+  name="search_box"
+  id="search_box"
+  />
 
   <font-awesome-icon class="fa-solid fa-xmark" @click = "clearSearch" id = "xmark" icon="fa-solid fa-xmark"/>      
 
@@ -16,17 +22,13 @@
 
 import { useInteractiveStore } from '@/stores/interactive'
 
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 const interactive_store = useInteractiveStore()
 
-let search_data = ref("");
-
-
-watch (search_data, (newValue) => {
-
-     interactive_store.setQuery(newValue)
-
+const search_data = computed({
+  get: () => interactive_store.query,
+  set: (value) => interactive_store.setQuery(value)
 })
 
 
@@ -34,8 +36,6 @@ watch (search_data, (newValue) => {
 function clearSearch() {
 
     interactive_store.clearQuery();
-
-    search_data.value = ""
     
 }
 
