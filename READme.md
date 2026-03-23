@@ -3,6 +3,14 @@
 A full-stack gadget ordering web application with client-facing storefront and admin dashboard for managing users, products, orders, and payments.
 
 
+## Live Production Demo
+
+Client Storefront:
+https://techbycas.com
+
+Admin Dashboard Login (Production Instance — Access Restricted):
+https://admin.techbycas.com
+
 ## Features
 
 ### Client
