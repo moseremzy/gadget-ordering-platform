@@ -37,6 +37,7 @@ INSERT INTO users (
   city,
   address,
   account_status,
+  welcome_terms_conditions,
   confirmation_code,
   password
 ) VALUES (
@@ -48,6 +49,7 @@ INSERT INTO users (
   'Benin',
   '123 Sample Street, Benin City',
   'Verified',
+  1,
   NULL,
   '$2a$12$guhSYi.HE/g80Mr9.kLN2Okd6TOxFbEYnopgqsSxZSuZX1zyYSJGu'
 );
@@ -146,6 +148,18 @@ INSERT INTO order_items (
 ) VALUES
 (1, 1, 1, 1, 450000.00),
 (2, 1, 2, 1, 720000.00);
+
+-- =====================
+-- Device Records
+-- =====================
+INSERT INTO device_records (
+  record_id,
+  order_item_id,
+  imei,
+  source
+) VALUES
+(1, 1, '356789012345678', 'user_device_upload'),
+(2, 2, '354321098765432', 'user_device_upload');
 
 -- =====================
 -- Settings

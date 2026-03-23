@@ -10,6 +10,7 @@ CREATE TABLE users (
   city VARCHAR(50),
   address VARCHAR(200),
   account_status ENUM('Verified', 'Unverified') DEFAULT 'Unverified',
+  welcome_terms_conditions TINYINT(1) NOT NULL DEFAULT 0,
   confirmation_code VARCHAR(50),
   password_reset_token VARCHAR(250),
   password VARCHAR(255) NOT NULL,
@@ -37,6 +38,7 @@ CREATE TABLE products (
   product_id INT AUTO_INCREMENT PRIMARY KEY,
   category_id INT NOT NULL,
   name VARCHAR(255) NOT NULL,
+  slug VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
   product_condition ENUM('new', 'uk_used', 'refurbished') DEFAULT 'new',
   status ENUM('active', 'inactive') DEFAULT 'active',
@@ -78,6 +80,7 @@ CREATE TABLE orders (
   total_amount DECIMAL(12,2) NOT NULL,
   total_items INT NOT NULL,
   description VARCHAR(250),
+  note VARCHAR(250),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   delivery_date TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(user_id)
@@ -91,6 +94,14 @@ CREATE TABLE order_items (
   price DECIMAL(12,2) NOT NULL,
   FOREIGN KEY (order_id) REFERENCES orders(order_id),
   FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+CREATE TABLE device_records (
+  record_id INT AUTO_INCREMENT PRIMARY KEY,
+  order_item_id INT NOT NULL,
+  imei VARCHAR(50) NOT NULL,
+  source VARCHAR(255) NOT NULL,
+  FOREIGN KEY (order_item_id) REFERENCES order_items(order_item_id)
 );
 
 CREATE TABLE settings (
