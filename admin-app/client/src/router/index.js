@@ -69,7 +69,8 @@ routes: [
     component: () => import('../views/Dashboard.vue'),
     meta: {
       title: 'Dashboard - Tech By Cas Admin',
-      requiresAuth: true
+      requiresAuth: true,
+      authorize_roles: ['super_admin', 'editor']
     }
   },
   {
@@ -78,7 +79,8 @@ routes: [
     component: () => import('../views/Items.vue'),
     meta: {
       title: 'Menus - Tech By Cas Admin',
-      requiresAuth: true
+      requiresAuth: true,
+      authorize_roles: ['super_admin', 'editor']
     }
   },
   {
@@ -87,7 +89,8 @@ routes: [
     component: () => import('../views/Add-Item.vue'),
     meta: {
       title: 'Add Item - Tech By Cas Admin',
-      requiresAuth: true
+      requiresAuth: true,
+      authorize_roles: ['super_admin', 'editor']
     }
   },
   {
@@ -96,7 +99,8 @@ routes: [
     component: () => import('../views/Customers.vue'),
     meta: {
       title: 'Customers - Tech By Cas Admin',
-      requiresAuth: true
+      requiresAuth: true,
+      authorize_roles: ['super_admin']
     }
   },
   {
@@ -105,7 +109,8 @@ routes: [
     component: () => import('../views/Orders.vue'),
     meta: {
       title: 'Orders - Tech By Cas Admin',
-      requiresAuth: true
+      requiresAuth: true,
+      authorize_roles: ['super_admin']
     }
   },
   {
@@ -114,7 +119,18 @@ routes: [
     component: () => import('../views/Device-Records.vue'),
     meta: {
       title: 'Device-Records - Tech By Cas Admin',
-      requiresAuth: true
+      requiresAuth: true,
+      authorize_roles: ['super_admin']
+    }
+  },
+  {
+    path: '/account/staff-management',
+    name: 'Staff-Management',
+    component: () => import('../views/Staff-Management.vue'),
+    meta: {
+      title: 'Staff-Management - Tech By Cas Admin',
+      requiresAuth: true,
+      authorize_roles: ['super_admin']
     }
   },
   {
@@ -123,7 +139,8 @@ routes: [
     component: () => import('../views/Analytics.vue'),
     meta: {
       title: 'Analytics - Tech By Cas Admin',
-      requiresAuth: true
+      requiresAuth: true,
+      authorize_roles: ['super_admin']
     }
   },
   {
@@ -132,7 +149,8 @@ routes: [
     component: () => import('../views/Settings.vue'),
     meta: {
       title: 'Settings - Tech By Cas Admin',
-      requiresAuth: true
+      requiresAuth: true,
+      authorize_roles: ['super_admin', 'editor']
     }
   },
   {
@@ -141,7 +159,8 @@ routes: [
     component: () => import('../views/View-Order.vue'),
     meta: {
       title: 'View Order - Tech By Cas Admin',
-      requiresAuth: true
+      requiresAuth: true,
+      authorize_roles: ['super_admin']
     }
   },
   {
@@ -150,7 +169,8 @@ routes: [
     component: () => import('../views/Edit-Item.vue'),
     meta: {
       title: 'Edit Item - Tech By Cas Admin',
-      requiresAuth: true
+      requiresAuth: true,
+      authorize_roles: ['super_admin', 'editor']
     }
   },
 ],
@@ -169,36 +189,43 @@ scrollBehavior(to, from, savedPosition) {
 
 })
 
-router.beforeEach(async (to, from, next) => { // Used to Set Page Title
-  
+router.beforeEach(async (to, from, next) => {
+
   const admin_store = useAdminStore();
-  const interactive_store = useInteractiveStore();
 
   document.title = to.meta.title || 'Tech By Cas Admin | Admin Panel.';
 
-   // Wait for fetch if not done
+  // Ensure admin data loaded
   if (!admin_store.isFetched) {
-    await admin_store.fetch_admin().catch(() => {}); // ignore errors
+    await admin_store.fetch_admin().catch(() => {});
   }
 
-  // Route requires auth & admin is authenticated → allow
-  if (to.meta.requiresAuth && admin_store.isAuthenticated) {
-    return next();
-  }
-
-  // Route requires auth & admin NOT authenticated → go to login
+  // Route requires login but user not logged in
   if (to.meta.requiresAuth && !admin_store.isAuthenticated) {
     return next({ name: "login" });
   }
 
-  // Route does NOT require auth & admin IS authenticated → go to dashboard
+  // Route requires roles → check role permission
+  if (to.meta.authorize_roles) {
+
+    const allowedRoles = to.meta.authorize_roles;
+
+    const admin_role = admin_store.admin?.role;
+
+    if (!allowedRoles.includes(admin_role)) {
+      return next({ name: "dashboard" });
+    }
+
+  }
+
+  // Logged in users shouldn't access login/register pages
   if (!to.meta.requiresAuth && admin_store.isAuthenticated) {
     return next({ name: "dashboard" });
-  } 
-   
+  }
+
   next();
 
-})
+});
 
 
 

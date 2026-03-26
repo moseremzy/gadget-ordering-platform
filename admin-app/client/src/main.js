@@ -6,6 +6,7 @@ import { useAdminStore } from './stores/admin';
 import { useOrdersStore } from './stores/orders';
 import { useRecordsStore } from './stores/records';
 import { useCustomersStore } from '@/stores/customers';
+import { useStaffsStore } from '@/stores/staffs';
 import { useProductStore } from '@/stores/products';
 import { useCategoriesStore } from './stores/categories';
 import { useSettingStore } from './stores/settings';
@@ -56,6 +57,8 @@ const initializeApp = async () => {
 
     const customers_store = useCustomersStore()
 
+    const staffs_store = useStaffsStore()
+
     const products_store = useProductStore()
 
     const categoriesStore = useCategoriesStore();
@@ -81,6 +84,8 @@ const initializeApp = async () => {
             products_store.fetch_products(),
 
             customers_store.fetch_customers(),
+
+            staffs_store.fetch_staffs(),
 
             categoriesStore.fetch_categories(),
 

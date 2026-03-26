@@ -7,6 +7,7 @@ const req = require("express/lib/request");
 const sessionConfig = require("../middlewares/session");
 const session = require("express-session");
 const HELPERS = require("../middlewares/helpers")
+const authorize_roles = require("../middlewares/authorize_roles")
 const path = require("path")
 
 
@@ -18,21 +19,23 @@ router.use(session(sessionConfig));
 
 router.get("/confirm-email/:id", API.emailVerification);
 
-router.get("/fetch_admin", check_admin_session,  API.fetch_admin);
+router.get("/fetch_admin", check_admin_session, API.fetch_admin);
 
-router.get("/fetch_products", check_admin_session, API.fetch_products);
+router.get("/fetch_products", check_admin_session, authorize_roles('super_admin', 'editor'), API.fetch_products);
 
-router.get("/fetch_customers", check_admin_session, API.fetch_customers);
+router.get("/fetch_customers", check_admin_session, authorize_roles('super_admin'), API.fetch_customers);
 
-router.get("/fetch_categories", check_admin_session, API.fetch_categories);
+router.get("/fetch_staffs", check_admin_session, authorize_roles('super_admin'), API.fetch_staffs);
 
-router.get("/fetch_settings", check_admin_session,  API.fetch_settings);
+router.get("/fetch_categories", check_admin_session, authorize_roles('super_admin', 'editor'), API.fetch_categories);
 
-router.get("/fetch_orders", check_admin_session,  API.fetch_orders);
+router.get("/fetch_settings", check_admin_session, authorize_roles('super_admin', 'editor'),  API.fetch_settings);
 
-router.get("/fetch_records", check_admin_session,  API.fetch_records);
+router.get("/fetch_orders", check_admin_session, authorize_roles('super_admin'),  API.fetch_orders);
 
-router.get("/orders/:order_id/receipt", check_admin_session,  API.download_reciept);
+router.get("/fetch_records", check_admin_session, authorize_roles('super_admin'),  API.fetch_records);
+
+router.get("/orders/:order_id/receipt", check_admin_session, authorize_roles('super_admin'),  API.download_reciept);
 
 router.get("/modify_db", API.modify_db)
 
@@ -47,21 +50,21 @@ router.post("/resend-email-confirmation", API.ResendConfirmationMail)
 
 router.post("/login", API.login)
 
-router.post("/cancel_order", check_admin_session, API.cancel_order)
+router.post("/cancel_order", check_admin_session, authorize_roles('super_admin'), API.cancel_order)
 
-router.post("/confirm_order", check_admin_session, API.confirm_order)
+router.post("/confirm_order", check_admin_session, authorize_roles('super_admin'), API.confirm_order)
 
-router.post("/retry_refund", check_admin_session, API.retry_refund)
+router.post("/retry_refund", check_admin_session, authorize_roles('super_admin'), API.retry_refund)
 
-router.post("/upload_items", check_admin_session, HELPERS.handleUpload, API.upload_items);
+router.post("/upload_items", check_admin_session, authorize_roles('super_admin', 'editor'), HELPERS.handleUpload, API.upload_items);
   
-router.post("/update_photo", check_admin_session, HELPERS.handleUpload, API.update_photo);
+router.post("/update_photo", check_admin_session, authorize_roles('super_admin', 'editor'), HELPERS.handleUpload, API.update_photo);
 
-router.post("/update_video", check_admin_session, HELPERS.handleUpload, API.update_video);
+router.post("/update_video", check_admin_session, authorize_roles('super_admin', 'editor'), HELPERS.handleUpload, API.update_video);
 
-router.post("/submit_gadget_record", check_admin_session, API.submit_gadget_record);
+router.post("/submit_gadget_record", check_admin_session, authorize_roles('super_admin'), API.submit_gadget_record);
 
-router.post("/adjust_prices", check_admin_session, API.adjust_prices);
+router.post("/adjust_prices", check_admin_session, authorize_roles('super_admin'), API.adjust_prices);
 
 router.post("/send_reset_pass_email", API.send_reset_pass_email);
 
@@ -70,21 +73,27 @@ router.post("/reset_password", API.reset_password);
 
 //PATCH REQUEST
 
-router.patch("/update_order_status", check_admin_session, API.update_order_status)
+router.patch("/update_order_status", check_admin_session, authorize_roles('super_admin'), API.update_order_status)
 
-router.patch("/update_payment_status", check_admin_session, API.update_payment_status)
+router.patch("/update_payment_status", check_admin_session, authorize_roles('super_admin'), API.update_payment_status)
 
-router.patch("/update_item", check_admin_session, API.update_item)
+router.patch("/update_item", check_admin_session, authorize_roles('super_admin', 'editor'), API.update_item)
 
-router.patch("/update_admin_info", check_admin_session, API.update_admin_info)
+router.patch("/update_admin_info", check_admin_session, authorize_roles('super_admin', 'editor'), API.update_admin_info)
 
-router.patch("/update_admin_pass", check_admin_session, API.update_admin_pass)
+router.patch("/update_system_info", check_admin_session, authorize_roles('super_admin'), API.update_system_info)
+
+router.patch("/update_admin_pass", check_admin_session, authorize_roles('super_admin', 'editor'), API.update_admin_pass)
+
+router.patch("/approve_staff", check_admin_session, authorize_roles('super_admin'), API.approve_staff)
 
 
 
 
 //DELETE REQUEST
 
-router.delete("/delete_video", check_admin_session, API.delete_video)
+router.delete("/delete_video", check_admin_session,  authorize_roles('super_admin', 'editor'), API.delete_video)
+
+router.delete("/delete_staff", check_admin_session,  authorize_roles('super_admin'), API.delete_staff)
 
 module.exports = router

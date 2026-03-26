@@ -18,6 +18,8 @@ import { useProductStore } from './stores/products';
 
 import { useCustomersStore } from './stores/customers'
 
+import { useStaffsStore } from './stores/staffs'
+
 import { useCategoriesStore } from './stores/categories';
 
 import { useInteractiveStore } from './stores/interactive';
@@ -31,6 +33,8 @@ const ordersStore = useOrdersStore(); //Access the orders store
 const recordsStore = useRecordsStore(); //Access the records store
 
 const customers_store = useCustomersStore()
+
+const staffs_store = useStaffsStore()
 
 const products_store = useProductStore()
 
@@ -100,6 +104,8 @@ setInterval(async () => {   // In App.vue (your polling function)
         products_store.fetch_products(),
 
         customers_store.fetch_customers(),
+
+        staffs_store.fetch_staffs(),
 
         categoriesStore.fetch_categories(),
 

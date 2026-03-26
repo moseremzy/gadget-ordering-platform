@@ -56,35 +56,35 @@ static async register(req, res) {
 
     try {
 
-    const admin_query = `SELECT * FROM admin`
+      const admin_query = `SELECT * FROM admin WHERE email = ?`;
 
-    const admin = await new Promise( (resolve, reject) => {
-
-      db.query(admin_query, (err, result) => {
-
-        if (err) {
-
-          reject(err)
-        
-        } else {
-
-          resolve(result)
-
-        }
-
+      const admin = await new Promise( (resolve, reject) => {
+  
+        db.query(admin_query, [data.email], (err, result) => {
+  
+          if (err) {
+  
+            reject(err)
+          
+          } else {
+  
+            resolve(result)
+  
+          }
+  
+        })
+  
       })
-
-    })
-
-     
-   if (admin.length == 1) { //do not allow more than one admin
-
-    return res.status(400).json({
-      success: false,
-      message: "Invalid Request",
-    });
-        
-    } else { //insert user for db
+  
+       
+     if (admin.length > 0) { //if another user get this email before
+  
+        return res.status(400).json({ // Failure
+          success: false,
+          message: "email already exists"
+        }); 
+          
+      }  
 
      data.password = await bcrypt.hash(data.password, 12); //encrypt the password
 
@@ -111,8 +111,6 @@ static async register(req, res) {
     })
 
     return await MAILS.SendConfirmationMail(req, res, data.email, data.confirmation_code)
-
-    }
         
     } catch (error) { //if there was an error at any point
 
@@ -160,7 +158,14 @@ static async register(req, res) {
   })
 
   
-  if (admin[0]) { //if the user dey
+  if (!admin[0]) { //if the user nor dey
+
+    return res.status(401).json({
+      success: false,
+      message: "Invalid email or password",
+    });
+
+  }
 
   const isMatch = await bcrypt.compare(data.password, admin[0].password); //decrypt he password, make u compare am with this one entered
 
@@ -171,53 +176,50 @@ static async register(req, res) {
       message: "Invalid email or password",
     });
     
-  } else { //if he match 
+  } 
 
-    if (admin[0].account_status === "Unverified") { //if user neva verify account
+  if (admin[0].account_status === "Unverified") { //if user neva verify account
       
     this_user = admin[0]
 
     return res.status(403).json({
       success: false,
       message: "Account not verified. Please verify your email",
-      isAuthenticated: req.session.isAuthenticated,
-      admin: this_user
     });
       
-    } else { //if account verified, log am in
+  }  
 
-    date.setHours(date.getHours() + 2); // session expires in 2 hours
-
-    req.session.cookie.expires = date;
-  
-    req.session.admin_id = admin[0].admin_id; //set admin id for session
-
-    req.session.isAuthenticated = true
-
-    this_user = {
-      email: admin[0].email,
-      phone: admin[0].phone,
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "success",
-      admin: this_user,
-      isAuthenticated: true
-    });
-
-   }
-
-  }
-     
-  } else { //if user no dey
-
-    return res.status(401).json({
+  if (admin[0].admin_status !== 'active') { //check admin status wether super_admin done approve he account
+    return res.status(403).json({
       success: false,
-      message: "Invalid email or password",
+      message: "Account awaiting approval from super admin"
     });
-
   }
+
+  //IF EVERYTHING IN ORDER, LOGIN
+
+  date.setHours(date.getHours() + 2); // session expires in 2 hours
+
+  req.session.cookie.expires = date;
+
+  req.session.admin_id = admin[0].admin_id; //set admin id for session
+
+  req.session.isAuthenticated = true
+
+  req.session.role = admin[0].role
+
+  this_user = {
+    email: admin[0].email,
+    phone: admin[0].phone,
+    role: admin[0].role
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "success",
+    admin: this_user,
+    isAuthenticated: true
+  });
       
   } catch (error) {
 
@@ -1547,6 +1549,55 @@ static async fetch_customers (req, res) {
 
 
 
+//fetch staffs
+static async fetch_staffs (req, res) {
+
+  try {
+
+    const staffs_query = `
+    SELECT * 
+    FROM admin 
+    WHERE role != 'super_admin'
+    ORDER BY created_at DESC;
+  `;
+
+    let all_staffs = await new Promise( (resolve, reject) => {
+
+      db.query(staffs_query, (err, result) => {
+
+        if (err) {
+
+          reject(err)
+        
+        } else {
+
+          resolve(result)
+
+        }
+
+      })
+
+    })
+
+    return res.status(200).json({ // Success
+      success: true,
+      message: "success",
+      all_staffs
+    });
+    
+  } catch (error) {
+    
+    return res.status(500).json({
+      success: false,
+      message: "Error loading data. please try again.",
+    });
+
+  }
+
+}
+
+
+
 //fetch products
 static async fetch_products (req, res) {
 
@@ -2101,6 +2152,8 @@ static async logout (req, res) {
 
     req.session.admin_id = null
 
+    req.session.role = null
+
     message = "success"
     
   } catch (error) {
@@ -2198,6 +2251,28 @@ static async update_admin_info (req, res) {
 
   })
 
+  return res.status(200).json({
+    success: true,
+    message: "success",
+  });
+    
+} catch (error) {
+
+  return res.status(500).json({
+    success: false,
+    message: "An error occurred. Please try again.",
+  });  
+
+}
+
+}
+
+
+
+//update system info
+static async update_system_info (req, res) {
+
+  try {
 
   //account setting update
   const settings_query = `UPDATE settings 
@@ -2329,6 +2404,44 @@ static async update_admin_pass (req, res) {
       
   }
 
+}
+
+
+
+// Approve Staff
+static async approve_staff(req, res) {
+
+  const { admin_id, status } = req.body;
+
+  try {
+
+    // 1️⃣ Approve staff
+    const update_query = `
+      UPDATE admin
+      SET admin_status = ?
+      WHERE admin_id = ?
+    `;
+
+    await new Promise((resolve, reject) => {
+      db.query(update_query, [status, admin_id], (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Staff Approved",
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred. Please try again.",
+    });
+
+  }
 }
 
 
@@ -2482,5 +2595,49 @@ static async update_payment_status (req, res) {
 
 }
 
+
+// Delete Staff
+static async delete_staff(req, res) { 
+
+try {
+
+  const { admin_id } = req.body
+
+  const admin_query = `DELETE FROM admin
+  WHERE admin_id = ?`
+
+  await new Promise( (resolve, reject) => {
+
+    db.query(admin_query, [admin_id], (err, result) => {
+
+      if (err) {
+
+        reject(err)
+      
+      } else {
+
+        resolve(result)
+
+      }
+
+    })
+
+  })
+
+  return res.status(200).json({
+    success: true,
+    message: "Staff Deleted Successfully",
+  });
+  
+} catch (error) {
+
+  return res.status(500).json({
+    success: false,
+    message: "An error occurred. Please try again.",
+  });   
+
+  }
+
+ }
 
 }

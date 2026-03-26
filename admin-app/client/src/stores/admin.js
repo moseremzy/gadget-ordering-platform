@@ -17,6 +17,12 @@ export const useAdminStore = defineStore("admin", {
 
 
     actions: {
+      
+      authorized (roles)  {
+
+        return roles.includes(this.admin.role)
+
+      },
     
       logged_In (admin, isAuthenticated) {
 

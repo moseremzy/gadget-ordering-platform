@@ -33,41 +33,53 @@
             <input type="text" placeholder="Phone No" v-model = "admin_info.phone" id = "phone" class="form-input">
             <p class="err">{{ admin_info_error.phone_err }}</p>
             </div>
+            <!-- Submit Button -->
+            <div class="form-group grid-full">
+                <button type="submit" @click.prevent = "update_admin_info" class="submit-button">Submit</button>
+            </div>
+            </form>
+            </div>
 
+
+            <!-- EDIT SYSTEM INFO -->
+            <div class="edit-details-form-container" v-if = "admin_store.authorized(['super_admin'])">
+            <h2 class="form-title">Edit System Info</h2>
+            <form class="edit-details-form grid-form">
+            
             <div class="form-group grid-full">
             <label for = "fee_same_city" class = "form-label">Same City (Benin) Delivery Fee</label>
-            <input type = "number" placeholder = "Delivery fee" id = "fee_same_city" v-model = "admin_info.fee_same_city" class = "form-input">
-            <p class="err">{{ admin_info_error.same_city_err }}</p>
+            <input type = "number" placeholder = "Delivery fee" id = "fee_same_city" v-model = "system_info.fee_same_city" class = "form-input">
+            <p class="err">{{ system_info_error.same_city_err }}</p>
             </div>
 
             <div class="form-group grid-full">
             <label for = "fee_same_state" class = "form-label">Same State (Edo) Delivery Fee</label>
-            <input type = "number" placeholder = "Delivery fee" id = "fee_same_state" v-model = "admin_info.fee_same_state" class = "form-input">
-            <p class="err">{{ admin_info_error.same_state_err }}</p>
+            <input type = "number" placeholder = "Delivery fee" id = "fee_same_state" v-model = "system_info.fee_same_state" class = "form-input">
+            <p class="err">{{ system_info_error.same_state_err }}</p>
             </div>
 
             <div class="form-group grid-full">
             <label for = "fee_other_state" class = "form-label">Other States Delivery Fee</label>
-            <input type = "number" placeholder="Delivery fee" v-model = "admin_info.fee_other_state" id = "fee_other_state" class = "form-input">
-            <p class="err">{{ admin_info_error.other_state_err }}</p>
+            <input type = "number" placeholder="Delivery fee" v-model = "system_info.fee_other_state" id = "fee_other_state" class = "form-input">
+            <p class="err">{{ system_info_error.other_state_err }}</p>
             </div>
 
-            <div class="form-group grid-full">
+            <div class="form-group grid-full" v-if = "admin_store.authorized(['super_admin', 'editor'])">
             <label for = "whatsapp" class = "form-label">Whatsapp Support</label>
-            <input type = "text" placeholder="Whatsapp Support" v-model = "admin_info.whatsapp" id = "whatsapp" class = "form-input">
-            <p class="err">{{ admin_info_error.whatsapp_err }}</p>
+            <input type = "text" placeholder="Whatsapp Support" v-model = "system_info.whatsapp" id = "whatsapp" class = "form-input">
+            <p class="err">{{ system_info_error.whatsapp_err }}</p>
             </div>
 
             <!-- Submit Button -->
             <div class="form-group grid-full">
-                <button type="submit" @click.prevent = "updateAdmin" class="submit-button">Submit</button>
+                <button type="submit" @click.prevent = "update_system_info" class="submit-button">Submit</button>
             </div>
             </form>
             </div>
 
 
             <!-- PRICE ADJUSTMENTS -->
-            <div class="edit-details-form-container">
+            <div class="edit-details-form-container" v-if = "admin_store.authorized(['super_admin'])">
             <h2 class="form-title">Price Adjustments</h2>
 
             <form class="edit-details-form grid-form">
@@ -209,14 +221,23 @@ let admin_info = reactive({
 
   ...admin_store.admin,
 
-  ...settings_store.settings
-
 })
  
 
 let admin_info_error = reactive({
     email_err: "",
-    phone_err: "", 
+    phone_err: ""
+})
+
+
+let system_info = reactive({
+
+  ...settings_store.settings
+
+})
+
+
+let system_info_error = reactive({
     same_city_err: "",  
     same_state_err: "",
     other_state_err: "",
@@ -357,19 +378,19 @@ function phonevalidated() {
 
 function whatsappvalidated() {
     
-    let whatsapp_length = admin_info.whatsapp.length;
+    let whatsapp_length = system_info.whatsapp.length;
     
-    if (admin_info.whatsapp === "") {
+    if (system_info.whatsapp === "") {
     
-        admin_info_error.whatsapp_err = "Please fill field";
+        system_info_error.whatsapp_err = "Please fill field";
     
     } else if (whatsapp_length != 13) {
     
-        admin_info_error.whatsapp_err = "Invalid whatsapp number"
+        system_info_error.whatsapp_err = "Invalid whatsapp number"
     
     } else {
         
-        admin_info_error.whatsapp_err = ""
+        system_info_error.whatsapp_err = ""
         
         return true
 
@@ -381,13 +402,13 @@ function whatsappvalidated() {
 
 function samecityvalidated() {
     
-    if (admin_info.fee_same_city === "") {
+    if (system_info.fee_same_city === "") {
     
-        admin_info_error.same_city_err = "Please fill field";
+        system_info_error.same_city_err = "Please fill field";
     
     } else {
         
-        admin_info_error.same_city_err = ""
+        system_info_error.same_city_err = ""
         
         return true
 
@@ -397,13 +418,13 @@ function samecityvalidated() {
 
 function samestatevalidated() {
     
-    if (admin_info.fee_same_state === "") {
+    if (system_info.fee_same_state === "") {
     
-        admin_info_error.same_state_err = "Please fill field";
+        system_info_error.same_state_err = "Please fill field";
     
     } else {
         
-        admin_info_error.same_state_err = ""
+        system_info_error.same_state_err = ""
         
         return true
 
@@ -413,13 +434,13 @@ function samestatevalidated() {
 
 function otherstatevalidated() {
     
-    if (admin_info.fee_other_state === "") {
+    if (system_info.fee_other_state === "") {
     
-        admin_info_error.other_state_err = "Please fill field";
+        system_info_error.other_state_err = "Please fill field";
     
     } else {
         
-        admin_info_error.other_state_err = ""
+        system_info_error.other_state_err = ""
         
         return true
 
@@ -533,9 +554,11 @@ function action_validated() {
 }
 
 
-async function updateAdmin() {
 
-    if (emailvalidated() && phonevalidated() && samecityvalidated() && samestatevalidated() && otherstatevalidated() && whatsappvalidated()) {
+
+async function update_admin_info() {
+
+    if (emailvalidated() && phonevalidated()) {
 
         interactive_store.toggle_loading_overlay(true)
 
@@ -544,6 +567,34 @@ async function updateAdmin() {
         const response = await API.update_admin_info(admin_info);
 
         interactive_store.backend_message = "Your profile was updated succesfully"
+        
+        interactive_store.display_success_alert_box()
+        
+        } catch (error) {
+
+          console.log(error)
+          
+        }  
+
+        interactive_store.toggle_loading_overlay(false)
+        
+    }  
+
+}
+
+
+
+async function update_system_info() {
+
+    if (samecityvalidated() && samestatevalidated() && otherstatevalidated() && whatsappvalidated()) {
+
+        interactive_store.toggle_loading_overlay(true)
+
+        try {
+
+        const response = await API.update_system_info(system_info);
+
+        interactive_store.backend_message = "System Info was updated succesfully"
         
         interactive_store.display_success_alert_box()
         

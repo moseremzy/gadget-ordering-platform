@@ -95,6 +95,9 @@ export default class API {
     return api.get("/fetch_customers").then(res => res.data);
   }
 
+  static async fetch_staffs() {
+    return api.get("/fetch_staffs").then(res => res.data);
+  }
 
   static async fetch_products() {
     return api.get("/fetch_products").then(res => res.data);
@@ -133,6 +136,10 @@ export default class API {
     return api.patch("/update_admin_info", info).then(res => res.data);
   }
 
+  static async update_system_info(info) {
+    return api.patch("/update_system_info", info).then(res => res.data);
+  }
+
   static async update_order_status(info) {
     return api.patch("/update_order_status", info).then(res => res.data);
   }
@@ -149,9 +156,17 @@ export default class API {
     return api.patch("/update_admin_pass", info).then(res => res.data);
   }
 
+  static async approve_staff(info) {
+    return api.patch("/approve_staff", info).then(res => res.data);
+  }
+
   //DELETE
   static async delete_video(info) {
     return api.delete("/delete_video", info).then(res => res.data)
+  }
+
+  static async delete_staff(info) {
+    return api.delete("/delete_staff", info).then(res => res.data)
   }
 
 }

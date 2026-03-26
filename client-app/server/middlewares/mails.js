@@ -1,6 +1,7 @@
 const hbs = require('nodemailer-express-handlebars');
 const path = require('path');
 const fs = require("fs")
+const SMTP_HOST = process.env.SMTP_HOST
 const SMTP_USER = process.env.SMTP_USER
 const SMTP_PASS = process.env.SMTP_PASS
 const nodemailer = require("nodemailer");
@@ -11,7 +12,7 @@ module.exports = class MIDDLEWARES {
   static async SendConfirmationMail(req, res, useremail, confirmationCode, fullname) {
 
     var smtpConfig = {
-        host: 'mail.techbycas.com',
+        host: SMTP_HOST,
         port:  465,
         secure: true,
         auth:{
@@ -65,7 +66,7 @@ module.exports = class MIDDLEWARES {
 static async contact_us_email(req, res, email, fullname, phone, message) {
 
     var smtpConfig = {
-        host: 'mail.techbycas.com',
+        host: SMTP_HOST,
         port:  465,
         secure: true,
         auth: {
@@ -148,7 +149,7 @@ var transporter = nodemailer.createTransport(smtpConfig);
 static async send_reset_pass_email(req, res, useremail, token, fullname) {
 
     var smtpConfig = {
-        host: 'mail.techbycas.com',
+        host: SMTP_HOST,
         port:  465,
         secure: true,
         auth: {
@@ -228,7 +229,7 @@ var transporter = nodemailer.createTransport(smtpConfig);
 static send_admin_order_notification(order_id, orderDate, data) {
 
     const smtpConfig = {
-        host: 'mail.techbycas.com',
+        host: SMTP_HOST,
         port: 465,
         secure: true,
         auth: {

@@ -36,8 +36,6 @@ async function send_confirmation_mail() {
 
     const response = await API.ResendConfirmationMail({ confirmationEmail: route.query.confirmationEmail});
 
-    console.log(response)
-
     interactive_store.backend_message = response.data?.message  
 
     interactive_store.toggle_loading_overlay(false)
