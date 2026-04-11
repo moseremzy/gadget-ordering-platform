@@ -12,7 +12,9 @@
     <SIDEBAR/>
 
     <div class="home_container">
-     <h1>Shop {{route.query.category || 'All'}} Products</h1>
+     <h1>Shop {{ route.query.condition || route.query.category || "All" }}
+       Products
+    </h1>
      <p>Discover authentic gadgets with warranty and fast delivery</p>
 
      <div class = "products_section">
@@ -90,16 +92,23 @@ onUpdated(() => {
 
 /* methods */
 
-let filteredProducts = computed(() => { 
+let filteredProducts = computed(() => {
 
-    return route.query.category ? products.value.filter((product) => {
+  return products.value.filter(product => {
 
-    return product.category_name === route.query.category;
+    const matchCategory =
+      !route.query.category ||
+      product.category_name === route.query.category
 
-    }) : products.value
+    const matchCondition =
+      !route.query.condition ||
+      product.product_condition === route.query.condition
+
+    return matchCategory && matchCondition
+
+  })
 
 })
-
 
 
 // Paginated Orders

@@ -71,12 +71,6 @@ let formvalues_err = reactive({
 
 
 
-// if (admin_store.isAuthenticated) { //if user no get session redirect to login
-
-//     router.push({ name: "dashboard" })
-
-// }
-
 
 
 /* Hooks */

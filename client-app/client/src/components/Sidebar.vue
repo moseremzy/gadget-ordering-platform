@@ -36,13 +36,35 @@
           <li 
           v-for="category in categories"
           :key="category.category_id"
-          @click="store.toggle_main_nav(false)">
+          @click="interactive_store.toggle_main_nav(false)">
           <router-link 
           :to="`/shop?category=${category.name}`" 
           class="link">{{category.name}}</router-link>
           </li>
         </ul>
       </div>
+
+      <div class="section categories">
+      <h2>Condition</h2>
+      <ul>
+        <li @click="interactive_store.toggle_main_nav(false)">
+          <router-link
+            to="/shop?condition=uk_used"
+            class="link"
+          >
+            UK Used
+          </router-link>
+        </li>
+        <li @click="interactive_store.toggle_main_nav(false)">
+          <router-link
+            to="/shop?condition=new"
+            class="link"
+          >
+            New
+          </router-link>
+        </li>
+      </ul>
+    </div>
     </div>
 
     <!-- Overlay for Mobile Sidebar -->
@@ -58,6 +80,18 @@
           class="nav-link"
           >{{category.name}}
         </router-link>
+        <router-link
+        to="/shop?condition=uk_used"
+        class="nav-link"
+        >
+        UK Used
+       </router-link>
+       <router-link
+        to="/shop?condition=new"
+        class="nav-link"
+        >
+        New
+       </router-link>
        </div>
       <div class="nav-right">
         <router-link to="/" class="nav-link" exact-active-class="active-link">Home</router-link>

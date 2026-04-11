@@ -8,7 +8,7 @@
 
     <ERRORALERTBOX>{{interactive_store.backend_message}}</ERRORALERTBOX>
 
-   <SIDEBAR/> <!--side bar--> 
+    <SIDEBAR/> <!--side bar--> 
 
     <div class="sub_container" :style = "interactive_store.sub_container_css">
 

@@ -5,7 +5,7 @@
     <ul>
        <li v-if = "admin_store.authorized(['super_admin', 'editor'])"><router-link exact-active-class = "active-link" to = "/account/dashboard"><font-awesome-icon class="fa-solid fa-user-tie icons" icon="fa-solid fa-gauge"/> Dashboard</router-link></li> 
        <li v-if = "admin_store.authorized(['super_admin'])"><router-link exact-active-class = "active-link" to = "/account/orders"><font-awesome-icon class="fa-solid fa-cart-shopping icons" icon="fa-solid fa-cart-shopping"/> Orders <strong v-if = "filteredItems > 0" style = "background-color: red; margin-left: 5px; padding: 3px 7px; font-size: 13px; border-radius: 100%;">{{filteredItems}}</strong></router-link></li> 
-       <li v-if = "admin_store.authorized(['super_admin','editor'])"><router-link exact-active-class = "active-link" to = "/account/items"><font-awesome-icon class="fa-solid fa-mobile-phone icons" icon="fa-solid fa-mobile-phone"/> Items</router-link></li> 
+       <li v-if = "admin_store.authorized(['super_admin','editor'])"><router-link exact-active-class = "active-link" to = "/account/items"><font-awesome-icon class="fa-solid fa-mobile-phone icons" icon="fa-solid fa-mobile-phone"/> Gadgets</router-link></li> 
        <li v-if = "admin_store.authorized(['super_admin'])"><router-link exact-active-class = "active-link" to = "/account/customers"><font-awesome-icon class="fa-solid fa-user icons" icon="fa-solid fa-user"/> Customers</router-link></li>
        <li v-if = "admin_store.authorized(['super_admin'])">
         <router-link exact-active-class="active-link" to="/account/device-records">

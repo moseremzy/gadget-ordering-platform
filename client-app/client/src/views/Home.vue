@@ -65,6 +65,20 @@
          style>
          {{category.name}}
         </b>
+         <b
+         class = "router_link"
+         id = "uk_used"
+         @click.prevent = "overall_func('uk_used')"
+         style>
+         Uk Used
+        </b>
+        <b
+         class = "router_link"
+         id = "new"
+         @click.prevent = "overall_func('new')"
+         style>
+         New
+        </b>
         </div>
         <div class = "products-grid">
         <Product
@@ -163,7 +177,11 @@ let filteredProducts = computed(() => { //search for item
 
     return products.value.filter((product) => {
 
-    return (product.category_name === tab_clicked.value);
+    const matchCategory = product.category_name === tab_clicked.value
+
+    const matchCondition = product.product_condition === tab_clicked.value
+
+    return matchCategory || matchCondition
 
   }).slice(0, 11) //return only first 10
 
