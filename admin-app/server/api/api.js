@@ -11,6 +11,8 @@ const HELPERS = require("../middlewares/helpers")
 const cloudinary = require("../middlewares/cloudinary")
 const PDFDocument = require("pdfkit");
 
+
+
 module.exports = class API {
 
 //POST REQUESTS
@@ -1029,19 +1031,22 @@ static async submit_gadget_record(req, res) {
 
 
 //Adjust Prices
+// Adjust Prices
 static async adjust_prices(req, res) {
 
   try {
 
-    const { percent, category, action } = req.body;
+    const { value, category, action, type } = req.body;
+
 
     // validation
-    if (!percent || percent <= 0) {
+    if (!value || value <= 0) {
       return res.json({
         success: false,
-        message: "Invalid percentage"
+        message: "Invalid value"
       });
     }
+
 
     if (!action || !["increase", "decrease"].includes(action)) {
       return res.json({
@@ -1050,46 +1055,94 @@ static async adjust_prices(req, res) {
       });
     }
 
-    // calculate multiplier
-    let multiplier;
 
-    if (action === "increase") {
-      multiplier = 1 + (percent / 100);
-    } 
-    else {
-      multiplier = 1 - (percent / 100);
+    if (!type || !["percent", "amount"].includes(type)) {
+      return res.json({
+        success: false,
+        message: "Invalid type"
+      });
     }
+
 
     let query;
     let values = [];
 
-    // ALL categories
-    if (category === "all") {
 
-      query = `
-        UPDATE products
-        SET price = price * ?
-      `;
+    // ======================
+    // PERCENT ADJUSTMENT
+    // ======================
 
-      values = [multiplier];
+    if (type === "percent") {
+
+      let multiplier;
+
+      if (action === "increase") {
+        multiplier = 1 + (value / 100);
+      } 
+      else {
+        multiplier = 1 - (value / 100);
+      }
+
+
+      if (category === "all") {
+
+        query = `
+          UPDATE products
+          SET price = price * ?
+        `;
+
+        values = [multiplier];
+
+      } 
+      else {
+
+        query = `
+          UPDATE products
+          SET price = price * ?
+          WHERE category_id = ?
+        `;
+
+        values = [multiplier, category];
+
+      }
 
     }
 
-    // SPECIFIC category
-    else {
 
-      query = `
-        UPDATE products
-        SET price = price * ?
-        WHERE category_id = ?
-      `;
+    // ======================
+    // AMOUNT ADJUSTMENT
+    // ======================
 
-      values = [multiplier, category];
+    if (type === "amount") {
+
+      let operator = action === "increase" ? "+" : "-";
+
+      if (category === "all") {
+
+        query = `
+          UPDATE products
+          SET price = GREATEST(price ${operator} ?, 0)
+        `;
+
+        values = [value];
+
+      } 
+      else {
+
+        query = `
+          UPDATE products
+          SET price = GREATEST(price ${operator} ?, 0) 
+          WHERE category_id = ?
+        `;
+
+        values = [value, category];
+
+      }
 
     }
+
 
     const result = await new Promise((resolve, reject) => {
-
       db.query(query, values, (err, data) => {
         if (err) reject(err);
         else resolve(data);
@@ -1097,15 +1150,14 @@ static async adjust_prices(req, res) {
 
     });
 
-    return res.json({
+    return res.status(200).json({
       success: true,
       message: "Prices updated successfully",
       affected_rows: result.affectedRows
     });
 
-  } catch (error) {
 
-    console.log(error);
+  } catch (error) {
 
     return res.status(500).json({
       success: false,

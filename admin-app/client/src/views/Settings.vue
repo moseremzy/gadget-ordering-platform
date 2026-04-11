@@ -84,28 +84,10 @@
 
             <form class="edit-details-form grid-form">
 
-            <!-- Percent -->
-            <div class="form-group grid-full">
-            <label class="form-label" for="percent">Percentage</label>
-            <input 
-            class="form-input" 
-            type="number" 
-            placeholder="10"
-            v-model="price_adjustment.percent"
-            id="percent"
-            />
-            <p class="err">{{price_adjustment_error.percent_err}}</p>
-            </div>
-
             <!-- Category -->
             <div class="form-group grid-full">
             <label class="form-label" for="category">Category</label>
-
-            <select 
-            class="form-input" 
-            v-model="price_adjustment.category" 
-            id="category"
-            >
+            <select class="form-input" v-model="price_adjustment.category" id="category">
             <option value="all">All Categories</option>
             <option 
             v-for="cat in categories" 
@@ -114,29 +96,41 @@
             >
             {{ cat.name }}
             </option>
-
             </select>
-
             <p class="err">{{price_adjustment_error.category_err}}</p>
             </div>
 
             <!-- Action -->
             <div class="form-group grid-full">
             <label class="form-label" for="action">Action</label>
-
-            <select 
-            class="form-input" 
-            v-model="price_adjustment.action" 
-            id="action"
-            >
-
-            <option disabled value="">Select Action</option>
+            <select class="form-input" v-model="price_adjustment.action" id="action">
             <option value="increase">Increase Price</option>
             <option value="decrease">Decrease Price</option>
-
             </select>
-
             <p class="err">{{price_adjustment_error.action_err}}</p>
+            </div>
+
+            <!-- type -->
+            <div class="form-group grid-full">
+            <label class="form-label" for="type">By</label>
+            <select class="form-input" v-model="price_adjustment.type" id="type">
+            <option value="percent">Percent</option>
+            <option value="amount">Amount</option>
+            </select>
+            <p class="err">{{price_adjustment_error.type_err}}</p>
+            </div>
+
+             <!-- value -->
+            <div class="form-group grid-full">
+            <label class="form-label" for="value">{{price_adjustment.type}} {{price_adjustment.type == 'amount' ? new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(price_adjustment.value) : ''}}</label>
+            <input 
+            class="form-input" 
+            type="number" 
+            placeholder="10"
+            v-model="price_adjustment.value"
+            id="value"
+            />
+            <p class="err">{{price_adjustment_error.value_err}}</p>
             </div>
 
             <!-- Submit -->
@@ -259,15 +253,17 @@ let password_error = reactive({
 
 
 let price_adjustment = reactive({
-    percent: "",
     category: "",
-    action: ""
+    action: "",
+    type: "",
+    value: "",
 })
 
 let price_adjustment_error = reactive({
-    percent_err: "",
     category_err: "",
-    action_err: ""
+    action_err: "",
+    type_err: "",
+    value_err: ""
 })
 
 const categories = computed(() => {
@@ -316,9 +312,10 @@ onUpdated(() => {
     new_password_validated()
     confirm_password_validated()
 
-    percent_validated()
+    value_validated()
     category_validated()
     action_validated()
+    type_validated()
 
 })
 
@@ -508,20 +505,36 @@ function confirm_password_validated() {
 
 
 
-function percent_validated() {
+function value_validated() {
     
-    if (price_adjustment.percent === "") {
+    if (price_adjustment.value === "") {
     
-        price_adjustment_error.percent_err = "Please fill field";
+        price_adjustment_error.value_err = "Please fill field";
     
     } else {
         
-        price_adjustment_error.percent_err = ""
+        price_adjustment_error.value_err = ""
         
         return true
 
     }         
 }
+
+function type_validated() {
+    
+    if (price_adjustment.type === "") {
+    
+        price_adjustment_error.type_err = "Please fill field";
+    
+    } else {
+        
+        price_adjustment_error.type_err = ""
+        
+        return true
+
+    }         
+}
+
 
 function category_validated() {
     
@@ -540,13 +553,13 @@ function category_validated() {
 
 function action_validated() {
     
-    if (price_adjustment.category === "") {
+    if (price_adjustment.action === "") {
     
-        price_adjustment_error.category_err = "Please fill field";
+        price_adjustment_error.action_err = "Please fill field";
     
     } else {
         
-        price_adjustment_error.category_err = ""
+        price_adjustment_error.action_err = ""
         
         return true
 
@@ -648,7 +661,7 @@ async function update_admin_pass() {
 
 async function adjustPrices() {
 
-    if (percent_validated() && category_validated() && action_validated()) {
+    if (value_validated() && category_validated() && action_validated() && type_validated()) {
 
         interactive_store.toggle_loading_overlay(true)
 
