@@ -1241,6 +1241,7 @@ static async adjust_prices(req, res) {
   const orderData = {
     customer_name: data.customer_name,
     customer_phone: data.phone,
+    customer_address: data.customer_address,
     order_status: 'confirmed',
     order_type: 'walk-in',
     total_amount: data.total_amount,
@@ -1327,7 +1328,7 @@ static async download_reciept(req, res) {
       COALESCE(u.fullname, o.customer_name) AS customer_name,
       COALESCE(u.phone, o.customer_phone) AS phone,
       u.email,
-      u.address,
+      COALESCE(u.address, o.customer_address) AS address,
 
       -- Product details
       p.product_id,
@@ -2019,7 +2020,7 @@ static async fetch_orders (req, res) {
       u.fullname AS customer_name,
       COALESCE(u.phone, o.customer_phone) AS phone,
       u.email,
-      u.address,
+      COALESCE(u.address, o.customer_address) AS address,
     
       -- Product / Item details
       p.product_id,

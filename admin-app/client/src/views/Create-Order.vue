@@ -42,6 +42,16 @@ placeholder="Phone Number"
 <p class="err">{{order_error.customer_phone_err}}</p>
 </div>
 
+<!-- Customer Name -->
+<div class="form-group grid-full">
+<label class="form-label">Customer Address</label>
+<input
+v-model="order.customer_address"
+class="form-input"
+placeholder="Optional"
+/>
+</div>
+
 <!-- Payment Method -->
 <div class="form-group grid-full">
 <label class="form-label">Payment Method</label>
@@ -180,6 +190,8 @@ const order = reactive({
 
     customer_phone: "",
 
+    customer_address: "",
+
     payment_method: "",
 
     items: []
@@ -310,6 +322,8 @@ if (!customer_name_validated() || !customer_phone_validated() || !payment_method
     customer_name: order.customer_name,
 
     phone: order.customer_phone,
+
+    customer_address: order.customer_address,
 
     payment_method: order.payment_method,
 
