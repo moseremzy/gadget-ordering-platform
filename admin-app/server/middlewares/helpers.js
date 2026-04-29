@@ -1,4 +1,5 @@
 const multer = require("multer");
+const crypto = require('crypto');
 const path = require("path");
 const axios = require("axios");
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_API_KEY;
@@ -149,6 +150,23 @@ module.exports = class MIDDLEWARES {
         .replace(/\s+/g, '-')     // spaces → hyphen
         .replace(/--+/g, '-');    // avoid double hyphens
     }
+
+    
+    // Creates Confirmation Pin for Orders
+    static generateConfirmationPin() {
+      
+      return Math.floor(1000 + Math.random() * 9000); // Generates a 4-digit PIN
+
+    }
+
+
+    static generatePaymentReference(length = 10) { //for order id
+
+      return crypto.randomBytes(length).toString('hex').slice(0, length);
+
+    }
+
+
               
 }
     

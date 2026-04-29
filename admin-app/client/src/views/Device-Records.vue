@@ -190,7 +190,7 @@ const totalPages = computed(() => Math.ceil(filteredRecords.value.length / items
 
 async function downloadReceipt(order_id) {
   
-  const blob = await API.download_reciept(order_id);
+  const blob = await API.download_reciept({order_id: order_id});
 
   const url = window.URL.createObjectURL(blob);  
 

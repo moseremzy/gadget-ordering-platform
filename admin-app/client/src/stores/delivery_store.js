@@ -38,7 +38,7 @@ export const useDeliveryStore = defineStore('delivery', {
         for (let i = 0; i < item.quantity; i++) {
           this.gadgets.push({
             order_item_id: item.order_item_id,
-            product_name: item.product_name,
+            product_name: item.item_name,
             imei: '',
             source: ''
           })

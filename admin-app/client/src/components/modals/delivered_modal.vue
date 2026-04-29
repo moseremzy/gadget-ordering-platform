@@ -27,6 +27,11 @@
                 v-model="gadget.imei"
                 placeholder="Enter IMEI or Serial"
               />
+              
+              <!-- Character counter -->
+              <small class="char-counter">
+                {{ gadget.imei.length }} characters
+              </small>
             </div>
 
             <div class="form-group">
@@ -88,6 +93,7 @@ async function submit_gadget_record() {
     interactive_store.display_error_alert_box()
     return
   }
+
 
   interactive_store.toggle_loading_overlay(true)
 
@@ -172,6 +178,12 @@ input {
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
+}
+
+.char-counter {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
 }
 
 .confirm {

@@ -80,6 +80,15 @@ export default class API {
     return await api.post("/adjust_prices", info)
   }
 
+  //create manual order
+  static async create_manual_order(info) {
+    return await api.post("/create_manual_order", info)
+  }
+
+  static async download_reciept(order_id) {
+    return api.post(`/download_reciept`, order_id, { responseType: 'blob' }).then(res => res.data);
+  }
+
   // GET
 
   //Verify Email
@@ -117,10 +126,6 @@ export default class API {
 
   static async fetch_settings() {
     return api.get("/fetch_settings").then(res => res.data);
-  }
-
-  static async download_reciept(order_id) {
-    return api.get(`/orders/${order_id}/receipt`, { responseType: 'blob' }).then(res => res.data);
   }
 
   static async logout() {

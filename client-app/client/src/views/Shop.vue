@@ -94,6 +94,8 @@ onUpdated(() => {
 
 let filteredProducts = computed(() => {
 
+  currentPage.value = 1
+
   return products.value.filter(product => {
 
     const matchCategory =

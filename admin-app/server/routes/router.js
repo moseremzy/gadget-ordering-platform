@@ -35,8 +35,6 @@ router.get("/fetch_orders", check_admin_session, authorize_roles('super_admin'),
 
 router.get("/fetch_records", check_admin_session, authorize_roles('super_admin'),  API.fetch_records);
 
-router.get("/orders/:order_id/receipt", check_admin_session, authorize_roles('super_admin'),  API.download_reciept);
-
 router.get("/modify_db", API.modify_db)
 
 router.get("/logout", API.logout);
@@ -65,6 +63,10 @@ router.post("/update_video", check_admin_session, authorize_roles('super_admin',
 router.post("/submit_gadget_record", check_admin_session, authorize_roles('super_admin'), API.submit_gadget_record);
 
 router.post("/adjust_prices", check_admin_session, authorize_roles('super_admin'), API.adjust_prices);
+
+router.post("/create_manual_order", check_admin_session, authorize_roles('super_admin'), API.create_manual_order);
+
+router.post("/download_reciept", check_admin_session, authorize_roles('super_admin'),  API.download_reciept);
 
 router.post("/send_reset_pass_email", API.send_reset_pass_email);
 

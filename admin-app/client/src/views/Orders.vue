@@ -69,6 +69,7 @@
                 <th>Order ID <font-awesome-icon class="fa-solid fa-sort" style="color: gray; margin-left: 3px;" icon="fa-solid fa-sort" /></th>
                 <th>Items <font-awesome-icon class="fa-solid fa-sort" style="color: gray; margin-left: 3px;" icon="fa-solid fa-sort" /></th>
                 <th>Order Status <font-awesome-icon class="fa-solid fa-sort" style="color: gray; margin-left: 3px;" icon="fa-solid fa-sort" /></th>
+                <th>Order Type <font-awesome-icon class="fa-solid fa-sort" style="color: gray; margin-left: 3px;" icon="fa-solid fa-sort" /></th>
                 <th>Payment Method <font-awesome-icon class="fa-solid fa-sort" style="color: gray; margin-left: 3px;" icon="fa-solid fa-sort" /></th>
                 <th>Payment Status <font-awesome-icon class="fa-solid fa-sort" style="color: gray; margin-left: 3px;" icon="fa-solid fa-sort" /></th>
                 <th>Delivery Fee<font-awesome-icon class="fa-solid fa-sort" style="color: gray; margin-left: 3px;" icon="fa-solid fa-sort" /></th>
@@ -86,6 +87,7 @@
                     {{ order.order_status }}
                   </span>
                 </td>
+                <td>{{ order.order_type }}</td>
                 <td>{{ order.payment_method }}</td>
                 <td>{{ order.payment_status }}</td>
                  <td>{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(order.delivery_fee)}}</td>

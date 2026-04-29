@@ -1030,7 +1030,7 @@ static async submit_gadget_record(req, res) {
 }
 
 
-//Adjust Prices
+
 // Adjust Prices
 static async adjust_prices(req, res) {
 
@@ -1167,6 +1167,615 @@ static async adjust_prices(req, res) {
   }
 
 }
+
+
+//CREATE ORDER MANUALLY
+ static async create_manual_order (req, res) {
+
+  const data = req.body;
+
+    try {
+
+      data.confirmation_pin = HELPERS.generateConfirmationPin()
+
+      data.payment_reference =  HELPERS.generatePaymentReference()
+
+      async function keep_for_db(data, orderData) { //keep item for db
+
+      const sql = 'INSERT INTO orders SET ?'
+
+      const order_id = await new Promise( (resolve, reject) => { //enter order in orders table
+  
+        db.query(sql, orderData, (err, result) => {
+  
+          if (err) {
+  
+            reject(err)
+          
+          } else {
+  
+            resolve(result.insertId)
+  
+          }
+  
+        })
+  
+      })
+
+      
+      const orderItems = data.products.map(item => [
+          order_id,
+          item.item_name,
+          item.quantity,
+          item.price
+      ]);
+
+
+      const itemsSql = `
+       INSERT INTO order_items (order_id, item_name, quantity, price)
+       VALUES ?
+      `; //enter each item in order items table
+
+      await new Promise( (resolve, reject) => {
+  
+        db.query(itemsSql, [orderItems], (err, result) => {
+  
+          if (err) {
+  
+            reject(err)
+          
+          } else {
+  
+            resolve()
+  
+          }
+  
+        })
+  
+     })
+
+     return order_id
+
+  }
+
+  const orderData = {
+    customer_name: data.customer_name,
+    customer_phone: data.phone,
+    order_status: 'confirmed',
+    order_type: 'walk-in',
+    total_amount: data.total_amount,
+    payment_method: data.payment_method,
+    payment_status: 'success',
+    total_items: data.total_items,
+    delivery_fee: data.delivery_fee,
+    confirmation_pin: data.confirmation_pin,
+    payment_reference: data.payment_reference
+  };
+ 
+    let order_id = await keep_for_db(data, orderData)
+
+    return res.status(200).json({
+      success: true,
+      message: "success",
+      order_id: order_id
+    });   
+    
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });  
+    
+  }
+
+ }
+
+
+ 
+//download reciept
+static async download_reciept(req, res) {
+  
+  try {
+    
+    // const naira = new Intl.NumberFormat("en-NG", {
+    //   style: "currency",
+    //   currency: "NGN",
+    // });
+
+    const order_id = req.body.order_id;
+
+    // 1️⃣ Fetch Order
+    const order = await new Promise((resolve, reject) => {
+      db.query(
+        "SELECT * FROM orders WHERE order_id = ?",
+        [order_id],
+        (err, result) => {
+          if (err) return reject(err);
+          resolve(result[0]);
+        }
+      );
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // 2️⃣ Verify payment
+    if (order.payment_status !== "success") {
+      return res.status(400).json({
+        success: false,
+        message: "Payment not verified",
+      });
+    }
+
+
+    const order_items_query = `
+    SELECT 
+      o.order_id,
+      o.order_status,
+      o.created_at,
+      o.note,
+      o.total_amount,
+      o.delivery_fee,
+
+      -- User details
+      u.user_id AS customer_id,
+      COALESCE(u.fullname, o.customer_name) AS customer_name,
+      COALESCE(u.phone, o.customer_phone) AS phone,
+      u.email,
+      u.address,
+
+      -- Product details
+      p.product_id,
+      COALESCE(p.name, oi.item_name) AS product_name,
+      p.main_image,
+
+      -- Order item details
+      oi.order_item_id,
+      oi.quantity,
+      oi.price,
+
+      -- Device record
+      dr.imei,
+      dr.source
+
+    FROM orders o
+    LEFT JOIN users u ON o.user_id = u.user_id
+    JOIN order_items oi ON o.order_id = oi.order_id
+    LEFT JOIN products p ON oi.product_id = p.product_id
+    LEFT JOIN device_records dr ON oi.order_item_id = dr.order_item_id
+
+    WHERE o.order_id = ?
+    `;
+
+  
+  let order_items = await new Promise((resolve, reject) => {
+    db.query(order_items_query, [order_id], (err, result) => {
+      if (err) reject(err);
+      else resolve(result);
+    });
+  });
+
+
+  const doc = new PDFDocument({ margin: 40 });
+
+  doc.registerFont("Roboto", path.join(__dirname, "../fonts/Roboto-Regular.ttf"));
+  doc.registerFont("Roboto-Bold", path.join(__dirname, "../fonts/Roboto-Bold.ttf"));
+  doc.registerFont("DancingScript-Regular", path.join(__dirname, "../fonts/DancingScript-Regular.ttf"));
+  
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=receipt-${order.order_id}.pdf`
+  );
+  
+  doc.pipe(res);
+  
+  const current_order = order_items[0];
+  const items = order_items;
+  
+  const naira = new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+  });
+  
+  // ===============================
+  // HEADER (UNCHANGED)
+  // ===============================
+  const logoPath = path.join(__dirname, "../images/logo.png");
+  const logoWidth = 60;
+  const pageWidth = doc.page.width;
+  const centerX = (pageWidth - logoWidth) / 2;
+  
+  doc.image(logoPath, centerX, 40, { width: logoWidth });
+  
+  doc.moveDown(2.5);
+  
+  doc.font("Roboto-Bold").fontSize(20).text("TECHBYCAS", { align: "center" });
+  doc.fontSize(14).text("GADGET STORE", { align: "center" });
+  
+  doc.moveDown(0.3);
+  
+  doc.font("Roboto").fontSize(9)
+    .text("18 Asemota Street, Edo State, Nigeria", { align: "center" })
+    .text("Phone: 08077416692 | Email: support@techbycas.com", { align: "center" });
+  
+  doc.moveDown();
+  doc.moveTo(40, doc.y).lineTo(560, doc.y).stroke();
+  doc.moveDown(0.5);
+  
+  doc.font("Roboto-Bold").fontSize(14).text("SALES RECEIPT", {
+    align: "center",
+  });
+  
+  doc.moveDown(0.8);
+  
+  // ===============================
+  // HELPER
+  // ===============================
+  function labelValue(label, value, x, y) {
+    doc.font("Roboto-Bold").text(label, x, y, { continued: true });
+    doc.font("Roboto").text(value);
+  }
+  
+  // ===============================
+  // 🔥 FORCE SMALL FONT FOR BOXES
+  // ===============================
+  doc.fontSize(9);
+  
+
+  const startX = 40;
+  const tableWidth = 520;
+  const col1 = 170;
+  const col2 = 170;
+  let y = doc.y;
+
+  // ===============================
+// RECEIPT BOX (FIXED WRAPPING)
+// ===============================
+doc.rect(startX, y, tableWidth, 25).stroke();
+
+doc.moveTo(startX + col1, y).lineTo(startX + col1, y + 25).stroke();
+doc.moveTo(startX + col1 + col2, y).lineTo(startX + col1 + col2, y + 25).stroke();
+
+const cellPadding = 5;
+
+// Receipt
+doc.font("Roboto-Bold").text("Receipt:", startX + cellPadding, y + 5);
+doc.font("Roboto").text(`#${current_order.order_id}`, startX + cellPadding + 60, y + 5, {
+  width: col1 - 70
+});
+
+// Date
+doc.font("Roboto-Bold").text("Date:", startX + col1 + cellPadding, y + 5);
+doc.font("Roboto").text(
+  new Date(current_order.created_at).toLocaleDateString(),
+  startX + col1 + cellPadding + 40,
+  y + 5,
+  { width: col2 - 50 }
+);
+
+// Time
+doc.font("Roboto-Bold").text("Time:", startX + col1 + col2 + cellPadding, y + 5);
+doc.font("Roboto").text(
+  new Date(current_order.created_at).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true
+  }),
+  startX + col1 + col2 + cellPadding + 40,
+  y + 5,
+  { width: col2 - 50 }
+);
+
+y += 30;
+  
+// ===============================
+// CUSTOMER BOX (FIXED WRAPPING)
+// ===============================
+const colWidth = tableWidth / 3;
+const padding = 5;
+
+// calculate dynamic height
+const nameHeight = doc.heightOfString(current_order.customer_name || "-", {
+  width: colWidth - 70
+});
+const phoneHeight = doc.heightOfString(current_order.phone || "-", {
+  width: colWidth - 60
+});
+const addressHeight = doc.heightOfString(current_order.address || "-", {
+  width: colWidth - 70
+});
+
+const customerHeight = Math.max(nameHeight, phoneHeight, addressHeight, 15) + 12;
+
+// box
+doc.rect(startX, y, tableWidth, customerHeight).stroke();
+
+// vertical lines
+doc.moveTo(startX + colWidth, y)
+  .lineTo(startX + colWidth, y + customerHeight)
+  .stroke();
+
+doc.moveTo(startX + colWidth * 2, y)
+  .lineTo(startX + colWidth * 2, y + customerHeight)
+  .stroke();
+
+// NAME
+doc.font("Roboto-Bold").text("Customer:", startX + padding, y + 5);
+doc.font("Roboto").text(
+  current_order.customer_name || "-",
+  startX + padding + 65,
+  y + 5,
+  { width: colWidth - 75 }
+);
+
+// PHONE
+doc.font("Roboto-Bold").text("Phone:", startX + colWidth + padding, y + 5);
+doc.font("Roboto").text(
+  current_order.phone || "-",
+  startX + colWidth + padding + 50,
+  y + 5,
+  { width: colWidth - 60 }
+);
+
+// ADDRESS
+doc.font("Roboto-Bold").text("Address:", startX + colWidth * 2 + padding, y + 5);
+doc.font("Roboto").text(
+  current_order.address || "n/a",
+  startX + colWidth * 2 + padding + 60,
+  y + 5,
+  { width: colWidth - 70 }
+);
+
+y += customerHeight + 10;
+  
+  // ===============================
+  // CONTINUE REST OF YOUR CODE...
+  // (table, totals, signatures remain unchanged)
+  // ===============================
+
+// ===============================
+// TABLE (QTY REMOVED - FULL WIDTH FIXED)
+// ===============================
+const colWidths = [210, 130, 90, 90];
+const headers = ["ITEM", "IMEI / SERIAL", "UNIT PRICE", "AMOUNT"];
+
+doc.rect(startX, y, tableWidth, 25).stroke();
+
+let x = startX;
+colWidths.forEach(width => {
+  doc.moveTo(x, y).lineTo(x, y + 25).stroke();
+  x += width;
+});
+doc.moveTo(startX + tableWidth, y)
+  .lineTo(startX + tableWidth, y + 25)
+  .stroke();
+
+doc.font("Roboto-Bold").fontSize(9);
+
+x = startX;
+headers.forEach((h, i) => {
+  doc.text(h, x + 5, y + 8, { width: colWidths[i] - 10 });
+  x += colWidths[i];
+});
+
+y += 25;
+doc.font("Roboto");
+
+items.forEach(item => {
+
+  const descHeight = doc.heightOfString(item.product_name || item.item_name, {
+    width: colWidths[0] - 10
+  });
+
+  const imeiHeight = doc.heightOfString(item.imei || "-", {
+    width: colWidths[1] - 10
+  });
+
+  const priceHeight = doc.heightOfString(naira.format(item.price), {
+    width: colWidths[2] - 10
+  });
+
+  const amountHeight = doc.heightOfString(
+    naira.format(item.price * item.quantity),
+    { width: colWidths[3] - 10 }
+  );
+
+  const rowHeight = Math.max(
+    descHeight,
+    imeiHeight,
+    priceHeight,
+    amountHeight,
+    20
+  ) + 10;
+
+  doc.rect(startX, y, tableWidth, rowHeight).stroke();
+
+  let x = startX;
+  colWidths.forEach(width => {
+    doc.moveTo(x, y).lineTo(x, y + rowHeight).stroke();
+    x += width;
+  });
+
+  doc.moveTo(startX + tableWidth, y)
+    .lineTo(startX + tableWidth, y + rowHeight)
+    .stroke();
+
+  x = startX;
+
+  doc.text(item.product_name || item.item_name, x + 5, y + 5, {
+    width: colWidths[0] - 10,
+    lineBreak: true
+  });
+  x += colWidths[0];
+
+  doc.text(item.imei || "-", x + 5, y + 5, {
+    width: colWidths[1] - 10,
+    lineBreak: true
+  });
+  x += colWidths[1];
+
+  doc.text(naira.format(item.price), x + 5, y + 5, {
+    width: colWidths[2] - 10,
+    lineBreak: true
+  });
+  x += colWidths[2];
+
+  doc.text(naira.format(item.price * item.quantity), x + 5, y + 5, {
+    width: colWidths[3] - 10,
+    lineBreak: true
+  });
+
+  y += rowHeight;
+});
+
+// ===============================
+// LEFT & RIGHT ROW (PAYMENT + SUMMARY)
+// ===============================
+const leftX = startX;
+const rightX = startX + tableWidth - 200;
+
+let sectionY = y + 20;
+
+// LEFT → Payment Method
+labelValue(
+  "Payment Method: ",
+  order.payment_method || "-",
+  leftX,
+  sectionY
+);
+
+// RIGHT → Order Summary
+
+const subTotal = Number(order.total_amount) - (order.delivery_fee || 0);
+const deliveryFee = Number(order.delivery_fee || 0);
+const finalTotal = Number(order.total_amount);
+const lineGap = 15;
+
+labelValue("SUBTOTAL: ", naira.format(subTotal), rightX, sectionY);
+
+labelValue(
+  "DELIVERY FEE: ",
+  naira.format(deliveryFee),
+  rightX,
+  sectionY + lineGap
+);
+
+labelValue(
+  "TOTAL PAID: ",
+  naira.format(finalTotal),
+  rightX,
+  sectionY + lineGap * 2
+);
+
+// ===============================
+// DIVIDER LINE
+// ===============================
+const dividerY = sectionY + 46;
+
+doc.moveTo(startX, dividerY)
+  .lineTo(startX + tableWidth, dividerY)
+  .stroke();
+
+
+// ===============================
+// TERMS SECTION (LEFT)
+// ===============================
+let termsY = dividerY + 15;
+
+doc.font("Roboto-Bold").text("Terms & Conditions:", leftX, termsY);
+
+doc.font("Roboto").fontSize(9).text(
+  "1. Used/Pre-owned devices carry a 7-day testing warranty.\n" +
+  "2. No refunds after 48 hours; returns for exchange within 7 days for defective hardware.\n" +
+  "3. Warranty does not cover liquid damage, broken screens, or rooting/software modifications.\n" +
+  "4. Sales receipt is required for all warranty claims.",
+  leftX,
+  termsY + 12,
+  { width: 220 }
+);
+
+
+// ===============================
+// SIGNATURES (FINAL CLEAN VERSION)
+// ===============================
+
+// more space from terms
+const signatureY = termsY + 130;
+
+// ---------- CUSTOMER (LEFT) ----------
+const customerLineWidth = 130;
+
+// line
+doc.moveTo(leftX, signatureY)
+  .lineTo(leftX + customerLineWidth, signatureY)
+  .stroke();
+
+// label (closer to line)
+doc.font("Roboto-Bold").fontSize(9).text(
+  "Customer Signature",
+  leftX,
+  signatureY + 3
+);
+
+
+// ---------- MANAGER (RIGHT) ----------
+const managerLineWidth = 120;
+
+// push fully to right
+const managerX = startX + tableWidth - managerLineWidth;
+
+// line
+doc.moveTo(managerX, signatureY)
+  .lineTo(managerX + managerLineWidth, signatureY)
+  .stroke();
+
+// signature text on line (centered nicely)
+doc.font("DancingScript-Regular").fontSize(12).text(
+  "Techbycas",
+  managerX + 20,
+  signatureY - 12
+);
+
+// label (tight under line)
+doc.font("Roboto-Bold").fontSize(9).text(
+  "Manager Signature",
+  managerX,
+  signatureY + 3
+);
+
+// ===============================
+// FOOTER CENTER (FIXED PROPERLY)
+// ===============================
+doc.moveDown(2);
+
+// force full-width centered text
+doc.font("Roboto-Bold")
+.fontSize(12)
+.text("THANK YOU FOR CHOOSING TECHBYCAS!", startX, doc.y, {
+  width: tableWidth,
+  align: "center"
+});
+
+doc.end();
+
+  } catch (error) {
+
+    console.log(error.message)
+
+    return res.status(500).json({
+      success: false,
+      message: "Error generating receipt",
+    });
+  }
+}
+
+
 
 
   //CHANGE ITEM PHOTO
@@ -1397,37 +2006,39 @@ static async fetch_orders (req, res) {
   })
 
 
-    const order_items_query = `SELECT 
-        o.order_id,
-        o.order_status,
-        o.created_at,
-        o.note,
-        o.total_amount,
-      
-        -- User details
-        u.user_id AS customer_id,
-        u.fullname AS customer_name,
-        u.phone,
-        u.email,
-        u.address,
-      
-        -- Product details
-        p.product_id,
-        p.name AS product_name,
-        p.main_image,
-      
-        -- Order item details
-        oi.order_item_id,
-        oi.quantity,
-        oi.price
-      
-      FROM orders o
-      JOIN users u ON o.user_id = u.user_id
-      JOIN order_items oi ON o.order_id = oi.order_id
-      JOIN products p ON oi.product_id = p.product_id
-      
-      ORDER BY o.created_at DESC;
-    `;
+  const order_items_query = `
+    SELECT 
+      o.order_id,
+      o.order_status,
+      o.created_at,
+      o.note,
+      o.total_amount,
+    
+      -- User details
+      u.user_id AS customer_id,
+      u.fullname AS customer_name,
+      COALESCE(u.phone, o.customer_phone) AS phone,
+      u.email,
+      u.address,
+    
+      -- Product / Item details
+      p.product_id,
+      COALESCE(p.name, oi.item_name) AS item_name,
+      p.main_image,
+    
+      -- Order item details
+      oi.order_item_id,
+      oi.product_id,
+      oi.quantity,
+      oi.price
+    
+    FROM orders o
+    LEFT JOIN users u ON o.user_id = u.user_id
+    JOIN order_items oi ON o.order_id = oi.order_id
+    LEFT JOIN products p ON oi.product_id = p.product_id
+    
+    ORDER BY o.created_at DESC;
+  `;
   
     let all_order_items = await new Promise( (resolve, reject) => {
 
@@ -1486,14 +2097,14 @@ static async fetch_records (req, res) {
   
     -- User details
     u.user_id AS customer_id,
-    u.fullname AS customer_name,
-    u.phone,
+    COALESCE(u.fullname, o.customer_name) AS customer_name,
+    COALESCE(u.phone, o.customer_phone) AS phone,
     u.email,
     u.address,
   
     -- Product details
     p.product_id,
-    p.name AS product_name,
+    COALESCE(p.name, oi.item_name) AS product_name,
     p.main_image,
   
     -- Order item details
@@ -1508,10 +2119,10 @@ static async fetch_records (req, res) {
   JOIN orders o 
     ON oi.order_id = o.order_id
   
-  JOIN users u 
+  LEFT JOIN users u 
     ON o.user_id = u.user_id
   
-  JOIN products p 
+  LEFT JOIN products p 
     ON oi.product_id = p.product_id
   
   ORDER BY dr.delivered_at DESC
@@ -1535,6 +2146,7 @@ static async fetch_records (req, res) {
 
   })
 
+   
 
     return res.status(200).json({ // Success
       success: true,
@@ -1800,313 +2412,6 @@ static async fetch_settings (req, res) {
   }
 
 }
-
-
-
-//download reciept
-static async download_reciept(req, res) {
-  
-  try {
-    
-    const naira = new Intl.NumberFormat("en-NG", {
-      style: "currency",
-      currency: "NGN",
-    });
-
-    const order_id = req.params.order_id;
-
-    // 1️⃣ Fetch Order
-    const order = await new Promise((resolve, reject) => {
-      db.query(
-        "SELECT * FROM orders WHERE order_id = ?",
-        [order_id],
-        (err, result) => {
-          if (err) return reject(err);
-          resolve(result[0]);
-        }
-      );
-    });
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: "Order not found",
-      });
-    }
-
-    // 2️⃣ Verify payment
-    if (order.payment_status !== "success") {
-      return res.status(400).json({
-        success: false,
-        message: "Payment not verified",
-      });
-    }
-
-
-    const order_items_query = `
-    SELECT 
-      o.order_id,
-      o.order_status,
-      o.created_at,
-      o.note,
-      o.total_amount,
-      o.delivery_fee,
-
-      -- User details
-      u.user_id AS customer_id,
-      u.fullname AS customer_name,
-      u.phone,
-      u.email,
-      u.address,
-
-      -- Product details
-      p.product_id,
-      p.name AS product_name,
-      p.main_image,
-
-      -- Order item details
-      oi.order_item_id,
-      oi.quantity,
-      oi.price,
-
-      -- Device record
-      dr.imei,
-      dr.source
-
-    FROM orders o
-    JOIN users u ON o.user_id = u.user_id
-    JOIN order_items oi ON o.order_id = oi.order_id
-    JOIN products p ON oi.product_id = p.product_id
-    LEFT JOIN device_records dr ON oi.order_item_id = dr.order_item_id
-
-    WHERE o.order_id = ?
-    `;
-  
-  let order_items = await new Promise((resolve, reject) => {
-    db.query(order_items_query, [order_id], (err, result) => {
-      if (err) reject(err);
-      else resolve(result);
-    });
-  });
-
-
-  const doc = new PDFDocument({ margin: 50 });
-
-  // Register fonts
-  doc.registerFont("Roboto", path.join(__dirname, "../fonts/Roboto-Regular.ttf"));
-  doc.registerFont("Roboto-Bold", path.join(__dirname, "../fonts/Roboto-Bold.ttf"));
-  
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename=receipt-${order.order_id}.pdf`
-  );
-  
-  doc.pipe(res);
-  
-  const current_order = order_items[0];
-  const items = order_items;
-  
-  // ===============================
-  // STORE HEADER
-  // ===============================
-
-  const logoPath = path.join(__dirname, "../images/logo.png");
-
-  // Get image dimensions (you can use approximate width if you know it)
-  const logoWidth = 80;
-  const pageWidth = doc.page.width;
-  const x = (pageWidth - logoWidth) / 2;  // centers image
-
-  // Logo
-  doc.image(logoPath, x, 45, { width: logoWidth });
-  doc.moveDown(2.5);
-
-
-  // Store name
-  doc.fontSize(18).font("Roboto-Bold").text("TECH BY CAS", {
-    align: "center",
-  });
-
-  doc.moveDown(0.3);
-
-  doc.fontSize(10)
-    .font("Roboto")
-    .text("18 Asemota street airport Benin city", { align: "center" })
-    .text("Phone: 08077416692 | Email: support@techbycas.com", { align: "center" });
-
-  doc.moveDown();
-
-  doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-  doc.moveDown();
-  
-  // ===============================
-  // ORDER DETAILS SECTION
-  // ===============================
-  doc.fontSize(12).font("Roboto-Bold").text("Receipt Details");
-  doc.moveDown(0.5);
-  
-  doc.font("Roboto");
-  doc.text(`Order ID: ${current_order.order_id}`);
-  doc.text(`Date: ${new Date(current_order.created_at).toDateString()}`);
-  doc.text(`Customer: ${current_order.customer_name}`);
-  doc.text(`Phone: ${current_order.phone}`);
-  doc.text(`Address: ${current_order.address}`);
-  
-  doc.moveDown();
-  doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-  doc.moveDown();
-  
-  // ===============================
-  // ITEMS TABLE
-  // ===============================
-  
-  const tableTop = doc.y + 10;
-  const itemX = 50;
-  const priceX = 280;
-  const imeiX = 350;
-  const sourceX = 470;
-  
-  doc.font("Roboto-Bold");
-  doc.text("Product", itemX, tableTop);
-  doc.text("Price", priceX, tableTop);
-  doc.text("IMEI / Serial", imeiX, tableTop);
-  doc.text("Source", sourceX, tableTop);
-  
-  doc.moveTo(50, tableTop + 15)
-     .lineTo(550, tableTop + 15)
-     .stroke();
-  
-  doc.font("Roboto");
-  
-  let position = tableTop + 25;
-  const rowSpacing = 8;
-
-  items.forEach(item => {
-
-    const productHeight = doc.heightOfString(item.product_name, {
-      width: 180,
-    });
-
-    const priceHeight = doc.heightOfString(naira.format(item.price), {
-      width: 60,
-    });
-
-    const imeiHeight = doc.heightOfString(item.imei || "-", {
-      width: 110,
-    });
-
-    const sourceHeight = doc.heightOfString(item.source || "-", {
-      width: 80,
-    });
-
-    const rowHeight = Math.max(
-      productHeight,
-      priceHeight,
-      imeiHeight,
-      sourceHeight,
-      20
-    );
-
-    doc.text(item.product_name, itemX, position, {
-      width: 180,
-    });
-
-    doc.text(naira.format(item.price), priceX, position, {
-      width: 60,
-    });
-
-    doc.text(item.imei || "-", imeiX, position, {
-      width: 110,
-    });
-
-    doc.text(item.source || "-", sourceX, position, {
-      width: 80,
-    });
-
-    position += rowHeight + rowSpacing;
-
-  });
-  // Bottom line
-  doc.moveTo(50, position)
-     .lineTo(550, position)
-     .stroke();
-  
-  doc.moveDown(2);
-  
-  // ===============================
-  // TOTAL SECTION
-  // ===============================
-  
-  const subTotal = Number(order.total_amount) - (order.delivery_fee || 0);
-  const deliveryFee = Number(order.delivery_fee || 0);
-  const finalTotal = Number(order.total_amount);
-  
-  // Move slightly down from table
-  position += 20;
-  
-  doc.moveTo(350, position)
-    .lineTo(550, position)
-    .stroke();
-  
-  position += 10;
-  
-  doc.font("Roboto");
-  
-  // Subtotal
-  doc.text("Subtotal:", 350, position);
-  doc.text(naira.format(subTotal), 450, position, {
-    width: 100,
-    align: "right",
-  });
-  
-  position += 20;
-  
-  // Delivery Fee
-  if (deliveryFee > 0) {
-    doc.text("Delivery Fee:", 350, position);
-    doc.text(naira.format(deliveryFee), 450, position, {
-      width: 100,
-      align: "right",
-    });
-    position += 20;
-  }
-  
-  // Divider
-  doc.moveTo(350, position)
-    .lineTo(550, position)
-    .stroke();
-  
-  position += 10;
-  
-  // Grand Total
-  doc.font("Roboto-Bold");
-  doc.text("Total:", 350, position);
-  doc.text(naira.format(finalTotal), 450, position, {
-    width: 100,
-    align: "right",
-  });
-  
-  // ===============================
-  // FOOTER
-  // ===============================
-  doc.moveDown(2);
-  
-  doc.fontSize(10)
-     .font("Roboto")
-     .text("Thank you for your patronage.", { align: "center" });
-  
-  doc.end();
-
-  } catch (error) {
-
-    return res.status(500).json({
-      success: false,
-      message: "Error generating receipt",
-    });
-  }
-}
-
 
 
 // Verify admin Email

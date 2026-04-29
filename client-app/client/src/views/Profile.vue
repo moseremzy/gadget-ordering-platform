@@ -210,7 +210,7 @@
         <font-awesome-icon class="fa-solid fa-box-open" id = "box"  icon="fa-solid fa-box-open"/>
         <h1>No orders yet</h1>
         <p>You haven't placed any orders yet. Start shopping.</p>
-        <router-link class = "link" to="/shop?category=all">View Products</router-link>
+        <router-link class = "link" to="/shop">View Products</router-link>
     </div>
     </div>
     

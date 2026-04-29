@@ -114,6 +114,16 @@ routes: [
     }
   },
   {
+    path: '/account/create-order',
+    name: 'createOrder',
+    component: () => import('../views/Create-Order.vue'),
+    meta: {
+      title: 'Create Order - Tech By Cas Admin',
+      requiresAuth: true,
+      authorize_roles: ['super_admin']
+    }
+  },
+  {
     path: '/account/device-records',
     name: 'deviceRecords',
     component: () => import('../views/Device-Records.vue'),
@@ -155,7 +165,7 @@ routes: [
   },
   {
     path: '/account/view-order/:order_id',
-    name: 'View-Order',
+    name: 'viewOrder',
     component: () => import('../views/View-Order.vue'),
     meta: {
       title: 'View Order - Tech By Cas Admin',
@@ -238,8 +248,6 @@ router.afterEach((to, from, next) => { // use am close sidebar after each page n
   interactive_store.Close_Sidebar()
 
   }
-
-  next();
 
 })
 

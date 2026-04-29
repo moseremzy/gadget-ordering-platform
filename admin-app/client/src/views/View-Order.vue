@@ -14,9 +14,9 @@
 
     <HEADER/> <!--header--> 
 
-    <h1>Order ID - #{{order.order_id}}</h1>
- 
-    <CONFIRMREJECTSTATUS :order = order v-if = "order.order_status == 'pending'" />
+    <h1>Order ID - #{{order_id}}</h1>
+
+    <CONFIRMREJECTSTATUS :order = order v-if = "order?.order_status == 'pending'" />
 
     <!-- Status Filter --> 
 
@@ -37,32 +37,37 @@
     <div class = "order_details">
         <div>
         <h2>ORDER DATE</h2>
-        <p>{{MIDDLEWARES.formatted_date(order.created_at)}}</p>
+        <p>{{MIDDLEWARES.formatted_date(order?.created_at)}}</p>
+        </div>
+
+        <div>
+        <h2>ORDER TYPE</h2>
+        <p>{{ order?.order_type }}</p>
         </div>
 
         <div>
         <h2>DELIVERY DATE</h2>
-        <p>{{new Date(order.created_at).toLocaleDateString()}} - {{order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : ''}}</p>
+        <p>{{new Date(order?.created_at).toLocaleDateString()}} - {{order?.delivery_date ? new Date(order?.delivery_date).toLocaleDateString() : ''}}</p>
         </div>
 
         <div>
         <h2>PAYMENT METHOD</h2>
-        <p>{{order.payment_method}}</p>
+        <p>{{order?.payment_method}}</p>
         </div>
 
         <div>
         <h2>CONFIRMATION PIN</h2>
-        <p>{{order.confirmation_pin}}</p>
+        <p>{{order?.confirmation_pin}}</p>
         </div>
 
         <div>
         <h2>DELIVERY ADDRESSS</h2>
-        <p>{{order_items[0].address}}</p>
+        <p>{{order_items[0]?.address}}</p>
         </div>
 
-        <div v-if = "order_items[0].note">
+        <div v-if = "order_items[0]?.note">
         <h2>NOTE</h2>
-        <p>{{order_items[0].note}}</p>
+        <p>{{order_items[0]?.note}}</p>
         </div>
 
         <REFUNDSTATUS :order = order />
@@ -70,23 +75,23 @@
     </div> <!-- ORDER DETAILS -->
 
     <div class = "order_items">
-    <h2>GADGETS ORDERED ({{order.total_items}})</h2>
+    <h2>GADGETS ORDERED ({{order?.total_items}})</h2>
     <div class="menu-items">
-      <template v-for = "item in order_items" :key = "item.product_name">
+      <template v-for = "item in order_items" :key = "item.item_name">
       <div class="menu-item">
         <div class="item-image">
-          <img :src="`${item.main_image}`" :alt="item.product_name">
+          <img :src="`${item.main_image}`" :alt="item.item_name">
         </div>
         <div class="item-details">
-          <h3 class="item-name">{{item.product_name}} x {{item.quantity}}</h3>
+          <h3 class="item-name">{{item.item_name}} x {{item.quantity}}</h3>
           <p class="item-price">{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(item.price)}}</p>
         </div>
       </div>
       </template>
     </div> 
-    <h1>SUB TOTAL PRICE: <b style = "float: right;">{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(order.total_amount - order.delivery_fee)}}</b></h1>
-    <h1>DELIVERY FEE: <b style = "float: right;">{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(order.delivery_fee)}}</b></h1>
-    <h1>TOTAL PRICE: <b style = "float: right;">{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(order.total_amount)}}</b></h1>
+    <h1>SUB TOTAL PRICE: <b style = "float: right;">{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(order?.total_amount - order?.delivery_fee)}}</b></h1>
+    <h1>DELIVERY FEE: <b style = "float: right;">{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(order?.delivery_fee)}}</b></h1>
+    <h1>TOTAL PRICE: <b style = "float: right;">{{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(order?.total_amount)}}</b></h1>
     </div> <!-- ITEMS -->
 
 
@@ -94,7 +99,7 @@
     <div class = "grid">    
     <div>
        <h2>USER NAME</h2>
-       <p>{{ order_items[0].customer_name }}</p>
+       <p>{{ order_items[0]?.customer_name || order?.customer_name }}</p>
     </div>
 
     <div>
@@ -105,7 +110,7 @@
     <div class = "grid">    
     <div>
        <h2>EMAIL</h2>
-       <p>{{ order_items[0].email }}</p>
+       <p>{{ order_items[0]?.email }}</p>
     </div>
 
     <div>
@@ -116,7 +121,7 @@
     <div class = "grid">    
     <div>
        <h2>PHONE NUMBER</h2>
-       <p>{{ order_items[0].phone }}</p>
+       <p>{{ order_items[0]?.phone}}</p>
     </div>
 
     <div>
@@ -127,7 +132,7 @@
     <div class = "grid">    
     <div>
        <h2>DELIVERY ADDRESS</h2>
-       <p>{{order_items[0].address}}</p>
+       <p>{{order_items[0]?.address}}</p>
     </div>
 
     <div>
@@ -144,7 +149,9 @@
 
 </div> <!-- FLEX_CONTAINER -->
 
-<CANCELORDERBTN :order = order v-if = "order.order_status != 'delivered' && order.order_status != 'cancelled'"/>
+<button @click="downloadReceipt(order_id)" class = "generate-receipt-btn" v-if = "order?.order_status == 'delivered'">Download Receipt</button>
+
+<!-- <CANCELORDERBTN :order = order v-if = "order?.order_status != 'delivered' && order?.order_status != 'cancelled'"/> -->
 
 </div> <!-- SUB_CONTAINER -->
 </div> <!-- CONTAINER -->
@@ -182,6 +189,8 @@ const interactive_store = useInteractiveStore()
 
 const admin_store = useAdminStore()
 
+const order_id = route.params.order_id
+
 const base_url = process.env.VUE_APP_API_BASE_URL
 
 if (!admin_store.isAuthenticated) { //if user no get session redirect to login
@@ -217,7 +226,7 @@ const order = computed(() =>  {
 
   return orders_store.orders.find((order) => { //get individual item
 
-    return order.order_id ==  route.params.order_id;
+    return order.order_id ==  order_id;
 
   })
 
@@ -233,11 +242,32 @@ const order_items = computed(() =>  {
 
   return orders_store.order_items.filter((order_item) => { //get individual item
 
-    return order_item.order_id == route.params.order_id;
+    return order_item.order_id == order_id;
 
   })
 
 })
+
+
+
+async function downloadReceipt(order_id) {
+  
+  const blob = await API.download_reciept({order_id: order_id});
+
+  const url = window.URL.createObjectURL(blob);  
+
+  const link = document.createElement('a');
+  
+  link.href = url;
+  
+  link.setAttribute('download', `receipt-${order_id}.pdf`);
+  
+  document.body.appendChild(link);
+  
+  link.click();
+
+}
+
 
 </script>
 
