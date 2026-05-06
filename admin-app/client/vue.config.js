@@ -11,7 +11,7 @@
 // vue.config.js
 module.exports = {
   transpileDependencies: true,
-  lintOnSave: true,
+  lintOnSave: false,
   devServer: {
     proxy: {
       '/api': {

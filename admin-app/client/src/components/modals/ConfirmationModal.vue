@@ -57,7 +57,7 @@
 
 import { useInteractiveStore } from '@/stores/interactive';
 
-import { useproductStore } from '@/stores/products';
+import { useProductStore } from '@/stores/products';
 
 import {toRefs, ref, computed, reactive, onMounted, watch } from 'vue';
 
@@ -65,7 +65,7 @@ import API from '../../api/index'
 
 const interactive_store = useInteractiveStore();
 
-const products_store = useproductStore();
+const products_store = useProductStore();
 
 const props = defineProps({
 
