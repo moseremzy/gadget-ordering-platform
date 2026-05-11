@@ -4,23 +4,18 @@ module.exports = {
     node: true,
     browser: true,
   },
-
-  parser: "vue-eslint-parser",
-
   parserOptions: {
-    parser: "@babel/eslint-parser",
+    parser: 'vue-eslint-parser',
     ecmaVersion: 2020,
-    sourceType: "module",
-    requireConfigFile: false,
+    sourceType: 'module',
   },
-
   extends: [
-    "eslint:recommended",
-    "plugin:vue/vue3-essential"
+    'plugin:vue/essential',
+    'eslint:recommended',
   ],
-
   rules: {
-    "vue/multi-word-component-names": "off",
-    "no-console": "off",
+    // Custom rules
+    'vue/multi-word-component-names': 'off',
+    'no-console': 'off',
   },
 };
