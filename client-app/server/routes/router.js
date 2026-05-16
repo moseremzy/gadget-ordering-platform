@@ -12,7 +12,7 @@ const session = require("express-session");
 
 router.use(session(sessionConfig));
 
-
+//http://localhost:8081/auth/google/callback
 
 //GET REQUESTS 
 
