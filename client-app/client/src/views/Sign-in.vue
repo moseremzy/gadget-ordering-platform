@@ -83,7 +83,7 @@ const tabs = reactive({
  
 async function loginWithGoogle() {
     
-    window.location.href = `https://${settings_store.website}/api/auth/google`;
+  window.location.href = `${window.location.origin}/api/auth/google`;
 
 }
 
