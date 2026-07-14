@@ -135,8 +135,35 @@ static async register(req, res) {
 
   })
 
-  
-  if (user[0]) { //if the user dey
+  if (!user[0]) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid email or password",
+    });
+  }
+
+  if (user[0] && user[0].auth_provider === 'google') { //if the user dey
+
+    return res.status(400).json({
+      success: false,
+      message: "This account was created using Google. Please login with Google",
+    });
+
+  }
+
+
+  if (user[0].account_status === "Unverified") { //if user neva verify account
+      
+    this_user = user[0]
+
+    return res.status(403).json({
+      success: false,
+      message: "Account not verified. Please verify your email",
+      isAuthenticated: true,
+      user: this_user
+    });
+      
+  } 
 
   const isMatch = await bcrypt.compare(data.password, user[0].password); //decrypt he password, make u compare am with this one entered
 
@@ -147,60 +174,41 @@ static async register(req, res) {
       message: "Invalid email or password",
     });
     
-  } else { //if he match 
+  }  
 
-    if (user[0].account_status === "Unverified") { //if user neva verify account
-      
-    this_user = user[0]
+  //LOG USER IN
+  const showTermsConditions = !user[0].welcome_terms_conditions;
 
-    return res.status(403).json({
-      success: false,
-      message: "Account not verified. Please verify your email",
-      isAuthenticated: req.session.isAuthenticated,
-      user: this_user
-    });
-      
-    } else { //if account verified, log am in
+  this_user = {
+      fullname: user[0].fullname,
+      email: user[0].email,
+      phone: user[0].phone,
+      delivery_address: user[0].address
+  }
 
-    const showTermsConditions = !user[0].welcome_terms_conditions;
+  req.login(user[0], (err) => {
 
-    date.setHours(date.getHours() + 2); // session expires in 2 hours
-
-    req.session.cookie.expires = date;
+    if (err) {
   
-    req.session.user_id = user[0].user_id; //set user id for session
-
-    req.session.isAuthenticated = true   
-
-    this_user = {
-         fullname: user[0].fullname,
-         email: user[0].email,
-         phone: user[0].phone,
-         delivery_address: user[0].address
-
+      return res.status(500).json({
+        success: false,
+        message: "Login failed"
+      });
+  
     }
+
+    req.session.cookie.maxAge = 1000 * 60 * 60 * 2;
 
     return res.status(200).json({
       success: true,
       message: "success",
       user: this_user,
       showTermsConditions,
-      isAuthenticated: true
-    });
+      isAuthenticated: req.isAuthenticated()
+    })
 
-    }
-
-  }
-     
-  } else { //if user no dey
-
-    return res.status(401).json({
-      success: false,
-      message: "Invalid email or password",
-    });
-
-  }
-      
+  })
+   
   } catch (error) {
 
     return res.status(500).json({
@@ -373,7 +381,7 @@ static async submit_order(req, res) {
 
       data.payment_reference =  HELPERS.generatePaymentReference()
       
-      data.user_id = req.session.user_id
+      data.user_id = req.user.user_id
 
       async function DerivedProducts(products) { //This function helps updates products with latest stock_quantity values
 
@@ -486,7 +494,7 @@ static async submit_order(req, res) {
   }
 
   const orderData = {
-    user_id: req.session.user_id,
+    user_id: req.user.user_id,
     total_amount: data.total_amount,
     payment_method: data.payment_method,
     total_items: data.total_items,
@@ -1045,7 +1053,7 @@ static async fetch_user (req, res) {
 
   try {
 
-    const user_id = req.session.user_id;
+    const user_id = req.user.user_id;
 
     const user_query = `SELECT * FROM users WHERE user_id=?`;
 
@@ -1079,7 +1087,7 @@ static async fetch_user (req, res) {
         city: user[0].city,
         address: user[0].address,
       },
-      isAuthenticated: true,
+      isAuthenticated: req.isAuthenticated(),
       showTermsConditions
     });
 
@@ -1232,7 +1240,8 @@ static async fetch_settings (req, res) {
         fee_same_state: all_settings[0].fee_same_state,
         fee_same_city: all_settings[0].fee_same_city,
         fee_other_state: all_settings[0].fee_other_state,
-        whatsapp: all_settings[0].whatsapp
+        whatsapp: all_settings[0].whatsapp,
+        website: all_settings[0].website
       }
     });
     
@@ -1258,7 +1267,7 @@ static async fetch_orders (req, res) {
 
   let all_orders = await new Promise( (resolve, reject) => {
 
-    db.query(orders_query, [req.session.user_id], (err, result) => {
+    db.query(orders_query, [req.user.user_id], (err, result) => {
 
       if (err) {
 
@@ -1293,7 +1302,7 @@ static async fetch_orders (req, res) {
   
     let all_order_items = await new Promise( (resolve, reject) => {
 
-      db.query(order_items_query, [req.session.user_id], (err, result) => {
+      db.query(order_items_query, [req.user.user_id], (err, result) => {
 
         if (err) {
 
@@ -1424,15 +1433,26 @@ static async logout (req, res) {
   
   try {
 
-    req.session.isAuthenticated = null
+    req.logout(function (err) {
 
-    req.session.user_id = null
-
-    req.session.destroy()
-
-    return res.status(200).json({
-      success: true,
-      message: "success",
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Logout failed"
+        });
+      }
+    
+      req.session.destroy(() => {
+    
+        res.clearCookie("connect.sid"); // important
+    
+        return res.status(200).json({
+          success: true,
+          message: "success"
+        });
+    
+      });
+    
     });
     
   } catch (error) {
@@ -1455,7 +1475,7 @@ static async update_user_info (req, res) {
 
   let information = req.body
 
-  let user_id = req.session.user_id
+  let user_id = req.user.user_id
 
   try {
 
@@ -1505,7 +1525,7 @@ static async update_address (req, res) {
 
   let information = req.body
 
-  let user_id = req.session.user_id
+  let user_id = req.user.user_id
 
   try {
 
@@ -1555,7 +1575,7 @@ static async update_password (req, res) {
 
   let information = req.body
 
-  let user_id = req.session.user_id
+  let user_id = req.user.user_id
 
   try {
 
@@ -1653,7 +1673,7 @@ static async mark_terms_conditions (req, res) {
 
     const user = await new Promise( (resolve, reject) => {
 
-      db.query(user_query, [req.session.user_id], (err, result) => {
+      db.query(user_query, [req.user.user_id], (err, result) => {
 
         if (err) {
 
@@ -1672,7 +1692,7 @@ static async mark_terms_conditions (req, res) {
 
   if (!user[0]) { //if the user nor dey
 
-    req.session.user_id = null
+    req.user.user_id = null
 
     req.session.isAuthenticated = false
 
@@ -1691,7 +1711,7 @@ static async mark_terms_conditions (req, res) {
 
     await new Promise( (resolve, reject) => {
 
-      db.query(terms_query, [1, req.session.user_id], (err, result) => {
+      db.query(terms_query, [1, req.user.user_id], (err, result) => {
 
         if (err) {
 

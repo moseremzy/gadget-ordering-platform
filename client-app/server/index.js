@@ -5,7 +5,12 @@ const port = process.env.PORT || 9000;
 const router = require("./routes/router.js");
 const cors = require("cors");
 const path = require("path");
+const session = require("express-session");
+const passport = require("passport");
+const sessionConfig = require("./middlewares/session");
 const app = express();
+
+
 const base_url = process.env.BASE_URL
 
 
@@ -20,6 +25,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ Routes
+app.use(session(sessionConfig));
+
+require("./middlewares/passport");
+
+app.use(passport.initialize());
+app.use(passport.session());
 app.use('/api', router);
 
 

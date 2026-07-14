@@ -65,6 +65,18 @@ placeholder="Optional"
 </div>
 
 
+<!-- Order Date/Time -->
+<div class="form-group grid-full">
+  <label class="form-label">Order Date & Time</label>
+  <input
+    type="datetime-local"
+    v-model="order.created_at"
+    class="form-input"
+  />
+  <p class="err">{{order_error.created_at_err}}</p>
+</div>
+
+
 <!-- Product selector -->
 <div class="form-group grid-full">
 <label id = "item-name" class="form-label">Item Name</label>
@@ -194,6 +206,8 @@ const order = reactive({
 
     payment_method: "",
 
+    created_at: "", // Add this line
+
     items: []
 
 })
@@ -202,6 +216,7 @@ let order_error = reactive({
     customer_name_err: "",
     customer_phone_err: "",
     payment_method_err: "",
+    created_at_err: "", // Add this line
 })
 
 const custom_item = reactive({
@@ -216,6 +231,7 @@ onUpdated(() => {
     customer_name_validated()
     customer_phone_validated()
     payment_method_validated()
+    created_at_validated() // Add this line
 })
 
 
@@ -243,6 +259,16 @@ function payment_method_validated() {
         order_error.payment_method_err = "Please fill the field";
     } else {
         order_error.payment_method_err = "";
+        return true;        
+    }
+}
+
+function created_at_validated() {
+    if (order.created_at === "") {
+        order_error.created_at_err = "Please select order date and time";
+        return false;
+    } else {
+        order_error.created_at_err = "";
         return true;        
     }
 }
@@ -303,7 +329,7 @@ if (!order.items.length) {
 
 }
 
-if (!customer_name_validated() || !customer_phone_validated() || !payment_method_validated()) {
+if (!customer_name_validated() || !customer_phone_validated() || !payment_method_validated() || !created_at_validated()) {
 
     interactive_store.backend_message = "Customer Info Required"
 
@@ -317,6 +343,11 @@ if (!customer_name_validated() || !customer_phone_validated() || !payment_method
 
   try {
 
+    // Format the datetime to "YYYY-MM-DD HH:MM:SS" format
+    const formattedDatetime = order.created_at 
+      ? order.created_at.replace('T', ' ') 
+      : null;
+
     const response = await API.create_manual_order({
 
     customer_name: order.customer_name,
@@ -326,6 +357,8 @@ if (!customer_name_validated() || !customer_phone_validated() || !payment_method
     customer_address: order.customer_address,
 
     payment_method: order.payment_method,
+
+    created_at: formattedDatetime,
 
     total_amount: total.value,
 
@@ -368,6 +401,7 @@ function resetForm(){
     order.customer_name=""
     order.customer_phone=""
     order.payment_method=""
+    order.created_at="" // Add this line
     order.items=[]
     custom_item.name=""
     custom_item.price=""

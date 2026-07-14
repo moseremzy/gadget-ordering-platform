@@ -1246,6 +1246,7 @@ static async adjust_prices(req, res) {
     order_type: 'walk-in',
     total_amount: data.total_amount,
     payment_method: data.payment_method,
+    created_at: data.created_at,
     payment_status: 'success',
     total_items: data.total_items,
     delivery_fee: data.delivery_fee,
@@ -1403,7 +1404,7 @@ static async download_reciept(req, res) {
   
   doc.font("Roboto").fontSize(9)
     .text("18 Asemota Street, Edo State, Nigeria", { align: "center" })
-    .text("Phone: 08077416692 | Email: support@techbycas.com", { align: "center" });
+    .text("Phone: 08077416692, 08130222383 | Email: support@techbycas.com", { align: "center" });
   
   doc.moveDown();
   doc.moveTo(40, doc.y).lineTo(560, doc.y).stroke();

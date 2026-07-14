@@ -2,17 +2,13 @@ const express = require("express")
 const router = express.Router();
 const API = require("../api/api")
 const Uri = process.env.URI
+const website = process.env.BASE_URL
 const check_user_session = require("../middlewares/check_user_session.js") 
 const req = require("express/lib/request");
+const passport = require('passport')
 const LIMITERS = require("../middlewares/limiters")
-const sessionConfig = require("../middlewares/session");
-const session = require("express-session");
 
 
-
-router.use(session(sessionConfig));
-
-//http://localhost:8081/auth/google/callback
 
 //GET REQUESTS 
 
@@ -23,6 +19,18 @@ router.get("/fetch_products", API.fetch_products);
 router.get("/fetch_categories", API.fetch_categories);
 
 router.get("/fetch_settings",  API.fetch_settings);
+
+router.get("/auth/google", passport.authenticate("google", {scope: ["profile", "email"]}));
+
+router.get("/auth/google/callback",
+    passport.authenticate("google", {
+      failureRedirect: `https://${website}/sign-in`
+    }),
+  
+    (req, res) => {  // redirect frontend
+       res.redirect(`https://${website}`);
+    }
+  );
 
 router.get("/fetch_user", check_user_session,  API.fetch_user);
 

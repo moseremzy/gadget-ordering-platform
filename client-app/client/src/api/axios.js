@@ -26,8 +26,10 @@ api.interceptors.response.use(
     }
 
     } else {  // Network error / no response
+
+      console.log(error)
        
-      interactiveStore.backend_message = error.response.data.message;
+      interactiveStore.backend_message = error?.response?.data?.message;
 
       interactiveStore.display_error_alert_box();
 
