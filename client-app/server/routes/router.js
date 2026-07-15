@@ -24,11 +24,11 @@ router.get("/auth/google", passport.authenticate("google", {scope: ["profile", "
 
 router.get("/auth/google/callback",
     passport.authenticate("google", {
-      failureRedirect: `https://${website}/sign-in`
+      failureRedirect: `${website}/sign-in`
     }),
   
     (req, res) => {  // redirect frontend
-       res.redirect(`https://${website}`);
+       res.redirect(`${website}`);
     }
   );
 
